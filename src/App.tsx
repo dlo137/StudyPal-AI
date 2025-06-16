@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Login } from './pages/Login';
 import { SubjectSelection } from './pages/SubjectSelection';
 import { ChatInterface } from './pages/ChatInterface';
