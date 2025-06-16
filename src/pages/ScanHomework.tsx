@@ -1,4 +1,3 @@
-import React from 'react';
 import { XIcon, ImageIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 export function ScanHomework() {
@@ -8,7 +7,7 @@ export function ScanHomework() {
         <Link to="/chat">
           <XIcon size={24} className="text-white" />
         </Link>
-        <div size={24} className="text-white" />
+        <div className="w-6 h-6" />
       </div>
       {/* Camera Frame */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 relative">

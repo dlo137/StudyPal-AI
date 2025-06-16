@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { XIcon } from 'lucide-react';
 export function Login() {

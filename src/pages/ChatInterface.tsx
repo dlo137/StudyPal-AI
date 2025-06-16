@@ -1,4 +1,3 @@
-import React from 'react';
 import { SendIcon, CopyIcon } from 'lucide-react';
 export function ChatInterface() {
   return <div className="flex flex-col h-screen bg-[#121212] text-white">

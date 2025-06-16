@@ -1,4 +1,3 @@
-import React from 'react';
 import { SettingsIcon, CrownIcon, BookmarkIcon, ClockIcon, MessageSquareIcon } from 'lucide-react';
 export function UserProfile() {
   return <div className="flex flex-col min-h-screen bg-[#121212] text-white">

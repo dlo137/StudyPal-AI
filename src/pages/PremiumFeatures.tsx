@@ -1,5 +1,4 @@
-import React from 'react';
-import { SparklesIcon, ZapIcon, StarIcon, CrownIcon } from 'lucide-react';
+import { SparklesIcon, ZapIcon, CrownIcon } from 'lucide-react';
 export function PremiumFeatures() {
   return <div className="flex flex-col min-h-screen bg-[#1a0b2e] text-white">
       {/* Background sparkles effect */}

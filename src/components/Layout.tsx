@@ -1,4 +1,3 @@
-import React from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import { BookOpenIcon, MessageSquareIcon, UserIcon, SparklesIcon, ScanLineIcon } from 'lucide-react';
 export function Layout() {
