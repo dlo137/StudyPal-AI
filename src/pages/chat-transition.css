@@ -1,0 +1,18 @@
+/* you can tweak the timing/duration as you like */
+.chat-fade-enter {
+  opacity: 0;
+}
+
+.chat-fade-enter-active {
+  opacity: 1;
+  transition: opacity 400ms ease;
+}
+
+.chat-fade-exit {
+  opacity: 1;
+}
+
+.chat-fade-exit-active {
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
