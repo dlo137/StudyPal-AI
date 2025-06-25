@@ -3,7 +3,6 @@ import { Login } from './pages/Login';
 import { ChatInterface } from './pages/Chat';
 import { UserProfile } from './pages/UserProfile';
 import { PremiumFeatures } from './pages/PremiumFeatures';
-import { Layout } from './components/Layout';
 
 export function App() {
   return <Router>
