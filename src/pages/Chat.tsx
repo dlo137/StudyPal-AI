@@ -69,7 +69,11 @@ export function ChatInterface() {
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-[#333333] bg-[#121212] bg-opacity-95 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-semibold">StudyPal</h1>
-          <img src="/13331037.png" alt="StudyPal Icon" className="h-7 w-7 object-contain" />
+          <img 
+            src="/13331037.png" 
+            alt="StudyPal Icon" 
+            className="h-7 w-7 object-contain" 
+          />
           <button
             onClick={() => setMsgs([])}
             className="ml-2 flex items-center justify-center w-7 h-7 rounded-full bg-[#222] hover:bg-[#333] transition"
