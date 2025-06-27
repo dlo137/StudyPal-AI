@@ -53,11 +53,10 @@ body {
   }
   
   #root {
-    height: 100svh;
-    height: 100dvh; /* Dynamic viewport height */
-    height: -webkit-fill-available; /* Safari mobile fallback */
-    display: flex;
-    flex-direction: column;
+    min-height: 100svh;
+    min-height: 100dvh;
+    /* Safari fallback still OK */
+    min-height: -webkit-fill-available;
   }
 }
 
