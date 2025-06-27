@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { SendIcon } from 'lucide-react';
-import { CSSTransition, SwitchTransition } from 'react-transition-group';
-import './chat-transition.css';
 import studyPalIcon from '../assets/studypal-icon.png';
 
 export function ChatInterface() {
@@ -27,8 +25,6 @@ export function ChatInterface() {
 
   /* ── refs ───────────────────────────────────────────────────────── */
   const bottomRef  = useRef<HTMLDivElement | null>(null);
-  const emptyRef   = useRef<HTMLDivElement | null>(null);
-  const chatRef    = useRef<HTMLDivElement | null>(null);
 
   /* ── helpers ────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -65,15 +61,10 @@ export function ChatInterface() {
 
   /* ── render ─────────────────────────────────────────────────────── */
   return (
-    <div 
-      className="flex flex-col h-full bg-[#121212] text-white overflow-hidden relative" 
-      style={{ 
-        height: '100vh',
-        maxHeight: '100vh'
-      }}
-    >
-      {/* header */}
-      <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-2 sm:py-3 border-b border-[#333333] bg-[#121212] bg-opacity-95 backdrop-blur-sm">
+    <div className="flex flex-col h-screen w-full bg-[#121212] text-white">
+      {/* HEADER SECTION */}
+      <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-3 border-b border-[#333333] bg-[#121212] z-10">
+        {/* Left side - Logo, Title, New Chat Button */}
         <div className="flex items-center gap-2">
           <h1 className="text-base sm:text-lg font-semibold">StudyPal</h1>
           <img 
@@ -83,7 +74,7 @@ export function ChatInterface() {
           />
           <button
             onClick={() => setMsgs([])}
-            className="ml-1 sm:ml-2 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#222] hover:bg-[#333] transition"
+            className="ml-2 sm:ml-2 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#222] hover:bg-[#333] transition"
             title="New Chat"
             type="button"
           >
@@ -92,8 +83,9 @@ export function ChatInterface() {
             </svg>
           </button>
         </div>
+        {/* Right side - Upgrade Button, Profile Menu */}
         <div className="flex items-center gap-2 sm:gap-3 relative">
-          <button className="border border-[#4285F4] text-[#4285F4] px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm hover:bg-[#4285F4]/10 transition">
+          <button className="border border-[#4285F4] text-[#4285F4] px-3 sm:px-3 py-1 sm:py-1 rounded-full text-sm sm:text-sm hover:bg-[#4285F4]/10 transition">
             Upgrade
           </button>
           <div className="relative" ref={menuRef}>
@@ -105,123 +97,100 @@ export function ChatInterface() {
             />
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-36 sm:w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg z-50 animate-fade-in">
-                <button className="block w-full text-left px-3 sm:px-4 py-2 text-sm hover:bg-[#333]" onClick={() => setMenuOpen(false)}>Login</button>
-                <button className="block w-full text-left px-3 sm:px-4 py-2 text-sm hover:bg-[#333]" onClick={() => setMenuOpen(false)}>Get premium</button>
-                <button className="block w-full text-left px-3 sm:px-4 py-2 text-sm hover:bg-[#333] text-red-400" onClick={() => setMenuOpen(false)}>Log out</button>
+                <button className="block w-full text-left px-4 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-sm hover:bg-[#333]" onClick={() => setMenuOpen(false)}>Login</button>
+                <button className="block w-full text-left px-4 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-sm hover:bg-[#333]" onClick={() => setMenuOpen(false)}>Get premium</button>
+                <button className="block w-full text-left px-4 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-sm hover:bg-[#333] text-red-400" onClick={() => setMenuOpen(false)}>Log out</button>
               </div>
             )}
           </div>
         </div>
       </header>
 
-      {/* animated area */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <SwitchTransition mode="out-in">
+      {/* MAIN CONTENT AREA */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        {/* Content Area - Welcome Screen or Chat Messages */}
+        <div className="flex-1 min-h-0">
           {messages.length === 0 ? (
-            <CSSTransition
-              key="prompt"
-              nodeRef={emptyRef}
-              timeout={400}
-              classNames="chat-fade"
-              unmountOnExit
-            >
-              <div ref={emptyRef} className="h-full flex flex-col px-4 sm:px-6">
-                <div className="flex-1 flex flex-col items-center justify-center text-center">
-                  <h2 className="text-xl sm:text-3xl font-medium px-2 mb-6 sm:mb-8">How can I help you?</h2>
-                </div>
-                <div className="pb-2 sm:pb-4">
-                  <InputBar
-                    input={input}
-                    setInput={setInput}
-                    handleKeyDown={handleKeyDown}
-                    sendMessage={sendMessage}
-                  />
-                </div>
-              </div>
-            </CSSTransition>
-          ) : (
-            <CSSTransition
-              key="chat"
-              nodeRef={chatRef}
-              timeout={400}
-              classNames="chat-fade"
-              unmountOnExit
-            >
-              <div ref={chatRef} className="h-full flex flex-col">
-                <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-2 sm:py-3 space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-transparent scrollbar-track-transparent min-h-0 pb-2">
-                  {messages.map((m, i) => (
-                    <div
-                      key={i}
-                      className={`max-w-xs sm:max-w-lg whitespace-pre-wrap leading-relaxed text-sm sm:text-base ${
-                        m.role === 'user'
-                          ? 'ml-auto bg-[#1e1e1e] rounded-2xl px-3 sm:px-4 py-2'
-                          : 'mr-auto bg-[#222222] rounded-2xl px-3 sm:px-4 py-2'
-                      }`}
+            /* WELCOME SCREEN WITH CENTERED INPUT */
+            <div className="h-full flex flex-col items-center justify-center text-center px-4 sm:px-6 py-4">
+              <h2 className="text-xl sm:text-3xl font-medium px-2 max-w-md mb-6 sm:mb-8">How can I help you?</h2>
+              <div className="w-full max-w-2xl px-2">
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    sendMessage();
+                  }}
+                  className="w-full"
+                >
+                  <div className="flex items-center bg-[#222222] rounded-full px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg">
+                    <input
+                      value={input}
+                      onChange={e => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      type="text"
+                      placeholder="Type a question"
+                      className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder:text-gray-400 text-base sm:text-base min-w-0"
+                    />
+                    <button
+                      type="submit"
+                      className="bg-[#4285F4] p-2 sm:p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors"
+                      disabled={!input.trim()}
                     >
-                      {m.content}
-                    </div>
-                  ))}
-                  <div ref={bottomRef} />
-                </main>
-                <div className="flex-shrink-0 bg-[#121212] pb-2 sm:pb-4">
-                  <InputBar
-                    input={input}
-                    setInput={setInput}
-                    handleKeyDown={handleKeyDown}
-                    sendMessage={sendMessage}
-                    wide
-                  />
-                </div>
+                      <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
+                    </button>
+                  </div>
+                </form>
               </div>
-            </CSSTransition>
+            </div>
+          ) : (
+            /* CHAT MESSAGES */
+            <main className="h-full overflow-y-auto px-4 sm:px-6 py-3 sm:py-3 space-y-3 sm:space-y-4">
+              {messages.map((m, i) => (
+                <div
+                  key={i}
+                  className={`max-w-[85%] sm:max-w-lg whitespace-pre-wrap leading-relaxed text-base sm:text-base ${
+                    m.role === 'user'
+                      ? 'ml-auto bg-[#1e1e1e] rounded-2xl px-4 sm:px-4 py-2.5 sm:py-2'
+                      : 'mr-auto bg-[#222222] rounded-2xl px-4 sm:px-4 py-2.5 sm:py-2'
+                  }`}
+                >
+                  {m.content}
+                </div>
+              ))}
+              <div ref={bottomRef} />
+              
+              {/* INPUT BAR - Inside chat area, underneath messages */}
+              <div className="mt-4 mb-4 sm:mb-6">
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    sendMessage();
+                  }}
+                  className="w-full"
+                >
+                  <div className="flex items-center bg-[#222222] rounded-full px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg">
+                    <input
+                      value={input}
+                      onChange={e => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      type="text"
+                      placeholder="Type a question"
+                      className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder:text-gray-400 text-base sm:text-base min-w-0"
+                    />
+                    <button
+                      type="submit"
+                      className="bg-[#4285F4] p-2 sm:p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors"
+                      disabled={!input.trim()}
+                    >
+                      <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </main>
           )}
-        </SwitchTransition>
-      </div>
-    </div>
-  );
-}
-
-/* ── tiny sub-component for the input bar so we don’t duplicate markup ── */
-function InputBar({
-  input,
-  setInput,
-  handleKeyDown,
-  sendMessage,
-  wide = false
-}: {
-  input: string;
-  setInput: (s: string) => void;
-  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  sendMessage: () => void;
-  wide?: boolean;
-}) {
-  return (
-    <div className={wide ? 'w-full max-w-3xl mx-auto px-4 sm:px-6' : 'w-full max-w-xl px-0 sm:px-6'}>
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          sendMessage();
-        }}
-        className="w-full"
-      >
-        <div className="flex items-center bg-[#222222] rounded-full p-1.5 sm:p-2 pl-3 sm:pl-4 mx-4 sm:mx-0">
-          <input
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            type="text"
-            placeholder="Type a question"
-            className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder:text-gray-400 text-sm sm:text-base min-w-0 py-1"
-          />
-          <button
-            type="submit"
-            className="bg-[#4285F4] p-1.5 sm:p-2 rounded-full disabled:opacity-40 ml-2 flex-shrink-0"
-            disabled={!input.trim()}
-          >
-            <SendIcon size={16} className="text-white sm:w-5 sm:h-5" />
-          </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
