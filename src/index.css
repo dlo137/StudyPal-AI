@@ -17,19 +17,22 @@ body {
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  /* Prevent overscroll bounce on iOS */
-  overflow: hidden;
+  /* Allow scrolling but prevent overscroll bounce on iOS */
   overscroll-behavior: none;
 }
 
 /* --- DYNAMIC FULL-HEIGHT WRAPPER ---------------- */
 #root {
-  /* Use dvh for dynamic viewport height that adjusts to mobile browser UI */
-  height: 100vh;
-  height: 100dvh; /* Dynamic viewport height - adjusts when mobile browser UI shows/hides */
-  width: 100%;
+  height: 100svh;   /* visible viewport when UI chrome is shown       */
+  height: 100dvh;   /* when chrome is collapsed                       */
+
+  /* Respect iOS safe-area */
+  padding-top:    env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 /* Mobile-specific fixes */
@@ -42,8 +45,9 @@ body {
   body {
     height: 100%;
     height: -webkit-fill-available; /* Safari mobile fix */
-    overflow: hidden;
     overscroll-behavior: none;
+    /* Prevent mobile document scrolling while allowing internal scrolling */
+    touch-action: manipulation;
   }
   
   #root {

@@ -61,7 +61,7 @@ export function ChatInterface() {
 
   /* ── render ─────────────────────────────────────────────────────── */
   return (
-    <div className="flex flex-col h-screen w-full bg-[#121212] text-white">
+    <div className="flex flex-col h-full w-full bg-[#121212] text-white">
       {/* HEADER SECTION */}
       <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-3 border-b border-[#333333] bg-[#121212] z-10">
         {/* Left side - Logo, Title, New Chat Button */}
