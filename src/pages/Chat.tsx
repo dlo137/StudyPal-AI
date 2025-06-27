@@ -41,7 +41,7 @@ export function ChatInterface() {
     // ――― replace with YOUR backend ―――
     try {
       // Use Vercel backend URL - replace with your actual Vercel URL
-      const apiUrl = 'study-pal-ai.vercel.app';
+      const apiUrl = 'https://study-pal-ai-dangelos-projects-9e03238c.vercel.app/api/chat';
       
       const res = await fetch(apiUrl, {
         method: 'POST',
