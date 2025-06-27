@@ -8,6 +8,7 @@ export function ChatInterface() {
   const [messages, setMsgs] = useState<
     { role: 'user' | 'assistant'; content: string }[]
   >([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -37,6 +38,10 @@ export function ChatInterface() {
 
     setMsgs(m => [...m, { role: 'user', content: text }]);
     setInput('');
+    setIsLoading(true);
+
+    // Record start time for minimum delay
+    const startTime = Date.now();
 
     // ――― replace with YOUR backend ―――
     try {
@@ -54,10 +59,30 @@ export function ChatInterface() {
       }
       
       const { reply } = await res.json();
+      
+      // Calculate elapsed time and wait if necessary to ensure minimum 2 seconds
+      const elapsedTime = Date.now() - startTime;
+      const minDelay = 2000; // 2 seconds
+      
+      if (elapsedTime < minDelay) {
+        await new Promise(resolve => setTimeout(resolve, minDelay - elapsedTime));
+      }
+      
       setMsgs(m => [...m, { role: 'assistant', content: reply }]);
     } catch (error) {
       console.error('API Error:', error);
+      
+      // Calculate elapsed time and wait if necessary to ensure minimum 2 seconds
+      const elapsedTime = Date.now() - startTime;
+      const minDelay = 2000; // 2 seconds
+      
+      if (elapsedTime < minDelay) {
+        await new Promise(resolve => setTimeout(resolve, minDelay - elapsedTime));
+      }
+      
       setMsgs(m => [...m, { role: 'assistant', content: '⚠️ Unable to connect to AI service. Please try again.' }]);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -83,7 +108,7 @@ export function ChatInterface() {
           />
           <button
             onClick={() => setMsgs([])}
-            className="ml-2 sm:ml-2 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#222] hover:bg-[#333] transition"
+            className="ml-2 sm:ml-2 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#222] hover:bg-[#333] transition cursor-pointer disabled:cursor-not-allowed"
             title="New Chat"
             type="button"
           >
@@ -94,7 +119,7 @@ export function ChatInterface() {
         </div>
         {/* Right side - Upgrade Button, Profile Menu */}
         <div className="flex items-center gap-2 sm:gap-3 relative">
-          <button className="border border-[#4285F4] text-[#4285F4] px-3 sm:px-3 py-1 sm:py-1 rounded-full text-sm sm:text-sm hover:bg-[#4285F4]/10 transition">
+          <button className="border border-[#4285F4] text-[#4285F4] px-3 sm:px-3 py-1 sm:py-1 rounded-full text-sm sm:text-sm hover:bg-[#4285F4]/10 transition cursor-pointer disabled:cursor-not-allowed">
             Upgrade
           </button>
           <div className="relative" ref={menuRef}>
@@ -142,8 +167,8 @@ export function ChatInterface() {
                     />
                     <button
                       type="submit"
-                      className="bg-[#4285F4] p-2 sm:p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors"
-                      disabled={!input.trim()}
+                      className="bg-[#4285F4] p-2 sm:p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed" 
+                      disabled={!input.trim() || isLoading}
                     >
                       <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
                     </button>
@@ -166,6 +191,19 @@ export function ChatInterface() {
                   {m.content}
                 </div>
               ))}
+              {/* Show "Thinking..." when loading */}
+              {isLoading && (
+                <div className="mr-auto max-w-[85%] sm:max-w-lg px-4 sm:px-4 py-2.5 sm:py-2">
+                  <div className="flex items-center gap-2 text-gray-400 italic text-sm">
+                    <span>Thinking</span>
+                    <div className="flex gap-1">
+                      <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                      <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                      <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div ref={bottomRef} />
             </main>
           )}
@@ -196,8 +234,8 @@ export function ChatInterface() {
                 />
                 <button
                   type="submit"
-                  className="bg-[#4285F4] p-2 sm:p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors"
-                  disabled={!input.trim()}
+                  className="bg-[#4285F4] p-2 sm:p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed"
+                  disabled={!input.trim() || isLoading}
                 >
                   <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
                 </button>
