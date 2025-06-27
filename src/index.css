@@ -19,7 +19,6 @@ body {
     Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   /* Allow scrolling but prevent overscroll bounce on iOS */
   overscroll-behavior: none;
-  background: #121212; color: #fff;
 }
 
 /* --- DYNAMIC FULL-HEIGHT WRAPPER ---------------- */
