@@ -54,8 +54,6 @@ body {
     height: 100svh;
     height: 100dvh; /* Dynamic viewport height */
     height: -webkit-fill-available; /* Safari mobile fallback */
-    min-height: 100vh;
-    min-height: 100dvh;
     display: flex;
     flex-direction: column;
   }
