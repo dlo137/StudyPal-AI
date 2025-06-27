@@ -40,15 +40,24 @@ export function ChatInterface() {
 
     // ――― replace with YOUR backend ―――
     try {
-      const res   = await fetch('/api/chat', {
-        method : 'POST',
+      // Use Vercel backend URL - replace with your actual Vercel URL
+      const apiUrl = 'study-pal-ai.vercel.app';
+      
+      const res = await fetch(apiUrl, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify({ messages: [...messages, { role: 'user', content: text }] })
+        body: JSON.stringify({ messages: [...messages, { role: 'user', content: text }] })
       });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
       const { reply } = await res.json();
       setMsgs(m => [...m, { role: 'assistant', content: reply }]);
-    } catch {
-      setMsgs(m => [...m, { role: 'assistant', content: '⚠️  Something went wrong.' }]);
+    } catch (error) {
+      console.error('API Error:', error);
+      setMsgs(m => [...m, { role: 'assistant', content: '⚠️ Unable to connect to AI service. Please try again.' }]);
     }
   }
 
@@ -151,7 +160,7 @@ export function ChatInterface() {
                   className={`max-w-[85%] sm:max-w-lg whitespace-pre-wrap leading-relaxed text-base sm:text-base ${
                     m.role === 'user'
                       ? 'ml-auto bg-[#1e1e1e] rounded-2xl px-4 sm:px-4 py-2.5 sm:py-2'
-                      : 'mr-auto bg-[#222222] rounded-2xl px-4 sm:px-4 py-2.5 sm:py-2'
+                      : 'mr-auto bg-[#3b87f6] rounded-2xl px-4 sm:px-4 py-2.5 sm:py-2'
                   }`}
                 >
                   {m.content}
