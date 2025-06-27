@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SendIcon } from 'lucide-react';
 import studyPalIcon from '../assets/studypal-icon.png';
 
@@ -11,6 +12,7 @@ export function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const navigate = useNavigate();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -93,6 +95,16 @@ export function ChatInterface() {
     }
   }
 
+  function handleLogin() {
+    setMenuOpen(false);
+    navigate('/login');
+  }
+
+  function handlePremium() {
+    setMenuOpen(false);
+    navigate('/premium');
+  }
+
   /* ── render ─────────────────────────────────────────────────────── */
   return (
     <div className="flex flex-col h-full w-full bg-[#121212] text-white">
@@ -119,7 +131,23 @@ export function ChatInterface() {
         </div>
         {/* Right side - Upgrade Button, Profile Menu */}
         <div className="flex items-center gap-2 sm:gap-3 relative">
-          <button className="border border-[#4285F4] text-[#4285F4] px-3 sm:px-3 py-1 sm:py-1 rounded-full text-sm sm:text-sm hover:bg-[#4285F4]/10 transition cursor-pointer disabled:cursor-not-allowed">
+          <button 
+            className="border border-[#4285F4] text-[#4285F4] bg-transparent px-3 sm:px-3 py-1 sm:py-1 rounded-full text-sm sm:text-sm transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+            style={{
+              borderColor: '#4285F4',
+              color: '#4285F4',
+              backgroundColor: 'transparent'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#4285F4';
+              e.currentTarget.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#4285F4';
+            }}
+            onClick={handlePremium}
+          >
             Upgrade
           </button>
           <div className="relative" ref={menuRef}>
@@ -131,9 +159,24 @@ export function ChatInterface() {
             />
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-36 sm:w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg z-50 animate-fade-in">
-                <button className="block w-full text-left px-4 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-sm hover:bg-[#333]" onClick={() => setMenuOpen(false)}>Login</button>
-                <button className="block w-full text-left px-4 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-sm hover:bg-[#333]" onClick={() => setMenuOpen(false)}>Get premium</button>
-                <button className="block w-full text-left px-4 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-sm hover:bg-[#333] text-red-400" onClick={() => setMenuOpen(false)}>Log out</button>
+                <button 
+                  className="block w-full text-left px-4 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-t-lg" 
+                  onClick={handleLogin}
+                >
+                  Login
+                </button>
+                <button 
+                  className="block w-full text-left px-4 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
+                  onClick={handlePremium}
+                >
+                  Get premium
+                </button>
+                <button 
+                  className="block w-full text-left px-4 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-sm hover:bg-[#444] hover:text-red-300 text-red-400 transition-all duration-200 cursor-pointer rounded-b-lg" 
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Log out
+                </button>
               </div>
             )}
           </div>

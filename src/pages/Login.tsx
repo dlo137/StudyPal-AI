@@ -1,10 +1,18 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { XIcon } from 'lucide-react';
 export function Login() {
+  const navigate = useNavigate();
+
   return <div className="flex flex-col min-h-screen bg-[#121212] text-white p-6">
       <div className="flex justify-between items-center mb-10">
-        <XIcon size={24} />
+        <button 
+          onClick={() => navigate('/')} 
+          className="text-white hover:text-gray-300 transition cursor-pointer"
+        >
+          <XIcon size={24} />
+        </button>
         <span className="font-bold">LOG IN</span>
+        <div></div> {/* Empty div for spacing */}
       </div>
       <div className="flex flex-col items-center flex-1 justify-center space-y-6">
         <h1 className="text-2xl font-bold mb-2">Join StudyBuddy AI</h1>

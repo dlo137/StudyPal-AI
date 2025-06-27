@@ -1,12 +1,28 @@
 import { SparklesIcon, ZapIcon, CrownIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { XIcon } from 'lucide-react';
+
 export function PremiumFeatures() {
-  return <div className="flex flex-col min-h-screen bg-[#1a0b2e] text-white">
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex flex-col min-h-screen bg-[#121212] text-white p-6 relative">
+      <div className="flex justify-between items-center mb-10 relative z-50">
+        <button 
+          onClick={() => navigate('/')} 
+          className="text-white hover:text-gray-300 transition cursor-pointer p-2 hover:bg-gray-800 rounded-full"
+        >
+          <XIcon size={24} />
+        </button>
+        <span className="font-bold">PREMIUM</span>
+        <div></div>
+      </div>
       {/* Background sparkles effect */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden z-0">
         <div className="absolute w-40 h-40 bg-[#8C52FF] rounded-full filter blur-[100px] top-0 left-0 opacity-30"></div>
         <div className="absolute w-40 h-40 bg-[#8C52FF] rounded-full filter blur-[100px] top-20 right-0 opacity-30"></div>
       </div>
-      <div className="relative">
+      <div className="relative z-10">
         {/* Header */}
         <div className="flex items-center justify-between p-4">
           <h1 className="text-xl font-medium text-center flex-1">
@@ -91,5 +107,6 @@ export function PremiumFeatures() {
           </p>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 }
