@@ -144,7 +144,7 @@ export function ChatInterface() {
             </div>
           ) : (
             /* CHAT MESSAGES */
-            <main className="h-full overflow-y-auto px-4 sm:px-6 py-3 sm:py-3 space-y-3 sm:space-y-4">
+            <main className="h-full overflow-y-auto px-4 sm:px-6 py-3 sm:py-3 space-y-3 sm:space-y-4 pb-20">
               {messages.map((m, i) => (
                 <div
                   key={i}
@@ -158,38 +158,44 @@ export function ChatInterface() {
                 </div>
               ))}
               <div ref={bottomRef} />
-              
-              {/* INPUT BAR - Inside chat area, underneath messages */}
-              <div className="mt-4 mb-4 sm:mb-6">
-                <form
-                  onSubmit={e => {
-                    e.preventDefault();
-                    sendMessage();
-                  }}
-                  className="w-full"
-                >
-                  <div className="flex items-center bg-[#222222] rounded-full px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg">
-                    <input
-                      value={input}
-                      onChange={e => setInput(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      type="text"
-                      placeholder="Type a question"
-                      className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder:text-gray-400 text-base sm:text-base min-w-0"
-                    />
-                    <button
-                      type="submit"
-                      className="bg-[#4285F4] p-2 sm:p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors"
-                      disabled={!input.trim()}
-                    >
-                      <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
-                    </button>
-                  </div>
-                </form>
-              </div>
             </main>
           )}
         </div>
+
+        {/* 
+          INPUT BAR POSITIONING LOGIC:
+          - When messages.length === 0: Input bar is centered under welcome message (above)
+          - When messages.length > 0: Input bar moves to fixed position at bottom of screen (below)
+        */}
+        {messages.length > 0 && (
+          <div className="fixed bottom-0 left-0 right-0 bg-[#121212] border-t border-[#333333] px-4 sm:px-6 py-3 sm:py-4 z-20">
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                sendMessage();
+              }}
+              className="w-full max-w-4xl mx-auto"
+            >
+              <div className="flex items-center bg-[#222222] rounded-full px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg">
+                <input
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  type="text"
+                  placeholder="Type a question"
+                  className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder:text-gray-400 text-base sm:text-base min-w-0"
+                />
+                <button
+                  type="submit"
+                  className="bg-[#4285F4] p-2 sm:p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors"
+                  disabled={!input.trim()}
+                >
+                  <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
