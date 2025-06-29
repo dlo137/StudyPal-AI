@@ -138,7 +138,7 @@ export function PremiumFeatures() {
           <p className="text-center text-xs sm:text-sm text-gray-400 mt-2">
             7-day free trial, then $9.99/month
           </p>
-        
+          
         </div>
       </div>
     </div>
