@@ -47,7 +47,7 @@ export function Login() {
           />
           {menuOpen && (
             <div className="absolute right-0 mt-2 w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg">
-              <button onClick={() => goto('/register')}      className="block w-full px-4 py-2 text-left hover:bg-[#444]">Sign&nbsp;Up</button>
+              <button onClick={() => goto('/signup')}        className="block w-full px-4 py-2 text-left hover:bg-[#444]">Sign&nbsp;Up</button>
               <button onClick={() => goto('/premium')}       className="block w-full px-4 py-2 text-left hover:bg-[#444]">Get&nbsp;Premium</button>
               <button onClick={() => goto('/')}              className="block w-full px-4 py-2 text-left hover:bg-[#444]">Chat</button>
               <button onClick={() => setMenuOpen(false)}     className="block w-full px-4 py-2 text-left text-red-400 hover:text-red-300 hover:bg-[#444]">Log&nbsp;out</button>
@@ -117,7 +117,7 @@ export function Login() {
         {/* footer link */}
         <p className="text-sm">
           Don’t have an account?&nbsp;
-          <button onClick={() => goto('/register')} className="text-[#2da8ff] hover:underline">
+          <button onClick={() => goto('/signup')} className="text-[#2da8ff] hover:underline">
             Create&nbsp;new&nbsp;Account
           </button>
         </p>
