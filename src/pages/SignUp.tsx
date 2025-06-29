@@ -1,6 +1,6 @@
 // src/pages/SignUp.tsx
 import { useNavigate } from 'react-router-dom';
-import { XIcon, Eye, EyeOff } from 'lucide-react';
+import { XIcon, Eye, EyeOff, User } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import logoImage from '/13331037.png';
 
@@ -40,12 +40,10 @@ export function SignUp() {
 
         {/* avatar + menu */}
         <div ref={menuRef} className="relative">
-          <img
-            src="https://placehold.co/32x32/png"
-            alt="profile"
-            className="h-8 w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4]"
-            onClick={() => setMenuOpen(v => !v)}
-          />
+          <div className="h-8 w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition bg-[#333] flex items-center justify-center"
+               onClick={() => setMenuOpen(v => !v)}>
+            <User size={16} className="text-gray-300" />
+          </div>
           {menuOpen && (
             <div className="absolute right-0 mt-2 w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg">
               <button onClick={() => goto('/login')}         className="block w-full px-4 py-2 text-left hover:bg-[#444]">Login</button>

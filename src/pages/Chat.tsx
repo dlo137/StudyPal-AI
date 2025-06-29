@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SendIcon } from 'lucide-react';
+import { SendIcon, User } from 'lucide-react';
 import studyPalIcon from '../assets/studypal-icon.png';
 import { SparklesIcon, ZapIcon, CrownIcon } from 'lucide-react';
 import { XIcon } from 'lucide-react';
@@ -142,12 +142,10 @@ export function ChatInterface() {
             Upgrade
           </button>
           <div className="relative" ref={menuRef}>
-            <img
-              src="https://placehold.co/32x32/png"
-              alt="Profile"
-              className="h-7 w-7 sm:h-8 sm:w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition"
-              onClick={() => setMenuOpen(v => !v)}
-            />
+            <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition bg-[#333] flex items-center justify-center"
+                 onClick={() => setMenuOpen(v => !v)}>
+              <User size={16} className="text-gray-300" />
+            </div>
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-36 sm:w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg z-50">
                 <button 
