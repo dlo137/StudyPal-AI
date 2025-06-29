@@ -1,62 +1,117 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { XIcon } from 'lucide-react';
-export function Login() {
-  const navigate = useNavigate();
+import { useNavigate } from 'react-router-dom';
+import { XIcon, Facebook, Linkedin, Instagram, Twitter } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
-  return <div className="flex flex-col min-h-screen bg-[#121212] text-white p-6">
-      <div className="flex justify-between items-center mb-10">
-        <button 
-          onClick={() => navigate('/')} 
-          className="text-white hover:text-gray-300 transition cursor-pointer"
-        >
+export function Login() {
+  const navigate                    = useNavigate();
+  const [menuOpen, setMenuOpen]     = useState(false);
+  const menuRef                     = useRef<HTMLDivElement | null>(null);
+
+  /* ── close avatar menu when you tap outside ───────────────────── */
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
+
+  /* ── helpers ──────────────────────────────────────────────────── */
+  const goto          = (path: string) => { setMenuOpen(false); navigate(path); };
+
+  /* ── render ───────────────────────────────────────────────────── */
+  return (
+    <div className="min-h-screen bg-[#121212] text-white flex flex-col overflow-hidden">
+      {/* ── header (unchanged) ──────────────────────────────────── */}
+      <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333] relative z-50">
+        <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-800 rounded-full">
           <XIcon size={24} />
         </button>
-        <span className="font-bold">LOG IN</span>
-        <div></div> {/* Empty div for spacing */}
-      </div>
-      <div className="flex flex-col items-center flex-1 justify-center space-y-6">
-        <h1 className="text-2xl font-bold mb-2">Join StudyBuddy AI</h1>
-        <p className="text-center text-gray-300 mb-6">
-          Get instant answers, scan your homework to solve it, and ace your
-          exams with
-          <span className="font-semibold"> AI-powered features</span> tailored
-          to your learning style!
-        </p>
-        <div className="w-full space-y-4">
-          <input type="email" placeholder="Email" className="w-full p-4 rounded-lg bg-[#2A2A2A] text-white border-none" />
-          <button className="w-full p-4 rounded-lg bg-[#8C52FF] text-white font-bold">
-            SIGN UP
-          </button>
-          <p className="text-center text-sm text-gray-400">
-            We won't spam you. We value your privacy.
-          </p>
-          <div className="flex items-center my-4">
-            <div className="flex-1 h-px bg-[#333333]"></div>
-            <div className="px-4 text-gray-400">OR</div>
-            <div className="flex-1 h-px bg-[#333333]"></div>
-          </div>
-          <button className="w-full p-4 rounded-lg bg-white text-black font-bold flex items-center justify-center">
-            <span className="mr-2">🍎</span>
-            CONTINUE WITH APPLE
-          </button>
-          <button className="w-full p-4 rounded-lg bg-[#222222] text-white font-bold flex items-center justify-center border border-[#444444]">
-            <span className="mr-2">G</span>
-            CONTINUE WITH GOOGLE
-          </button>
-          <button className="w-full p-4 rounded-lg bg-[#1877F2] text-white font-bold flex items-center justify-center">
-            <span className="mr-2">f</span>
-            CONTINUE WITH FACEBOOK
-          </button>
+
+        {/* centred title */}
+        <span className="absolute left-1/2 -translate-x-1/2 font-bold text-lg">
+          LOG&nbsp;IN
+        </span>
+
+        {/* avatar + menu */}
+        <div ref={menuRef} className="relative">
+          <img
+            src="https://placehold.co/32x32/png"
+            alt="profile"
+            className="h-8 w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4]"
+            onClick={() => setMenuOpen(v => !v)}
+          />
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg">
+              <button onClick={() => goto('/register')}      className="block w-full px-4 py-2 text-left hover:bg-[#444]">Sign&nbsp;Up</button>
+              <button onClick={() => goto('/premium')}       className="block w-full px-4 py-2 text-left hover:bg-[#444]">Get&nbsp;Premium</button>
+              <button onClick={() => goto('/')}              className="block w-full px-4 py-2 text-left hover:bg-[#444]">Chat</button>
+              <button onClick={() => setMenuOpen(false)}     className="block w-full px-4 py-2 text-left text-red-400 hover:text-red-300 hover:bg-[#444]">Log&nbsp;out</button>
+            </div>
+          )}
         </div>
-        <p className="text-xs text-gray-400 text-center mt-8">
-          To make StudyBuddy work, we log user data and share it with service
-          providers. Click "Sign up" above to accept StudyBuddy
-          <span className="text-[#8C52FF]"> Terms of service</span> &
-          <span className="text-[#8C52FF]"> Privacy Policy</span>.
-        </p>
       </div>
-      <Link to="/" className="text-center text-sm text-[#8C52FF] mt-4">
-        Already have an account? Log in
-      </Link>
-    </div>;
+
+      {/* ── body ─────────────────────────────────────────────────── */}
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-4">
+        {/* hero icon */}
+        <img
+          src="./13331037(1).png"
+          alt="StudyPal Logo"
+          className="w-24 h-24 mb-6 object-contain"
+        />
+
+        {/* input fields */}
+        <form className="w-full max-w-xs mb-6 space-y-4">
+          <input
+            type="text"
+            placeholder="Email address or phone number"
+            className="w-full rounded-lg bg-transparent border border-[#444] px-4 py-2.5 placeholder-gray-400 focus:outline-none focus:border-[#4285F4] transition"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full rounded-lg bg-transparent border border-[#444] px-4 py-2.5 placeholder-gray-400 focus:outline-none focus:border-[#4285F4] transition"
+          />
+
+          <div className="text-right text-sm pt-1">
+            <button
+              type="button"
+              className="text-[#2da8ff] hover:underline"
+              onClick={() => goto('/forgot')}
+            >
+              Forgot&nbsp;Password?
+            </button>
+          </div>
+        </form>
+
+        {/* divider */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className="h-px flex-1 bg-[#444]"></span>
+          <span className="text-sm text-gray-400 uppercase">or</span>
+          <span className="h-px flex-1 bg-[#444]"></span>
+        </div>
+
+        {/* login with socials */}
+        <p className="text-sm mb-3">Login with</p>
+        <div className="flex gap-6 mb-4">
+          <button aria-label="Facebook"  className="hover:text-[#2da8ff]"><Facebook  size={24}/></button>
+          <button aria-label="LinkedIn"   className="hover:text-[#2da8ff]"><Linkedin  size={24}/></button>
+          <button aria-label="Instagram"  className="hover:text-[#2da8ff]"><Instagram size={24}/></button>
+          <button aria-label="Twitter"    className="hover:text-[#2da8ff]"><Twitter   size={24}/></button>
+        </div>
+
+        {/* footer link */}
+        <p className="text-sm">
+          Don’t have an account?&nbsp;
+          <button onClick={() => goto('/register')} className="text-[#2da8ff] hover:underline">
+            Create&nbsp;new&nbsp;Account
+          </button>
+        </p>
+      </main>
+    </div>
+  );
 }
