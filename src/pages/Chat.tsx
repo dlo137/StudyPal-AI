@@ -2,17 +2,18 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SendIcon, User } from 'lucide-react';
 import studyPalIcon from '../assets/studypal-icon.png';
+import demoLogo from '../assets/13331037.png';
 import { SparklesIcon, ZapIcon, CrownIcon } from 'lucide-react';
 import { XIcon } from 'lucide-react';
+import { sendMessageToOpenAI, validateOpenAIConfig, type ChatMessage } from '../lib/openai';
 
 export function ChatInterface() {
   /* ── state ──────────────────────────────────────────────────────── */
   const [input, setInput]   = useState('');
-  const [messages, setMsgs] = useState<
-    { role: 'user' | 'assistant'; content: string }[]
-  >([]);
+  const [messages, setMsgs] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openaiError, setOpenaiError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
 
@@ -40,29 +41,27 @@ export function ChatInterface() {
     const text = input.trim();
     if (!text) return;
 
-    setMsgs(m => [...m, { role: 'user', content: text }]);
+    // Clear any previous errors
+    setOpenaiError(null);
+
+    // Check OpenAI configuration
+    const configCheck = validateOpenAIConfig();
+    if (!configCheck.valid) {
+      setOpenaiError(configCheck.error || 'OpenAI configuration error');
+      return;
+    }
+
+    const userMessage: ChatMessage = { role: 'user', content: text };
+    setMsgs(m => [...m, userMessage]);
     setInput('');
     setIsLoading(true);
 
     // Record start time for minimum delay
     const startTime = Date.now();
 
-    // ――― replace with YOUR backend ―――
     try {
-      // Use Vercel backend URL - replace with your actual Vercel URL
-      const apiUrl = 'https://study-pal-ai-dangelos-projects-9e03238c.vercel.app/api/chat';
-      
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [...messages, { role: 'user', content: text }] })
-      });
-      
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      
-      const { reply } = await res.json();
+      // Send message to OpenAI
+      const aiResponse = await sendMessageToOpenAI([...messages, userMessage]);
       
       // Calculate elapsed time and wait if necessary to ensure minimum 2 seconds
       const elapsedTime = Date.now() - startTime;
@@ -72,9 +71,10 @@ export function ChatInterface() {
         await new Promise(resolve => setTimeout(resolve, minDelay - elapsedTime));
       }
       
-      setMsgs(m => [...m, { role: 'assistant', content: reply }]);
+      const aiMessage: ChatMessage = { role: 'assistant', content: aiResponse };
+      setMsgs(m => [...m, aiMessage]);
     } catch (error) {
-      console.error('API Error:', error);
+      console.error('OpenAI Error:', error);
       
       // Calculate elapsed time and wait if necessary to ensure minimum 2 seconds
       const elapsedTime = Date.now() - startTime;
@@ -84,7 +84,14 @@ export function ChatInterface() {
         await new Promise(resolve => setTimeout(resolve, minDelay - elapsedTime));
       }
       
-      setMsgs(m => [...m, { role: 'assistant', content: '⚠️ Unable to connect to AI service. Please try again.' }]);
+      const errorMessage = error instanceof Error ? error.message : 'Something went wrong with the AI service. Please try again.';
+      setOpenaiError(errorMessage);
+      
+      const errorResponse: ChatMessage = { 
+        role: 'assistant', 
+        content: `⚠️ ${errorMessage}`
+      };
+      setMsgs(m => [...m, errorResponse]);
     } finally {
       setIsLoading(false);
     }
@@ -183,6 +190,37 @@ export function ChatInterface() {
         {messages.length === 0 ? (
           /* WELCOME SCREEN WITH CENTERED INPUT */
           <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 min-h-0">
+            {/* Demo Logo */}
+            <div className="mb-6">
+              <img 
+                src={demoLogo} 
+                alt="StudyPal Demo" 
+                className="w-20 h-20 sm:w-24 sm:h-24 object-contain mx-auto rounded-lg shadow-lg" 
+              />
+            </div>
+
+            {/* OpenAI Configuration Status */}
+            {(() => {
+              const configCheck = validateOpenAIConfig();
+              if (!configCheck.valid) {
+                return (
+                  <div className="bg-red-900/20 border border-red-400/30 rounded-lg p-3 sm:p-4 mb-6 max-w-md">
+                    <p className="text-red-300 text-sm">
+                      <span className="font-semibold">⚠️ Configuration Required:</span> {configCheck.error}
+                    </p>
+                  </div>
+                );
+              } else {
+                return (
+                  <div className="bg-green-900/20 border border-green-400/30 rounded-lg p-3 sm:p-4 mb-6 max-w-md">
+                    <p className="text-green-300 text-sm">
+                      <span className="font-semibold">✅ AI Ready:</span> StudyPal AI is configured and ready to help!
+                    </p>
+                  </div>
+                );
+              }
+            })()}
+            
             <h2 className="text-xl sm:text-3xl font-medium px-2 max-w-md mb-6 sm:mb-8">How can I help you?</h2>
             <div className="w-full max-w-2xl px-2">
               <form
