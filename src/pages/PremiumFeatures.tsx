@@ -8,7 +8,7 @@ export function PremiumFeatures() {
   return (
     <div className="min-h-screen bg-[#121212] text-white relative overflow-x-hidden">
       {/* Header with X button and PREMIUM text */}
-      <div className="flex items-center justify-between p-4 sm:p-6 relative z-50">
+      <div className="flex items-center justify-between p-4 pl-4 pr-4 pb-0 Srelative z-50">
         <button 
           onClick={() => navigate('/')} 
           className="text-white hover:text-gray-300 transition cursor-pointer p-2 hover:bg-gray-800 rounded-full"
@@ -21,14 +21,9 @@ export function PremiumFeatures() {
         <div></div> {/* Empty div for proper spacing */}
       </div>
 
-      {/* Background sparkles effect */}
-      <div className="absolute inset-0 overflow-hidden z-0">
-        <div className="absolute w-40 h-40 bg-[#8C52FF] rounded-full filter blur-[100px] top-0 left-0 opacity-30"></div>
-        <div className="absolute w-40 h-40 bg-[#8C52FF] rounded-full filter blur-[100px] top-20 right-0 opacity-30"></div>
-      </div>
 
       {/* Title, Descriptions, Cards, Button, etc */}
-      <div className="relative z-10 max-w-5xl mx-auto w-full px-4 sm:px-6 md:px-8 pb-8 sm:pb-12">
+      <div className="relative z-10 max-w-5xl mx-auto w-full px-4 sm:px-6 md:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-80px)] py-4 sm:py-8">
         {/* Title and Description Section */}
         <div className="text-center mb-6 sm:mb-8 md:mb-10">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">StudyPal: AI Homework Helper</h1>
@@ -38,7 +33,7 @@ export function PremiumFeatures() {
         </div>
 
         {/* Cards - 3 column layout on all screen sizes */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-6 sm:mb-8 pt-4">
           {/* Card 1 */}
           <div className="bg-[#2a1052]/80 p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border border-purple-500/30 backdrop-blur-sm h-[200px] sm:h-[240px] md:h-[280px] flex flex-col relative">
             <div className="bg-[#8C52FF] w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-2 md:mb-3">
