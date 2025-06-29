@@ -38,7 +38,7 @@ export function PremiumFeatures() {
         </div>
 
         {/* Cards - 3 column layout on all screen sizes */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-8 pt-5">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-8">
           {/* Card 1 */}
           <div className="bg-[#2a1052]/80 p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border border-purple-500/30 backdrop-blur-sm h-[200px] sm:h-[240px] md:h-[280px] flex flex-col relative">
             <div className="bg-[#8C52FF] w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-2 md:mb-3">
