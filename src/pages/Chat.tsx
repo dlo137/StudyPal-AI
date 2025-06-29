@@ -116,6 +116,7 @@ export function ChatInterface() {
         
         {/* Left side - Logo and New Chat Button */}
         <div className="flex items-center gap-2">
+          <span className="text-base sm:text-lg font-semibold">StudyPal</span>
           <img 
             src={studyPalIcon} 
             alt="StudyPal Icon" 

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { XIcon, Facebook, Linkedin, Instagram, Twitter, Eye, EyeOff } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import logoImage from '/13331037.png';
 
 export function Login() {
   const navigate                    = useNavigate();
@@ -60,7 +61,7 @@ export function Login() {
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-4">
         {/* hero icon */}
         <img
-          src="/13331037.png"
+          src={logoImage}
           alt="StudyPal Logo"
           className="w-24 h-24 mb-6 object-contain"
         />
