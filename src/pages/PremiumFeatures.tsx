@@ -27,7 +27,7 @@ export function PremiumFeatures() {
         <div className="absolute w-40 h-40 bg-[#8C52FF] rounded-full filter blur-[100px] top-20 right-0 opacity-30"></div>
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto w-full pt-1 pl-2 pr-2 sm:pl-4 sm:pr-4 md:pl-6 md:pr-6 pb-6">
+      <div className="relative z-10 max-w-5xl mx-auto w-full pt-1 pl-2 pr-2 sm:pl-4 sm:pr-4 md:pl-6 md:pr-6 pb-6 flex flex-col justify-center min-h-screen sm:min-h-0">
         {/* Title and Description Section */}
         <div className="text-center mb-8 sm:mb-10 md:mb-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">StudyPal: AI Homework Helper</h1>
@@ -49,11 +49,11 @@ export function PremiumFeatures() {
             <ul className="space-y-1 sm:space-y-1.5 md:space-y-2 text-gray-300 flex-1 text-xs sm:text-xs md:text-sm">
               <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-                <span>10/Daily</span>
+                <span>10 Requests/Daily</span>
               </li>
               <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-                <span>30/Monthly</span>
+                <span>30 Requests/Monthly</span>
               </li>
               <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
@@ -61,7 +61,7 @@ export function PremiumFeatures() {
               </li>
               <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-                <span>No Card</span>
+                <span>No Credit Card Required </span>
               </li>
             </ul>
           </div>
@@ -77,11 +77,11 @@ export function PremiumFeatures() {
             <ul className="space-y-1 sm:space-y-1.5 md:space-y-2 text-gray-300 flex-1 text-xs sm:text-xs md:text-sm">
               <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-                <span>50/Daily</span>
+                <span>50 Requests/Daily</span>
               </li>
               <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-                <span>1.5K/Monthly</span>
+                <span>1.5K Requests/Monthly</span>
               </li>
               <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
@@ -111,11 +111,11 @@ export function PremiumFeatures() {
             <ul className="space-y-1 sm:space-y-1.5 md:space-y-2 text-gray-300 flex-1 text-xs sm:text-xs md:text-sm">
               <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-                <span>150/Daily</span>
+                <span>150 Requests/Daily</span>
               </li>
               <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-                <span>4.5K/Monthly</span>
+                <span>4.5K Requests/Monthly</span>
               </li>
               <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
