@@ -23,7 +23,7 @@ export function PremiumFeatures() {
 
       {/* Body Section - centered in remaining space */}
       <div className="flex-1 flex items-center justify-center">
-        <div className="relative z-10 max-w-5xl mx-auto w-full px-3 sm:px-6 md:px-8 pb-6">
+        <div className="relative z-10 max-w-5xl mx-auto w-full px-3 sm:px-6 md:px-8 pb-14">
           {/* Title and Description Section */}
           <div className="text-center mb-4 sm:mb-6 md:mb-8 pb-2">
             <h1 className="text-xl sm:text-2xl md:text-4xl font-bold mb-2 md:mb-4">StudyPal: AI Homework Helper</h1>
