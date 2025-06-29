@@ -27,7 +27,8 @@ export function PremiumFeatures() {
         <div className="absolute w-40 h-40 bg-[#8C52FF] rounded-full filter blur-[100px] top-20 right-0 opacity-30"></div>
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto w-full pt-1 pl-2 pr-2 sm:pl-4 sm:pr-4 md:pl-6 md:pr-6 pb-6 flex flex-col justify-center min-h-screen sm:min-h-0">
+      {/* Title, Descriptions, Cards, Button, etc */}
+      <div className="relative z-10 max-w-5xl mx-auto w-full px-2 sm:px-4 md:px-6 flex flex-col justify-center flex-1">
         {/* Title and Description Section */}
         <div className="text-center mb-8 sm:mb-10 md:mb-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">StudyPal: AI Homework Helper</h1>
