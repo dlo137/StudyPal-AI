@@ -58,17 +58,16 @@ export function SignUp() {
       </div>
 
       {/* ── body ────────────────────────────────────────────── */}
-      {/* grid + place-items-center guarantees perfect centering */}
-      <main className="flex-grow grid place-items-center px-4 sm:px-6">
+      <div className="flex-grow flex items-center justify-center -mt-8 sm:-mt-4">
+        <main className="grid place-items-center px-4 sm:px-6">
+          {/* wrap everything so grid treats it as one unit */}
+          <section className="flex flex-col items-center w-full max-w-xs">
 
-        {/* wrap everything so grid treats it as one unit */}
-        <section className="flex flex-col items-center w-full max-w-xs">
-
-          <img
-            src={logoImage}
-            alt="StudyPal Logo"
-            className="w-24 h-24 mb-6 object-contain"
-          />
+            <img
+              src={logoImage}
+              alt="StudyPal Logo"
+              className="w-24 h-24 mb-6 object-contain"
+            />
 
           <button className="text-xs text-gray-400 mb-6 hover:text-white">
             English&nbsp;(US)<span className="align-text-top ml-0.5">▾</span>
@@ -130,5 +129,6 @@ export function SignUp() {
         </section>
       </main>
     </div>
+  </div>
   );
 }
