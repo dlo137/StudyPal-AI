@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { XIcon, Facebook, Linkedin, Instagram, Twitter } from 'lucide-react';
+import { XIcon, Facebook, Linkedin, Instagram, Twitter, Eye, EyeOff } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 export function Login() {
   const navigate                    = useNavigate();
   const [menuOpen, setMenuOpen]     = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const menuRef                     = useRef<HTMLDivElement | null>(null);
 
   /* ── close avatar menu when you tap outside ───────────────────── */
@@ -59,7 +60,7 @@ export function Login() {
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-4">
         {/* hero icon */}
         <img
-          src="./13331037(1).png"
+          src="/13331037(1).png"
           alt="StudyPal Logo"
           className="w-24 h-24 mb-6 object-contain"
         />
@@ -71,11 +72,20 @@ export function Login() {
             placeholder="Email address or phone number"
             className="w-full rounded-lg bg-transparent border border-[#444] px-4 py-2.5 placeholder-gray-400 focus:outline-none focus:border-[#4285F4] transition"
           />
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full rounded-lg bg-transparent border border-[#444] px-4 py-2.5 placeholder-gray-400 focus:outline-none focus:border-[#4285F4] transition"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              className="w-full rounded-lg bg-transparent border border-[#444] px-4 py-2.5 pr-12 placeholder-gray-400 focus:outline-none focus:border-[#4285F4] transition"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
 
           <div className="text-right text-sm pt-1">
             <button
