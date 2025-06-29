@@ -109,7 +109,7 @@ export function ChatInterface() {
 
   /* ── render ─────────────────────────────────────────────────────── */
   return (
-    <div className="h-full w-full bg-[#121212] text-white flex flex-col overflow-hidden">
+    <div className="h-screen w-full bg-[#121212] text-white flex flex-col overflow-hidden">
       {/* HEADER SECTION */}
       <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333333] bg-[#121212] z-10">
         {/* Left side - Logo, Title, New Chat Button */}
@@ -173,10 +173,10 @@ export function ChatInterface() {
       </header>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 min-h-0 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {messages.length === 0 ? (
           /* WELCOME SCREEN WITH CENTERED INPUT */
-          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6">
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 overflow-hidden">
             <h2 className="text-xl sm:text-3xl font-medium px-2 max-w-md mb-6 sm:mb-8">How can I help you?</h2>
             <div className="w-full max-w-2xl px-2">
               <form
