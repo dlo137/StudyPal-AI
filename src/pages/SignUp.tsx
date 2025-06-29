@@ -1,17 +1,34 @@
 // src/pages/SignUp.tsx
 import { useNavigate } from 'react-router-dom';
 import { XIcon, Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export function SignUp() {
   const navigate                        = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [menuOpen, setMenuOpen]         = useState(false);
+  const menuRef                         = useRef<HTMLDivElement | null>(null);
+
+  /* ── close avatar menu when you tap outside ───────────────────── */
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
+
+  /* ── helpers ──────────────────────────────────────────────────── */
+  const goto = (path: string) => { setMenuOpen(false); navigate(path); };
 
   /* ───────────────────────── render ─────────────────────────── */
   return (
     <div className="min-h-screen bg-[#121212] text-white flex flex-col overflow-hidden">
       {/* ── header (same structure / colours) ─────────────────── */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333] relative">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333] relative z-50">
         <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-800 rounded-full">
           <XIcon size={24} />
         </button>
@@ -20,12 +37,34 @@ export function SignUp() {
           SIGN&nbsp;UP
         </span>
 
-        {/* right-side spacer so title stays centred */}
-        <div className="w-8 h-8" />
+        {/* avatar + menu */}
+        <div ref={menuRef} className="relative">
+          <img
+            src="https://placehold.co/32x32/png"
+            alt="profile"
+            className="h-8 w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4]"
+            onClick={() => setMenuOpen(v => !v)}
+          />
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg">
+              <button onClick={() => goto('/login')}         className="block w-full px-4 py-2 text-left hover:bg-[#444]">Login</button>
+              <button onClick={() => setMenuOpen(false)}     className="block w-full px-4 py-2 text-left hover:bg-[#444]">Sign&nbsp;Up</button>
+              <button onClick={() => goto('/premium')}       className="block w-full px-4 py-2 text-left hover:bg-[#444]">Get&nbsp;Premium</button>
+              <button onClick={() => goto('/')}              className="block w-full px-4 py-2 text-left hover:bg-[#444] rounded-b-lg">Chat</button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── body ──────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col items-center px-6 py-4 overflow-y-auto">
+        {/* hero icon */}
+        <img
+          src="./13331037(1).png"
+          alt="StudyPal Logo"
+          className="w-24 h-24 mb-6 object-contain"
+        />
+
         {/* language selector placeholder (top centre) */}
         <button className="text-xs text-gray-400 mb-6 hover:text-white">
           English&nbsp;(US)<span className="align-text-top ml-0.5">▾</span>

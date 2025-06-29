@@ -25,6 +25,11 @@ export function PremiumFeatures() {
     navigate('/login');
   }
 
+  function handleSignUp() {
+    setMenuOpen(false);
+    navigate('/signup');
+  }
+
   function handleChat() {
     setMenuOpen(false);
     navigate('/');
@@ -33,16 +38,16 @@ export function PremiumFeatures() {
   return (
     <div className="min-h-screen bg-[#121212] text-white relative overflow-hidden flex flex-col">
       {/* Header with X button and PREMIUM text - stays at top */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-2 relative z-50 border-b border-[#333333]">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-3 relative z-50 border-b border-[#333]">
         <button 
           onClick={() => navigate('/')} 
           className="text-white hover:text-gray-300 transition cursor-pointer p-2 hover:bg-gray-800 rounded-full"
         >
           <XIcon size={24} />
         </button>
-        <div className="absolute left-1/2 transform -translate-x-1/2">
-          <span className="font-bold text-lg">PREMIUM</span>
-        </div>
+        <span className="absolute left-1/2 -translate-x-1/2 font-bold text-lg">
+          PREMIUM
+        </span>
         <div className="relative" ref={menuRef}>
           <img
             src="https://placehold.co/32x32/png"
@@ -60,15 +65,21 @@ export function PremiumFeatures() {
               </button>
               <button 
                 className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
+                onClick={handleSignUp}
+              >
+                Sign Up
+              </button>
+              <button 
+                className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
+                onClick={() => setMenuOpen(false)}
+              >
+                Get Premium
+              </button>
+              <button 
+                className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-b-lg" 
                 onClick={handleChat}
               >
                 Chat
-              </button>
-              <button 
-                className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-red-300 text-red-400 transition-all duration-200 cursor-pointer rounded-b-lg" 
-                onClick={() => setMenuOpen(false)}
-              >
-                Log out
               </button>
             </div>
           )}

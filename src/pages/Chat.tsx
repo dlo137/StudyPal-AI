@@ -111,10 +111,14 @@ export function ChatInterface() {
   return (
     <div className="mobile-full-height w-full bg-[#121212] text-white flex flex-col">
       {/* HEADER SECTION */}
-      <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333333] bg-[#121212] z-10">
-        {/* Left side - Logo, Title, New Chat Button */}
+      <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333] bg-[#121212] z-10 relative">
+        {/* Centered title */}
+        <span className="absolute left-1/2 -translate-x-1/2 font-bold text-lg">
+          CHAT
+        </span>
+        
+        {/* Left side - Logo and New Chat Button */}
         <div className="flex items-center gap-2">
-          <h1 className="text-base sm:text-lg font-semibold">StudyPal</h1>
           <img 
             src={studyPalIcon} 
             alt="StudyPal Icon" 
@@ -156,15 +160,21 @@ export function ChatInterface() {
                 </button>
                 <button 
                   className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
-                  onClick={handlePremium}
+                  onClick={() => { setMenuOpen(false); navigate('/signup'); }}
                 >
-                  Get premium
+                  Sign Up
                 </button>
                 <button 
-                  className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-red-300 text-red-400 transition-all duration-200 cursor-pointer rounded-b-lg" 
-                  onClick={() => setMenuOpen(false)}
+                  className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
+                  onClick={handlePremium}
                 >
-                  Log out
+                  Get Premium
+                </button>
+                <button 
+                  className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-b-lg" 
+                  onClick={() => { setMenuOpen(false); navigate('/'); }}
+                >
+                  Chat
                 </button>
               </div>
             )}
