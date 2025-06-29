@@ -109,7 +109,7 @@ export function ChatInterface() {
 
   /* ── render ─────────────────────────────────────────────────────── */
   return (
-    <div className="h-screen w-full bg-[#121212] text-white flex flex-col overflow-hidden">
+    <div className="h-screen w-full bg-[#121212] text-white flex flex-col">
       {/* HEADER SECTION */}
       <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333333] bg-[#121212] z-10">
         {/* Left side - Logo, Title, New Chat Button */}
@@ -173,10 +173,10 @@ export function ChatInterface() {
       </header>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         {messages.length === 0 ? (
           /* WELCOME SCREEN WITH CENTERED INPUT */
-          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 overflow-hidden">
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 min-h-0">
             <h2 className="text-xl sm:text-3xl font-medium px-2 max-w-md mb-6 sm:mb-8">How can I help you?</h2>
             <div className="w-full max-w-2xl px-2">
               <form
@@ -209,7 +209,7 @@ export function ChatInterface() {
         ) : (
           /* CHAT MESSAGES WITH BOTTOM INPUT */
           <>
-            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 space-y-3 sm:space-y-4">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 space-y-3 sm:space-y-4 min-h-0">
               {messages.map((m, i) => (
                 <div
                   key={i}
