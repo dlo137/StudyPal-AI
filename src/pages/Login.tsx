@@ -60,7 +60,7 @@ export function Login() {
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-4">
         {/* hero icon */}
         <img
-          src="/13331037(1).png"
+          src="./13331037(1).png"
           alt="StudyPal Logo"
           className="w-24 h-24 mb-6 object-contain"
         />
