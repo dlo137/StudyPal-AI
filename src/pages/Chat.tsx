@@ -112,10 +112,7 @@ export function ChatInterface() {
     <div className="mobile-full-height w-full bg-[#121212] text-white flex flex-col">
       {/* HEADER SECTION */}
       <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333] bg-[#121212] z-10 relative">
-        {/* Centered title */}
-        <span className="absolute left-1/2 -translate-x-1/2 font-bold text-lg">
-          CHAT
-        </span>
+
         
         {/* Left side - Logo and New Chat Button */}
         <div className="flex items-center gap-2">
