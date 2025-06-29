@@ -41,17 +41,27 @@ body {
     overscroll-behavior: none;
     /* Prevent mobile document scrolling while allowing internal scrolling */
     touch-action: manipulation;
+    overflow: hidden; /* Prevent body scroll on mobile */
   }
   
   #root {
+    height: 100vh;
+    height: -webkit-fill-available; /* Safari fallback */
     min-height: 100vh;
-    min-height: -webkit-fill-available; /* Safari fallback */
+    min-height: -webkit-fill-available;
+    overflow: hidden; /* Prevent root overflow */
     /* Remove dvh/svh that can cause overflow on mobile */
   }
 }
 
 /* Safe-area utility (unchanged) */
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
+/* Mobile-optimized full height */
+.mobile-full-height {
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+}
 
 /* Optional: hide native scrollbars where you already use Tailwind's
    custom scroll styling */
