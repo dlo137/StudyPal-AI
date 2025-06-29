@@ -21,13 +21,11 @@ body {
   overscroll-behavior: none;
 }
 
-/* --- FIXED FULL-HEIGHT WRAPPER ---------------- */
+/* --- SIMPLIFIED FULL-HEIGHT WRAPPER ---------------- */
 #root {
-  height: 100vh;      /* Actual height, not just min-height */
-  height: 100dvh;     /* Dynamic viewport height for mobile */
+  min-height: 100vh;   /* Use standard viewport height */
   width: 100%;
-  overflow: hidden;   /* Prevent any overflow */
-  position: relative;
+  /* Remove forced height and safe-area padding that causes issues */
 }
 
 /* Mobile-specific fixes */
@@ -46,11 +44,9 @@ body {
   }
   
   #root {
-    height: 100vh;
-    height: 100dvh;
-    height: -webkit-fill-available; /* Safari fallback */
-    overflow: hidden;
-    position: relative;
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* Safari fallback */
+    /* Remove dvh/svh that can cause overflow on mobile */
   }
 }
 
