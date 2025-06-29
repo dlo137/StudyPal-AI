@@ -56,7 +56,7 @@ export function SignUp() {
       </div>
 
       {/* ── body ──────────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col items-center px-6 py-4 overflow-y-auto">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-4 overflow-y-auto">
         {/* hero icon */}
         <img
           src={logoImage}
