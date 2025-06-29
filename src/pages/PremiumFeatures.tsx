@@ -6,9 +6,9 @@ export function PremiumFeatures() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#121212] text-white relative">
+    <div className="min-h-screen bg-[#121212] text-white relative overflow-x-hidden">
       {/* Header with X button and PREMIUM text */}
-      <div className="flex items-center justify-between p-6 relative z-50">
+      <div className="flex items-center justify-between p-4 sm:p-6 relative z-50">
         <button 
           onClick={() => navigate('/')} 
           className="text-white hover:text-gray-300 transition cursor-pointer p-2 hover:bg-gray-800 rounded-full"
@@ -28,9 +28,9 @@ export function PremiumFeatures() {
       </div>
 
       {/* Title, Descriptions, Cards, Button, etc */}
-      <div className="relative z-10 max-w-5xl mx-auto w-full px-2 sm:px-4 md:px-6 flex flex-col justify-center flex-1">
+      <div className="relative z-10 max-w-5xl mx-auto w-full px-4 sm:px-6 md:px-8 pb-8 sm:pb-12">
         {/* Title and Description Section */}
-        <div className="text-center mb-8 sm:mb-10 md:mb-12">
+        <div className="text-center mb-6 sm:mb-8 md:mb-10">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">StudyPal: AI Homework Helper</h1>
           <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-2xl mx-auto px-2">
             Saves time and stress while ensuring clarity and quality in your homework, making it the smart choice for tackling assignments with ease.
@@ -38,7 +38,7 @@ export function PremiumFeatures() {
         </div>
 
         {/* Cards - 3 column layout on all screen sizes */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
           {/* Card 1 */}
           <div className="bg-[#2a1052]/80 p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border border-purple-500/30 backdrop-blur-sm h-[200px] sm:h-[240px] md:h-[280px] flex flex-col relative">
             <div className="bg-[#8C52FF] w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-2 md:mb-3">
@@ -68,7 +68,7 @@ export function PremiumFeatures() {
           </div>
 
           {/* Card 2 - Elevated */}
-          <div className="bg-[#2a1052]/80 p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border border-purple-500/30 backdrop-blur-sm h-[200px] sm:h-[240px] md:h-[280px] flex flex-col relative md:-mt-8">
+          <div className="bg-[#2a1052]/80 p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border border-purple-500/30 backdrop-blur-sm h-[200px] sm:h-[240px] md:h-[280px] flex flex-col relative sm:-mt-4 md:-mt-8">
             <div className="bg-[#8C52FF] w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-2 md:mb-3">
               <SparklesIcon size={12} className="text-white sm:hidden" />
               <SparklesIcon size={16} className="text-white hidden sm:block md:hidden" />
@@ -132,12 +132,13 @@ export function PremiumFeatures() {
 
         {/* Bottom CTA */}
         <div className="max-w-md mx-auto">
-          <button className="w-full p-3 sm:p-4 rounded-xl bg-[#8C52FF] text-white font-bold shadow-lg shadow-purple-500/30 hover:bg-[#7a4ae6] transition-colors text-sm sm:text-base">
+          <button className="w-full p-3 sm:p-4 rounded-xl bg-[#8C52FF] text-white font-bold shadow-lg shadow-purple-500/30 hover:bg-[#7a4ae6] transition-colors text-sm sm:text-base cursor-pointer">
             Get Now
           </button>
           <p className="text-center text-xs sm:text-sm text-gray-400 mt-2">
             7-day free trial, then $9.99/month
           </p>
+        
         </div>
       </div>
     </div>
