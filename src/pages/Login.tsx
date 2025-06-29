@@ -26,7 +26,9 @@ export function Login() {
 
   /* ── render ───────────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-[#121212] text-white flex flex-col overflow-hidden">
+    
+    //Main Container
+    <div className="h-screen bg-[#121212] text-white flex flex-col">
       {/* ── header (unchanged) ──────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333] relative z-50">
         <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-800 rounded-full">
@@ -56,7 +58,7 @@ export function Login() {
       </div>
 
       {/* ── body ─────────────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-4">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 min-h-0 mb-6">
         {/* hero icon */}
         <img
           src={logoImage}
