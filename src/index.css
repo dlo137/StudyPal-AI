@@ -21,20 +21,13 @@ body {
   overscroll-behavior: none;
 }
 
-/* --- DYNAMIC FULL-HEIGHT WRAPPER ---------------- */
+/* --- FIXED FULL-HEIGHT WRAPPER ---------------- */
 #root {
-  height: 100svh;   /* visible viewport when UI chrome is shown       */
-  height: 100dvh;   /* when chrome is collapsed                       */
-
-  min-height: 100svh;
-  min-height: 100dvh; 
-  /* Respect iOS safe-area */
-  padding-top:    env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-
-  display: flex;
-  flex-direction: column;
+  height: 100vh;      /* Actual height, not just min-height */
+  height: 100dvh;     /* Dynamic viewport height for mobile */
   width: 100%;
+  overflow: hidden;   /* Prevent any overflow */
+  position: relative;
 }
 
 /* Mobile-specific fixes */
@@ -53,16 +46,17 @@ body {
   }
   
   #root {
-    min-height: 100svh;
-    min-height: 100dvh;
-    /* Safari fallback still OK */
-    min-height: -webkit-fill-available;
+    height: 100vh;
+    height: 100dvh;
+    height: -webkit-fill-available; /* Safari fallback */
+    overflow: hidden;
+    position: relative;
   }
 }
 
 /* Safe-area utility (unchanged) */
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 
-/* Optional: hide native scrollbars where you already use Tailwind’s
+/* Optional: hide native scrollbars where you already use Tailwind's
    custom scroll styling */
 .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
