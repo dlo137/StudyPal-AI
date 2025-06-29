@@ -190,36 +190,6 @@ export function ChatInterface() {
         {messages.length === 0 ? (
           /* WELCOME SCREEN WITH CENTERED INPUT */
           <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 min-h-0">
-            {/* Demo Logo */}
-            <div className="mb-6">
-              <img 
-                src={demoLogo} 
-                alt="StudyPal Demo" 
-                className="w-20 h-20 sm:w-24 sm:h-24 object-contain mx-auto rounded-lg shadow-lg" 
-              />
-            </div>
-
-            {/* OpenAI Configuration Status */}
-            {(() => {
-              const configCheck = validateOpenAIConfig();
-              if (!configCheck.valid) {
-                return (
-                  <div className="bg-red-900/20 border border-red-400/30 rounded-lg p-3 sm:p-4 mb-6 max-w-md">
-                    <p className="text-red-300 text-sm">
-                      <span className="font-semibold">⚠️ Configuration Required:</span> {configCheck.error}
-                    </p>
-                  </div>
-                );
-              } else {
-                return (
-                  <div className="bg-green-900/20 border border-green-400/30 rounded-lg p-3 sm:p-4 mb-6 max-w-md">
-                    <p className="text-green-300 text-sm">
-                      <span className="font-semibold">✅ AI Ready:</span> StudyPal AI is configured and ready to help!
-                    </p>
-                  </div>
-                );
-              }
-            })()}
             
             <h2 className="text-xl sm:text-3xl font-medium px-2 max-w-md mb-6 sm:mb-8">How can I help you?</h2>
             <div className="w-full max-w-2xl px-2">
