@@ -1,14 +1,39 @@
 import { SparklesIcon, ZapIcon, CrownIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { XIcon } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
 export function PremiumFeatures() {
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
+
+  function handleLogin() {
+    setMenuOpen(false);
+    navigate('/login');
+  }
+
+  function handleChat() {
+    setMenuOpen(false);
+    navigate('/');
+  }
 
   return (
     <div className="min-h-screen bg-[#121212] text-white relative overflow-hidden flex flex-col">
       {/* Header with X button and PREMIUM text - stays at top */}
-      <div className="flex items-center justify-between p-4 relative z-50">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-2 relative z-50 border-b border-[#333333]">
         <button 
           onClick={() => navigate('/')} 
           className="text-white hover:text-gray-300 transition cursor-pointer p-2 hover:bg-gray-800 rounded-full"
@@ -18,12 +43,41 @@ export function PremiumFeatures() {
         <div className="absolute left-1/2 transform -translate-x-1/2">
           <span className="font-bold text-lg">PREMIUM</span>
         </div>
-        <div></div> {/* Empty div for proper spacing */}
+        <div className="relative" ref={menuRef}>
+          <img
+            src="https://placehold.co/32x32/png"
+            alt="Profile"
+            className="h-7 w-7 sm:h-8 sm:w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition"
+            onClick={() => setMenuOpen(v => !v)}
+          />
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-36 sm:w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg z-50">
+              <button 
+                className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-t-lg" 
+                onClick={handleLogin}
+              >
+                Login
+              </button>
+              <button 
+                className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
+                onClick={handleChat}
+              >
+                Chat
+              </button>
+              <button 
+                className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-red-300 text-red-400 transition-all duration-200 cursor-pointer rounded-b-lg" 
+                onClick={() => setMenuOpen(false)}
+              >
+                Log out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Body Section - centered in remaining space */}
       <div className="flex-1 flex items-center justify-center">
-        <div className="relative z-10 max-w-5xl mx-auto w-full px-3 sm:px-6 md:px-8 pb-14">
+        <div className="relative z-10 max-w-6xl mx-auto w-full px-3 sm:px-6 md:px-8 pb-0">
           {/* Title and Description Section */}
           <div className="text-center mb-4 sm:mb-6 md:mb-8 pb-2">
             <h1 className="text-xl sm:text-2xl md:text-4xl font-bold mb-2 md:mb-4">StudyPal: AI Homework Helper</h1>
