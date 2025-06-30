@@ -2,11 +2,31 @@ import { SparklesIcon, ZapIcon, CrownIcon, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { XIcon } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { useAuthContext } from '../contexts/AuthContext';
 
 export function PremiumFeatures() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const { user, signOut } = useAuthContext();
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    
+    // Try to get user metadata first (from sign up)
+    const metadata = user.user_metadata;
+    if (metadata?.firstName && metadata?.lastName) {
+      return `${metadata.firstName.charAt(0)}${metadata.lastName.charAt(0)}`.toUpperCase();
+    }
+    
+    // Fallback to email first letter
+    if (user.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    
+    return 'U';
+  };
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -30,6 +50,11 @@ export function PremiumFeatures() {
     navigate('/signup');
   }
 
+  function handleLogout() {
+    setMenuOpen(false);
+    signOut();
+  }
+
   function handleChat() {
     setMenuOpen(false);
     navigate('/');
@@ -51,34 +76,60 @@ export function PremiumFeatures() {
         <div className="relative" ref={menuRef}>
           <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition bg-[#333] flex items-center justify-center"
                onClick={() => setMenuOpen(v => !v)}>
-            <User size={16} className="text-gray-300" />
+            {user ? (
+              <span className="text-white text-xs font-medium">
+                {getUserInitials()}
+              </span>
+            ) : (
+              <User size={16} className="text-gray-300" />
+            )}
           </div>
           {menuOpen && (
             <div className="absolute right-0 mt-2 w-36 sm:w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg z-50">
+              {!user && (
+                <>
+                  <button 
+                    className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-t-lg" 
+                    onClick={handleLogin}
+                  >
+                    Login
+                  </button>
+                  <button 
+                    className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
+                    onClick={handleSignUp}
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
+              {user && (
+                <button 
+                  className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-t-lg" 
+                  onClick={() => { setMenuOpen(false); navigate('/profile'); }}
+                >
+                  Profile
+                </button>
+              )}
               <button 
-                className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-t-lg" 
-                onClick={handleLogin}
-              >
-                Login
-              </button>
-              <button 
-                className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
-                onClick={handleSignUp}
-              >
-                Sign Up
-              </button>
-              <button 
-                className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
+                className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''}`}
                 onClick={() => setMenuOpen(false)}
               >
                 Get Premium
               </button>
               <button 
-                className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-b-lg" 
+                className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer ${!user ? 'rounded-b-lg' : ''}`}
                 onClick={handleChat}
               >
                 Chat
               </button>
+              {user && (
+                <button 
+                  className="block w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-[#444] hover:text-red-300 transition-all duration-200 cursor-pointer rounded-b-lg" 
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+              )}
             </div>
           )}
         </div>

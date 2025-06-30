@@ -7,7 +7,7 @@ export async function testSupabaseConnection() {
     authServiceAccessible: false,
     environmentVariables: false,
     currentSession: false,
-    errors: {} as any
+    errors: {} as Record<string, unknown>
   };
 
   try {
@@ -53,11 +53,11 @@ export async function testSupabaseConnection() {
       }
       
       console.log('✅ Database connection test:', results.databaseConnected);
-    } catch (dbError: any) {
+    } catch (dbError: unknown) {
       console.log('❌ Database connection error:', dbError);
       results.errors.database = {
-        message: dbError.message || 'Unknown database error',
-        stack: dbError.stack
+        message: dbError instanceof Error ? dbError.message : 'Unknown database error',
+        stack: dbError instanceof Error ? dbError.stack : undefined
       };
       results.databaseConnected = false;
     }
@@ -81,11 +81,11 @@ export async function testSupabaseConnection() {
       
       console.log('✅ Auth service accessible:', results.authServiceAccessible);
       console.log('📝 Current session:', session ? 'Logged in' : 'Not logged in');
-    } catch (authError: any) {
+    } catch (authError: unknown) {
       console.log('❌ Auth service error:', authError);
       results.errors.auth = {
-        message: authError.message || 'Unknown auth error',
-        stack: authError.stack
+        message: authError instanceof Error ? authError.message : 'Unknown auth error',
+        stack: authError instanceof Error ? authError.stack : undefined
       };
       results.authServiceAccessible = false;
     }
@@ -102,9 +102,9 @@ export async function testSupabaseConnection() {
       
       console.log('📝 REST API response status:', response.status);
       results.errors.restApi = response.status !== 200 ? `Status: ${response.status}` : null;
-    } catch (restError: any) {
+    } catch (restError: unknown) {
       console.log('❌ REST API error:', restError);
-      results.errors.restApi = restError.message;
+      results.errors.restApi = restError instanceof Error ? restError.message : 'Unknown REST API error';
     }
 
     const allTestsPassed = results.clientInitialized && 
@@ -120,17 +120,17 @@ export async function testSupabaseConnection() {
       details: results
     };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Supabase test failed with unexpected error:', error);
     return {
       success: false,
       message: '🚨 Supabase test failed with unexpected error',
-      error: error.message || 'Unknown error',
+      error: error instanceof Error ? error.message : 'Unknown error',
       details: {
         ...results,
         unexpectedError: {
-          message: error.message,
-          stack: error.stack
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined
         }
       }
     };

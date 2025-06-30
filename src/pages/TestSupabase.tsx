@@ -5,13 +5,13 @@ import { quickSupabaseTest } from '../lib/quickTest';
 interface TestResult {
   success: boolean;
   message: string;
-  details?: any;
-  error?: any;
+  details?: Record<string, unknown>;
+  error?: Record<string, unknown> | string;
 }
 
 const TestSupabase: React.FC = () => {
   const [testResults, setTestResults] = useState<TestResult | null>(null);
-  const [quickResults, setQuickResults] = useState<any>(null);
+  const [quickResults, setQuickResults] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

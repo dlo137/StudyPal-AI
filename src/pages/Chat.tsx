@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SendIcon, User } from 'lucide-react';
 import studyPalIcon from '../assets/studypal-icon.png';
-import demoLogo from '../assets/13331037.png';
 import { SparklesIcon, ZapIcon, CrownIcon } from 'lucide-react';
 import { XIcon } from 'lucide-react';
 import { sendMessageToOpenAI, validateOpenAIConfig, type ChatMessage } from '../lib/openai';
+import { useAuthContext } from '../contexts/AuthContext';
 
 export function ChatInterface() {
   /* ── state ──────────────────────────────────────────────────────── */
@@ -13,9 +13,27 @@ export function ChatInterface() {
   const [messages, setMsgs] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [openaiError, setOpenaiError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+  const { user, signOut } = useAuthContext();
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    
+    // Try to get user metadata first (from sign up)
+    const metadata = user.user_metadata;
+    if (metadata?.firstName && metadata?.lastName) {
+      return `${metadata.firstName.charAt(0)}${metadata.lastName.charAt(0)}`.toUpperCase();
+    }
+    
+    // Fallback to email first letter
+    if (user.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    
+    return 'U';
+  };
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -41,13 +59,14 @@ export function ChatInterface() {
     const text = input.trim();
     if (!text) return;
 
-    // Clear any previous errors
-    setOpenaiError(null);
-
     // Check OpenAI configuration
     const configCheck = validateOpenAIConfig();
     if (!configCheck.valid) {
-      setOpenaiError(configCheck.error || 'OpenAI configuration error');
+      const errorMessage: ChatMessage = { 
+        role: 'assistant', 
+        content: `⚠️ ${configCheck.error || 'OpenAI configuration error'}`
+      };
+      setMsgs(m => [...m, errorMessage]);
       return;
     }
 
@@ -85,7 +104,6 @@ export function ChatInterface() {
       }
       
       const errorMessage = error instanceof Error ? error.message : 'Something went wrong with the AI service. Please try again.';
-      setOpenaiError(errorMessage);
       
       const errorResponse: ChatMessage = { 
         role: 'assistant', 
@@ -107,6 +125,11 @@ export function ChatInterface() {
   function handleLogin() {
     setMenuOpen(false);
     navigate('/login');
+  }
+
+  function handleLogout() {
+    setMenuOpen(false);
+    signOut();
   }
 
   function handlePremium() {
@@ -151,34 +174,60 @@ export function ChatInterface() {
           <div className="relative" ref={menuRef}>
             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition bg-[#333] flex items-center justify-center"
                  onClick={() => setMenuOpen(v => !v)}>
-              <User size={16} className="text-gray-300" />
+              {user ? (
+                <span className="text-white text-xs font-medium">
+                  {getUserInitials()}
+                </span>
+              ) : (
+                <User size={16} className="text-gray-300" />
+              )}
             </div>
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-36 sm:w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg z-50">
+                {!user && (
+                  <>
+                    <button 
+                      className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-t-lg" 
+                      onClick={handleLogin}
+                    >
+                      Login
+                    </button>
+                    <button 
+                      className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
+                      onClick={() => { setMenuOpen(false); navigate('/signup'); }}
+                    >
+                      Sign Up
+                    </button>
+                  </>
+                )}
+                {user && (
+                  <button 
+                    className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-t-lg" 
+                    onClick={() => { setMenuOpen(false); navigate('/profile'); }}
+                  >
+                    Profile
+                  </button>
+                )}
                 <button 
-                  className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-t-lg" 
-                  onClick={handleLogin}
-                >
-                  Login
-                </button>
-                <button 
-                  className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
-                  onClick={() => { setMenuOpen(false); navigate('/signup'); }}
-                >
-                  Sign Up
-                </button>
-                <button 
-                  className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
+                  className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''}`}
                   onClick={handlePremium}
                 >
                   Get Premium
                 </button>
                 <button 
-                  className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-b-lg" 
+                  className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer ${!user ? 'rounded-b-lg' : ''}`}
                   onClick={() => { setMenuOpen(false); navigate('/'); }}
                 >
                   Chat
                 </button>
+                {user && (
+                  <button 
+                    className="block w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-[#444] hover:text-red-300 transition-all duration-200 cursor-pointer rounded-b-lg" 
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                )}
               </div>
             )}
           </div>
