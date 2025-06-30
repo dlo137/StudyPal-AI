@@ -35,7 +35,7 @@ export async function testSupabaseConnection() {
         throw new Error('Supabase client is not initialized');
       }
       
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('test_table')
         .select('*')
         .limit(1);
@@ -75,7 +75,7 @@ export async function testSupabaseConnection() {
         throw new Error('Supabase client is not initialized');
       }
       
-      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      const { data: { session }, error: authError } = await supabase!.auth.getSession();
       
       console.log('📝 Auth response:', { session: !!session, error: authError });
       

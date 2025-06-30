@@ -110,7 +110,7 @@ export function SignUp() {
         return;
       }
       
-      const { error } = await supabase.auth.resend({
+      const { error } = await supabase!.auth.resend({
         type: 'signup',
         email: email
       });

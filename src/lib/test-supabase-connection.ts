@@ -14,7 +14,7 @@ export async function testSupabaseConnection() {
     }
     
     // Test 2: Check if we can connect to the database
-    const { data, error } = await supabase
+    const { data, error } = await supabase!
       .from('test_table')
       .select('*')
       .limit(1)
@@ -28,7 +28,7 @@ export async function testSupabaseConnection() {
     console.log('📊 Test data:', data)
     
     // Test 3: Check authentication
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase!.auth.getUser()
     console.log('👤 Current user:', user ? `${user.email} (${user.id})` : 'Not logged in')
     
     return true
