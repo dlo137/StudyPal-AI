@@ -1,10 +1,11 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+// Initialize OpenAI client only if API key is available
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+const openai = apiKey ? new OpenAI({
+  apiKey: apiKey,
   dangerouslyAllowBrowser: true // Note: In production, use Supabase Edge Functions instead
-});
+}) : null;
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -12,6 +13,11 @@ export interface ChatMessage {
 }
 
 export async function sendMessageToOpenAI(messages: ChatMessage[]): Promise<string> {
+  // If no OpenAI client available, return a helpful message
+  if (!openai) {
+    return "I'm StudyPal AI! 🤖\n\nTo enable AI responses, you'll need to set up an OpenAI API key. For now, I'm running in demo mode.\n\nI can help you with:\n- Study planning and organization\n- Academic questions and explanations\n- Learning strategies and tips\n- Research assistance\n\nTo get started with full AI capabilities, please contact your administrator to configure the OpenAI integration.";
+  }
+
   try {
     // Add a system message to set the context for StudyPal
     const systemMessage: ChatMessage = {
