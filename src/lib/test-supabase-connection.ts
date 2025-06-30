@@ -8,6 +8,11 @@ export async function testSupabaseConnection() {
     // Test 1: Basic client setup
     console.log('✅ Supabase client initialized')
     
+    if (!supabase) {
+      console.error('❌ Supabase client is not initialized')
+      return false
+    }
+    
     // Test 2: Check if we can connect to the database
     const { data, error } = await supabase
       .from('test_table')

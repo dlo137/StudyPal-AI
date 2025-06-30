@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, isSupabaseConfigured } from './supabase'
 import type { AuthError, User } from '@supabase/supabase-js'
 
 export interface SignUpData {
@@ -19,8 +19,22 @@ export interface AuthResult {
   error: AuthError | null
 }
 
+// Helper to create a demo mode error
+const createDemoModeError = (action: string): AuthError => {
+  const error = new Error(`Demo Mode: ${action} is not available without Supabase configuration. Please set up your environment variables to enable authentication.`) as AuthError
+  error.name = 'DemoModeError'
+  return error
+}
+
 // Sign up a new user
 export async function signUpUser(data: SignUpData): Promise<AuthResult> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return {
+      user: null,
+      error: createDemoModeError('Sign up')
+    }
+  }
+
   try {
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
@@ -48,6 +62,13 @@ export async function signUpUser(data: SignUpData): Promise<AuthResult> {
 
 // Log in an existing user
 export async function loginUser(data: LoginData): Promise<AuthResult> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return {
+      user: null,
+      error: createDemoModeError('Login')
+    }
+  }
+
   try {
     const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: data.email,
@@ -68,6 +89,10 @@ export async function loginUser(data: LoginData): Promise<AuthResult> {
 
 // Log out the current user
 export async function logoutUser(): Promise<{ error: AuthError | null }> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { error: createDemoModeError('Logout') }
+  }
+
   try {
     const { error } = await supabase.auth.signOut()
     return { error }
@@ -78,6 +103,10 @@ export async function logoutUser(): Promise<{ error: AuthError | null }> {
 
 // Get the current user
 export async function getCurrentUser(): Promise<User | null> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return null
+  }
+
   try {
     const { data: { user } } = await supabase.auth.getUser()
     return user
@@ -95,6 +124,10 @@ export async function isUserLoggedIn(): Promise<boolean> {
 
 // Get user profile from profiles table
 export async function getUserProfile(userId: string) {
+  if (!isSupabaseConfigured() || !supabase) {
+    return null
+  }
+
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -112,6 +145,10 @@ export async function getUserProfile(userId: string) {
 
 // Update user profile
 export async function updateUserProfile(userId: string, updates: Record<string, unknown>) {
+  if (!isSupabaseConfigured() || !supabase) {
+    throw new Error('Demo Mode: Profile updates are not available without Supabase configuration.')
+  }
+
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -133,6 +170,10 @@ export async function updateUserProfile(userId: string, updates: Record<string, 
 
 // Social login helpers
 export async function loginWithGoogle() {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { data: null, error: createDemoModeError('Google login') }
+  }
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
@@ -143,6 +184,10 @@ export async function loginWithGoogle() {
 }
 
 export async function loginWithFacebook() {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { data: null, error: createDemoModeError('Facebook login') }
+  }
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'facebook',
     options: {
@@ -154,6 +199,10 @@ export async function loginWithFacebook() {
 
 // Password reset
 export async function resetPassword(email: string) {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { error: createDemoModeError('Password reset') }
+  }
+
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`

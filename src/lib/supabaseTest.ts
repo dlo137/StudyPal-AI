@@ -30,6 +30,11 @@ export async function testSupabaseConnection() {
     // Test 3: Test database connection with detailed error handling
     try {
       console.log('🔍 Testing database connection...');
+      
+      if (!supabase) {
+        throw new Error('Supabase client is not initialized');
+      }
+      
       const { data, error } = await supabase
         .from('test_table')
         .select('*')
@@ -65,6 +70,11 @@ export async function testSupabaseConnection() {
     // Test 4: Test auth service with detailed error handling
     try {
       console.log('🔍 Testing auth service...');
+      
+      if (!supabase) {
+        throw new Error('Supabase client is not initialized');
+      }
+      
       const { data: { session }, error: authError } = await supabase.auth.getSession();
       
       console.log('📝 Auth response:', { session: !!session, error: authError });

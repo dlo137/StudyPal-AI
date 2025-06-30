@@ -105,6 +105,11 @@ export function SignUp() {
     setError(null);
     
     try {
+      if (!supabase) {
+        setError('Authentication service is not available. Please check your configuration.');
+        return;
+      }
+      
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: email
