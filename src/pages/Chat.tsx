@@ -188,7 +188,7 @@ export function ChatInterface() {
             type="button"
           >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="sm:w-4 sm:h-4">
-              <path d="M8 3.333v9.334M3.333 8h9.334" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M8 3.333v9.334M3.333 8h9.334" stroke={isDarkMode ? "#fff" : "#333"} strokeWidth="2" strokeLinecap="round"/>
             </svg>
           </button>
         </div>

@@ -150,7 +150,7 @@ export function UserProfile() {
           onClick={handleToggleDarkMode}
           className={`w-full ${theme.bgSecondary} p-4 rounded-lg flex items-center ${theme.bgHover} transition cursor-pointer`}
         >
-          <div className={`w-10 h-10 rounded-full ${theme.bgTertiary} flex items-center justify-center mr-4`}>
+          <div className="mr-4 ml-1">
             {/* Toggle Switch replacing the clock icon */}
             <div className={`relative w-8 h-4 rounded-full transition-colors duration-200 ${isDarkMode ? 'bg-[#8C52FF]' : 'bg-gray-400'}`}>
               <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 flex items-center justify-center ${isDarkMode ? 'translate-x-4' : 'translate-x-0'}`}>

@@ -281,15 +281,7 @@ export function ContactUs() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#8C52FF]/20 flex items-center justify-center">
-                      <MapPin size={20} className="text-[#8C52FF]" />
-                    </div>
-                    <div>
-                      <p className={`font-medium ${themeClasses.textPrimary}`}>Address</p>
-                      <p className={themeClasses.textSecondary}>123 Education Street<br />Learning City, LC 12345</p>
-                    </div>
-                  </div>
+
                 </div>
               </div>
             </div>
