@@ -4,8 +4,9 @@ import { SendIcon, User } from 'lucide-react';
 import studyPalIcon from '../assets/studypal-icon.png';
 import { SparklesIcon, ZapIcon, CrownIcon } from 'lucide-react';
 import { XIcon } from 'lucide-react';
-import { sendMessageToOpenAI, validateOpenAIConfig, type ChatMessage } from '../lib/openai';
+import { sendMessageToAI, validateOpenAIConfig, type ChatMessage } from '../lib/aiService';
 import { useAuthContext } from '../contexts/AuthContext';
+import { DebugPanel } from '../components/DebugPanel';
 
 export function ChatInterface() {
   /* ── state ──────────────────────────────────────────────────────── */
@@ -59,9 +60,19 @@ export function ChatInterface() {
     const text = input.trim();
     if (!text) return;
 
+    console.log('💬 Sending message:', {
+      messageText: text,
+      timestamp: new Date().toISOString(),
+      location: window.location.href,
+      currentMessageCount: messages.length
+    });
+
     // Check OpenAI configuration
     const configCheck = validateOpenAIConfig();
+    console.log('⚙️ Config check result:', configCheck);
+    
     if (!configCheck.valid) {
+      console.warn('⚠️ OpenAI configuration invalid:', configCheck.error);
       const errorMessage: ChatMessage = { 
         role: 'assistant', 
         content: `⚠️ ${configCheck.error || 'OpenAI configuration error'}`
@@ -79,8 +90,15 @@ export function ChatInterface() {
     const startTime = Date.now();
 
     try {
-      // Send message to OpenAI
-      const aiResponse = await sendMessageToOpenAI([...messages, userMessage]);
+      console.log('🚀 Calling OpenAI API...');
+      
+      // Send message to AI
+      const aiResponse = await sendMessageToAI([...messages, userMessage]);
+      
+      console.log('✅ Received OpenAI response:', {
+        responseLength: aiResponse?.length || 0,
+        timestamp: new Date().toISOString()
+      });
       
       // Calculate elapsed time and wait if necessary to ensure minimum 2 seconds
       const elapsedTime = Date.now() - startTime;
@@ -93,7 +111,13 @@ export function ChatInterface() {
       const aiMessage: ChatMessage = { role: 'assistant', content: aiResponse };
       setMsgs(m => [...m, aiMessage]);
     } catch (error) {
-      console.error('OpenAI Error:', error);
+      console.error('❌ Chat Error:', {
+        error,
+        timestamp: new Date().toISOString(),
+        errorType: error?.constructor?.name,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        location: window.location.href
+      });
       
       // Calculate elapsed time and wait if necessary to ensure minimum 2 seconds
       const elapsedTime = Date.now() - startTime;
@@ -467,6 +491,9 @@ export function ChatInterface() {
           </div>
         </div>
       </div>
+      
+      {/* Debug Panel for troubleshooting */}
+      <DebugPanel />
     </div>
   );
 }

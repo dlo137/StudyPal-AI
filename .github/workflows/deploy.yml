@@ -36,9 +36,20 @@ jobs:
       - name: Build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}  
           VITE_OPENAI_API_KEY: ${{ secrets.VITE_OPENAI_API_KEY }}
-        run: npm run build
+          VITE_BUILD_TIME: ${{ github.run_number }}
+          VITE_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          echo "🔧 Starting build process..."
+          echo "📊 Build environment info:"
+          echo "  - Node version: $(node --version)"
+          echo "  - NPM version: $(npm --version)"  
+          echo "  - Build time: ${{ github.run_number }}"
+          echo "  - Commit: ${{ github.sha }}"
+          echo "  - Environment variables are configured"
+          npm run build
+          echo "✅ Build completed successfully"
         
       - name: Setup Pages
         uses: actions/configure-pages@v5
