@@ -19,24 +19,21 @@ export async function sendMessageToAI(messages: ChatMessage[]): Promise<string> 
     hasSupabase: isSupabaseConfigured()
   });
 
-  // Strategy 1: Use Supabase Edge Function (recommended for production)
-  if (isSupabaseConfigured() && environment.isGitHubPages) {
-    console.log('🌐 Using Supabase Edge Function strategy...');
+  // Strategy 1: Use Supabase Edge Function for GitHub Pages (recommended for production)
+  if (environment.isGitHubPages && isSupabaseConfigured()) {
+    console.log('🌐 Using Supabase Edge Function strategy for GitHub Pages...');
     try {
       return await sendMessageViaSupabase(messages);
     } catch (error) {
       console.error('❌ Supabase Edge Function failed:', error);
-      // Fall back to direct call if edge function fails
-      if (openaiConfig.canUseOpenAI) {
-        console.log('🔄 Falling back to direct OpenAI call...');
-        return await sendDirectToOpenAI(messages);
-      }
-      throw error;
+      
+      // If Edge Function fails, show helpful error message instead of falling back
+      throw new Error(`Edge Function error: ${error instanceof Error ? error.message : 'Unknown error'}. Please check your Supabase Edge Function deployment.`);
     }
   }
 
   // Strategy 2: Direct OpenAI call (for development or when Supabase isn't available)
-  if (openaiConfig.canUseOpenAI) {
+  if (openaiConfig.canUseOpenAI && !environment.isGitHubPages) {
     console.log('🚀 Using direct OpenAI call strategy...');
     return await sendDirectToOpenAI(messages);
   }

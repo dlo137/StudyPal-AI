@@ -63,11 +63,23 @@ export function getOpenAIConfiguration(): {
     };
   }
 
+  // If we're on GitHub Pages but have Supabase configured, we can use OpenAI via Edge Functions
   if (env.isGitHubPages) {
+    // Check if Supabase is available for Edge Function fallback
+    const hasSupabase = !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (hasSupabase) {
+      return {
+        canUseOpenAI: true, // We can use it via Edge Functions
+        reason: 'Using Supabase Edge Functions for GitHub Pages',
+        suggestion: 'Edge Functions provide secure server-side API access'
+      };
+    }
+    
     return {
       canUseOpenAI: false,
       reason: 'GitHub Pages CORS restrictions',
-      suggestion: 'Consider using a proxy server or Supabase Edge Functions for production'
+      suggestion: 'Deploy Supabase Edge Functions to enable AI functionality'
     };
   }
 
