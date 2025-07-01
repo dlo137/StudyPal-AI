@@ -3,9 +3,12 @@ import { XIcon, Facebook, Linkedin, Instagram, Twitter, Eye, EyeOff, User } from
 import { useState, useRef, useEffect } from 'react';
 import logoImage from '/13331037.png';
 import { loginUser, loginWithGoogle, loginWithFacebook } from '../lib/auth';
+import { useTheme } from '../contexts/ThemeContext';
+import { getThemeClasses } from '../utils/theme';
 
 export function Login() {
   const navigate                    = useNavigate();
+  const { isDarkMode } = useTheme();
   const [menuOpen, setMenuOpen]     = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail]           = useState('');
@@ -13,6 +16,8 @@ export function Login() {
   const [isLoading, setIsLoading]   = useState(false);
   const [error, setError]           = useState<string | null>(null);
   const menuRef                     = useRef<HTMLDivElement | null>(null);
+  
+  const theme = getThemeClasses(isDarkMode);
 
   /* ── close avatar menu when you tap outside ───────────────────── */
   useEffect(() => {
@@ -70,7 +75,7 @@ export function Login() {
   return (
     
     //Main Container
-    <div className="h-screen bg-[#121212] text-white flex flex-col">
+    <div className={`h-screen ${theme.bgPrimary} ${theme.textPrimary} flex flex-col`}>
       {/* ── header (unchanged) ──────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333] relative z-50">
         <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-800 rounded-full">

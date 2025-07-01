@@ -5,9 +5,12 @@ import { useState, useRef, useEffect } from 'react';
 import logoImage from '/13331037.png';
 import { signUpUser, loginWithGoogle, loginWithFacebook } from '../lib/auth';
 import { supabase } from '../lib/supabase';
+import { useTheme } from '../contexts/ThemeContext';
+import { getThemeClasses } from '../utils/theme';
 
 export function SignUp() {
   const navigate                        = useNavigate();
+  const { isDarkMode } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [menuOpen, setMenuOpen]         = useState(false);
   const [firstName, setFirstName]       = useState('');
@@ -19,6 +22,8 @@ export function SignUp() {
   const [error, setError]               = useState<string | null>(null);
   const [success, setSuccess]           = useState<string | null>(null);
   const menuRef                         = useRef<HTMLDivElement | null>(null);
+  
+  const theme = getThemeClasses(isDarkMode);
 
   /* ── close avatar menu when you tap outside ─────────────── */
   useEffect(() => {
@@ -129,11 +134,11 @@ export function SignUp() {
 
   /* ───────────────────────── render ──────────────────────── */
   return (
-    <div className="flex flex-col min-h-screen bg-[#121212] text-white">
+    <div className={`flex flex-col min-h-screen ${theme.bgPrimary} ${theme.textPrimary}`}>
 
       {/* ── header ──────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333] relative z-50">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-800 rounded-full">
+      <div className={`flex items-center justify-between px-4 sm:px-6 py-3 border-b ${theme.borderPrimary} relative z-50`}>
+        <button onClick={() => navigate(-1)} className={`p-2 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full`}>
           <XIcon size={24} />
         </button>
 
@@ -143,18 +148,18 @@ export function SignUp() {
 
         <div ref={menuRef} className="relative">
           <div
-            className="h-8 w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition bg-[#333] flex items-center justify-center"
+            className={`h-8 w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition ${theme.bgTertiary} flex items-center justify-center`}
             onClick={() => setMenuOpen(v => !v)}
           >
-            <User size={16} className="text-gray-300" />
+            <User size={16} className={theme.textSecondary} />
           </div>
 
           {menuOpen && (
-            <div className="absolute right-0 mt-2 w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg">
-              <button onClick={() => goto('/login')}    className="block w-full px-4 py-2 text-left hover:bg-[#444]">Login</button>
-              <button onClick={() => setMenuOpen(false)} className="block w-full px-4 py-2 text-left hover:bg-[#444]">Sign&nbsp;Up</button>
-              <button onClick={() => goto('/premium')}  className="block w-full px-4 py-2 text-left hover:bg-[#444]">Get&nbsp;Premium</button>
-              <button onClick={() => goto('/')}         className="block w-full px-4 py-2 text-left hover:bg-[#444] rounded-b-lg">Chat</button>
+            <div className={`absolute right-0 mt-2 w-40 ${theme.bgSecondary} border ${theme.borderPrimary} rounded-lg shadow-lg`}>
+              <button onClick={() => goto('/login')}    className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Login</button>
+              <button onClick={() => setMenuOpen(false)} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Sign&nbsp;Up</button>
+              <button onClick={() => goto('/premium')}  className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Get&nbsp;Premium</button>
+              <button onClick={() => goto('/')}         className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} rounded-b-lg`}>Chat</button>
             </div>
           )}
         </div>
@@ -172,7 +177,7 @@ export function SignUp() {
               className="w-24 h-24 mb-6 object-contain"
             />
 
-          <button className="text-xs text-gray-400 mb-6 hover:text-white">
+          <button className={`text-xs ${theme.textSecondary} mb-6 ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}>
             English&nbsp;(US)<span className="align-text-top ml-0.5">▾</span>
           </button>
 
@@ -204,7 +209,7 @@ export function SignUp() {
               placeholder="First Name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full rounded-lg bg-transparent border border-[#444] px-4 py-2.5 placeholder-gray-400 focus:outline-none focus:border-[#4285F4] transition"
+              className={`w-full rounded-lg ${theme.inputBg} border ${theme.inputBorder} px-4 py-2.5 ${theme.inputPlaceholder} focus:outline-none ${theme.inputFocus} transition`}
               disabled={isLoading}
               required
             />
@@ -213,7 +218,7 @@ export function SignUp() {
               placeholder="Last Name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full rounded-lg bg-transparent border border-[#444] px-4 py-2.5 placeholder-gray-400 focus:outline-none focus:border-[#4285F4] transition"
+              className={`w-full rounded-lg ${theme.inputBg} border ${theme.inputBorder} px-4 py-2.5 ${theme.inputPlaceholder} focus:outline-none ${theme.inputFocus} transition`}
               disabled={isLoading}
               required
             />
@@ -222,7 +227,7 @@ export function SignUp() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg bg-transparent border border-[#444] px-4 py-2.5 placeholder-gray-400 focus:outline-none focus:border-[#4285F4] transition"
+              className={`w-full rounded-lg ${theme.inputBg} border ${theme.inputBorder} px-4 py-2.5 ${theme.inputPlaceholder} focus:outline-none ${theme.inputFocus} transition`}
               disabled={isLoading}
               required
             />
@@ -232,14 +237,14 @@ export function SignUp() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg bg-transparent border border-[#444] px-4 py-2.5 pr-12 placeholder-gray-400 focus:outline-none focus:border-[#4285F4] transition"
+                className={`w-full rounded-lg ${theme.inputBg} border ${theme.inputBorder} px-4 py-2.5 pr-12 ${theme.inputPlaceholder} focus:outline-none ${theme.inputFocus} transition`}
                 disabled={isLoading}
                 required
                 minLength={6}
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                className={`absolute right-3 top-1/2 -translate-y-1/2 ${theme.textSecondary} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={isLoading}
               >
@@ -252,7 +257,7 @@ export function SignUp() {
                 type="checkbox"
                 checked={isRobot}
                 onChange={(e) => setIsRobot(e.target.checked)}
-                className="h-4 w-4 accent-[#2da8ff] rounded-sm border-[#555] bg-transparent"
+                className={`h-4 w-4 accent-[#2da8ff] rounded-sm ${isDarkMode ? 'border-[#555]' : 'border-gray-400'} bg-transparent`}
                 disabled={isLoading}
               />
               I'm not a robot
@@ -261,7 +266,7 @@ export function SignUp() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-4 rounded-full bg-white text-[#121212] font-semibold py-2 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full mt-4 rounded-full ${theme.buttonPrimary} font-semibold py-2 ${isDarkMode ? 'hover:bg-gray-200' : 'hover:bg-gray-800'} transition disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isLoading ? 'Creating Account...' : 'Sign up'}
             </button>
@@ -269,7 +274,7 @@ export function SignUp() {
 
           {/* Social Login Options */}
           <div className="w-full mt-6 space-y-3">
-            <div className="text-xs text-gray-400 text-center">or continue with</div>
+            <div className={`text-xs ${theme.textSecondary} text-center`}>or continue with</div>
             
             <button
               type="button"
@@ -282,7 +287,7 @@ export function SignUp() {
                 setIsLoading(false);
               }}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 border border-[#444] rounded-lg py-2.5 hover:bg-[#333] transition disabled:opacity-50"
+              className={`w-full flex items-center justify-center gap-3 border ${theme.buttonSecondary} rounded-lg py-2.5 ${theme.bgHover} transition disabled:opacity-50`}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -304,7 +309,7 @@ export function SignUp() {
                 setIsLoading(false);
               }}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 border border-[#444] rounded-lg py-2.5 hover:bg-[#333] transition disabled:opacity-50"
+              className={`w-full flex items-center justify-center gap-3 border ${theme.buttonSecondary} rounded-lg py-2.5 ${theme.bgHover} transition disabled:opacity-50`}
             >
               <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>

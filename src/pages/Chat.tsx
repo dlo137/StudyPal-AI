@@ -6,6 +6,8 @@ import { SparklesIcon, ZapIcon, CrownIcon } from 'lucide-react';
 import { XIcon } from 'lucide-react';
 import { sendMessageToAI, validateOpenAIConfig, type ChatMessage } from '../lib/aiService';
 import { useAuthContext } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { getThemeClasses } from '../utils/theme';
 import { DebugPanel } from '../components/DebugPanel';
 
 export function ChatInterface() {
@@ -17,6 +19,9 @@ export function ChatInterface() {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { user, signOut } = useAuthContext();
+  const { isDarkMode } = useTheme();
+  
+  const theme = getThemeClasses(isDarkMode);
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -163,9 +168,9 @@ export function ChatInterface() {
 
   /* ── render ─────────────────────────────────────────────────────── */
   return (
-    <div className="mobile-full-height w-full bg-[#121212] text-white flex flex-col">
+    <div className={`mobile-full-height w-full ${theme.bgPrimary} ${theme.textPrimary} flex flex-col`}>
       {/* HEADER SECTION */}
-      <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#333] bg-[#121212] z-10 relative">
+      <header className={`flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-b ${theme.borderPrimary} ${theme.bgPrimary} z-10 relative`}>
 
         
         {/* Left side - Logo and New Chat Button */}
@@ -178,7 +183,7 @@ export function ChatInterface() {
           />
           <button
             onClick={() => setMsgs([])}
-            className="ml-2 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#222] hover:bg-[#333] transition cursor-pointer"
+            className={`ml-2 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full ${theme.bgSecondary} ${theme.bgHover} transition cursor-pointer`}
             title="New Chat"
             type="button"
           >
@@ -196,28 +201,28 @@ export function ChatInterface() {
             Upgrade
           </button>
           <div className="relative" ref={menuRef}>
-            <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition bg-[#333] flex items-center justify-center"
+            <div className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition ${theme.bgSecondary} flex items-center justify-center`}
                  onClick={() => setMenuOpen(v => !v)}>
               {user ? (
-                <span className="text-white text-xs font-medium">
+                <span className={`${theme.textPrimary} text-xs font-medium`}>
                   {getUserInitials()}
                 </span>
               ) : (
-                <User size={16} className="text-gray-300" />
+                <User size={16} className={theme.textSecondary} />
               )}
             </div>
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-36 sm:w-40 bg-[#222] border border-[#333] rounded-lg shadow-lg z-50">
+              <div className={`absolute right-0 mt-2 w-36 sm:w-40 ${theme.bgSecondary} border ${theme.borderPrimary} rounded-lg shadow-lg z-50`}>
                 {!user && (
                   <>
                     <button 
-                      className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-t-lg" 
+                      className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer rounded-t-lg`} 
                       onClick={handleLogin}
                     >
                       Login
                     </button>
                     <button 
-                      className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer" 
+                      className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer`} 
                       onClick={() => { setMenuOpen(false); navigate('/signup'); }}
                     >
                       Sign Up
@@ -226,27 +231,27 @@ export function ChatInterface() {
                 )}
                 {user && (
                   <button 
-                    className="block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer rounded-t-lg" 
+                    className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer rounded-t-lg`} 
                     onClick={() => { setMenuOpen(false); navigate('/profile'); }}
                   >
                     Profile
                   </button>
                 )}
                 <button 
-                  className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''}`}
+                  className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''}`}
                   onClick={handlePremium}
                 >
                   Get Premium
                 </button>
                 <button 
-                  className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-[#444] hover:text-white transition-all duration-200 cursor-pointer ${!user ? 'rounded-b-lg' : ''}`}
+                  className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-b-lg' : ''}`}
                   onClick={() => { setMenuOpen(false); navigate('/'); }}
                 >
                   Chat
                 </button>
                 {user && (
                   <button 
-                    className="block w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-[#444] hover:text-red-300 transition-all duration-200 cursor-pointer rounded-b-lg" 
+                    className={`block w-full text-left px-4 py-2.5 text-sm text-red-400 ${theme.bgHoverSecondary} hover:text-red-300 transition-all duration-200 cursor-pointer rounded-b-lg`} 
                     onClick={handleLogout}
                   >
                     Logout
@@ -273,14 +278,14 @@ export function ChatInterface() {
                 }}
                 className="w-full"
               >
-                <div className="flex items-center bg-[#222222] rounded-full px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg">
+                <div className={`flex items-center ${theme.bgSecondary} rounded-full px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg`}>
                   <input
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     type="text"
                     placeholder="Type a question"
-                    className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder:text-gray-400 text-base min-w-0"
+                    className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0`}
                   />
                   <button
                     type="submit"
@@ -302,7 +307,7 @@ export function ChatInterface() {
                   key={i}
                   className={`max-w-[85%] sm:max-w-lg whitespace-pre-wrap leading-relaxed text-base ${
                     m.role === 'user'
-                      ? 'ml-auto bg-[#1e1e1e] rounded-2xl px-4 py-2.5'
+                      ? `ml-auto ${theme.bgTertiary} rounded-2xl px-4 py-2.5`
                       : 'mr-auto bg-[#3b87f6] rounded-2xl px-4 py-2.5'
                   }`}
                 >
@@ -312,12 +317,12 @@ export function ChatInterface() {
               {/* Show "Thinking..." when loading */}
               {isLoading && (
                 <div className="mr-auto max-w-[85%] sm:max-w-lg px-4 py-2.5">
-                  <div className="flex items-center gap-2 text-gray-400 italic text-sm">
+                  <div className={`flex items-center gap-2 ${theme.textSecondary} italic text-sm`}>
                     <span>Thinking</span>
                     <div className="flex gap-1">
-                      <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
-                      <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
-                      <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                      <div className={`w-1 h-1 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-600'} rounded-full animate-bounce`} style={{animationDelay: '0ms'}}></div>
+                      <div className={`w-1 h-1 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-600'} rounded-full animate-bounce`} style={{animationDelay: '150ms'}}></div>
+                      <div className={`w-1 h-1 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-600'} rounded-full animate-bounce`} style={{animationDelay: '300ms'}}></div>
                     </div>
                   </div>
                 </div>
@@ -326,7 +331,7 @@ export function ChatInterface() {
             </div>
             
             {/* BOTTOM INPUT BAR */}
-            <div className="flex-shrink-0 bg-[#121212] border-t border-[#333333] px-4 sm:px-6 py-3 sm:py-4">
+            <div className={`flex-shrink-0 ${theme.bgPrimary} border-t ${theme.borderPrimary} px-4 sm:px-6 py-3 sm:py-4`}>
               <form
                 onSubmit={e => {
                   e.preventDefault();
@@ -334,14 +339,14 @@ export function ChatInterface() {
                 }}
                 className="w-full max-w-4xl mx-auto"
               >
-                <div className="flex items-center bg-[#222222] rounded-full px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg">
+                <div className={`flex items-center ${theme.bgSecondary} rounded-full px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg`}>
                   <input
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     type="text"
                     placeholder="Type a question"
-                    className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder:text-gray-400 text-base min-w-0"
+                    className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0`}
                   />
                   <button
                     type="submit"
