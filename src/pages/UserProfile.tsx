@@ -111,20 +111,9 @@ export function UserProfile() {
             <BookmarkIcon size={20} className="text-[#8C52FF]" />
           </div>
           <div>
-            <h4 className="font-medium">Saved Responses</h4>
+            <h4 className="font-medium">Mission Statement</h4>
             <p className="text-sm text-gray-400">
-              Access your bookmarked answers
-            </p>
-          </div>
-        </div>
-        <div className="bg-[#222222] p-4 rounded-lg flex items-center">
-          <div className="w-10 h-10 rounded-full bg-[#333333] flex items-center justify-center mr-4">
-            <ClockIcon size={20} className="text-[#8C52FF]" />
-          </div>
-          <div>
-            <h4 className="font-medium">History</h4>
-            <p className="text-sm text-gray-400">
-              View your past conversations
+              Learn about our purpose and goals
             </p>
           </div>
         </div>
@@ -133,20 +122,23 @@ export function UserProfile() {
             <MessageSquareIcon size={20} className="text-[#8C52FF]" />
           </div>
           <div>
-            <h4 className="font-medium">Study Sessions</h4>
+            <h4 className="font-medium">Contact Us</h4>
             <p className="text-sm text-gray-400">
-              Track your learning progress
+              Get in touch with our support team
             </p>
           </div>
         </div>
-      </div>
-      <div className="mt-auto p-4">
-        <button 
-          onClick={handleLogout}
-          className="w-full p-3 rounded-lg border border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
-        >
-          Sign Out
-        </button>
+        <div className="bg-[#222222] p-4 rounded-lg flex items-center">
+          <div className="w-10 h-10 rounded-full bg-[#333333] flex items-center justify-center mr-4">
+            <ClockIcon size={20} className="text-[#8C52FF]" />
+          </div>
+          <div>
+            <h4 className="font-medium">Dark & Light Mode</h4>
+            <p className="text-sm text-gray-400">
+              Toggle between light and dark themes
+            </p>
+          </div>
+        </div>
       </div>
     </div>;
 }

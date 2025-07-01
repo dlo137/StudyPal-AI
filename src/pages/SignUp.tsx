@@ -161,8 +161,8 @@ export function SignUp() {
       </div>
 
       {/* ── body ────────────────────────────────────────────── */}
-      <div className="flex-grow flex items-center justify-center -mt-16 md:-mt-12 lg:-mt-0">
-        <main className="grid place-items-center px-4 sm:px-6">
+      <div className="flex-grow flex items-center justify-center py-8 px-4 sm:px-6">
+        <main className="grid place-items-center">
           {/* wrap everything so grid treats it as one unit */}
           <section className="flex flex-col items-center w-full max-w-xs">
 
