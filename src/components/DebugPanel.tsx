@@ -101,11 +101,12 @@ export function DebugPanel() {
 
   return (
     <>
-      {/* Debug Toggle Button */}
+      {/* Debug Toggle Button - HIDDEN */}
       <button
         onClick={() => setIsVisible(!isVisible)}
-        className="fixed bottom-4 right-4 z-50 bg-yellow-600 hover:bg-yellow-700 text-white p-2 rounded-full shadow-lg transition-all"
+        className="fixed bottom-4 right-4 z-50 bg-yellow-600 hover:bg-yellow-700 text-white p-2 rounded-full shadow-lg transition-all hidden"
         title="Toggle Debug Panel"
+        style={{ display: 'none' }}
       >
         🐛
       </button>

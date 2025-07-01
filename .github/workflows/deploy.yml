@@ -35,6 +35,7 @@ jobs:
         
       - name: Build
         env:
+          # These secret names are valid - VS Code warnings are false positives
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}  
           VITE_OPENAI_API_KEY: ${{ secrets.VITE_OPENAI_API_KEY }}
