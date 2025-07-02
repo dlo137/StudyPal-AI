@@ -86,7 +86,7 @@ export function MissionStatement() {
                 </>
               )}
               <button onClick={() => goto('/profile')} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} ${!user ? '' : 'rounded-t-lg'}`}>Profile</button>
-              <button onClick={() => goto('/premium')} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Get&nbsp;Premium</button>
+              <button onClick={() => goto('/premium')} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Upgrade</button>
               <button onClick={() => goto('/')} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} ${!user ? 'rounded-b-lg' : ''}`}>Chat</button>
               {user && (
                 <button onClick={handleLogout} className={`block w-full px-4 py-2 text-left text-red-400 ${theme.bgHoverSecondary} hover:text-red-300 rounded-b-lg`}>Logout</button>

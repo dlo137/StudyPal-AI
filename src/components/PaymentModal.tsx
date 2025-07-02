@@ -26,6 +26,8 @@ const CARD_ELEMENT_OPTIONS = {
       color: '#9e2146',
     },
   },
+  hidePostalCode: false,
+  disableLink: true,
 };
 
 function CheckoutForm({ planType, onSuccess, onCancel }: PaymentFormProps) {
@@ -135,7 +137,13 @@ function CheckoutForm({ planType, onSuccess, onCancel }: PaymentFormProps) {
             Card Information
           </label>
           <div className={`p-4 border ${themeClasses.borderPrimary} rounded-lg ${themeClasses.bgPrimary}`}>
-            <CardElement options={CARD_ELEMENT_OPTIONS} />
+            <CardElement 
+              options={{
+                ...CARD_ELEMENT_OPTIONS,
+                hidePostalCode: false,
+                disableLink: true,
+              }} 
+            />
           </div>
         </div>
 
@@ -155,14 +163,14 @@ function CheckoutForm({ planType, onSuccess, onCancel }: PaymentFormProps) {
           <button
             type="button"
             onClick={onCancel}
-            className={`flex-1 px-6 py-3 border ${themeClasses.borderPrimary} rounded-lg ${themeClasses.textPrimary} ${themeClasses.bgHover} transition`}
+            className={`flex-1 px-6 py-3 border ${themeClasses.borderPrimary} rounded-lg ${themeClasses.textPrimary} ${themeClasses.bgHover} transition-all duration-200 hover:shadow-md hover:scale-105 hover:border-gray-400 cursor-pointer`}
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={!stripe || isProcessing}
-            className="flex-1 bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none cursor-pointer"
           >
             {isProcessing ? 'Processing...' : `Subscribe ${formatPrice(plan.price)}/month`}
           </button>

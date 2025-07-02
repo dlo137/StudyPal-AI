@@ -7,7 +7,7 @@ export default defineConfig({
   base: '/StudyPal-AI/',
   server: {
     proxy: {
-      '/api': 'http://localhost:4000'   // <── this is the key line
+      '/api': 'http://localhost:3001'   // Fixed to match server port
     }
   }
 });

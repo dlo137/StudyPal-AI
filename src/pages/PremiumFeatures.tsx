@@ -6,12 +6,14 @@ import { useAuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/theme';
 import { PaymentModal } from '../components/PaymentModal';
+import { PaymentSuccessModal } from '../components/PaymentSuccessModal';
 import { formatPrice, getPlanDetails } from '../lib/paymentService';
 
 export function PremiumFeatures() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'gold' | 'diamond' | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const { user, signOut } = useAuthContext();
@@ -80,13 +82,17 @@ export function PremiumFeatures() {
 
   function handlePaymentSuccess() {
     setShowPaymentModal(false);
-    setSelectedPlan(null);
-    // You could redirect to a success page or show a success message
-    alert('Payment successful! Welcome to your new plan!');
+    setShowSuccessModal(true);
+    // Keep selectedPlan for the success modal, will be cleared when success modal closes
   }
 
   function handlePaymentCancel() {
     setShowPaymentModal(false);
+    setSelectedPlan(null);
+  }
+
+  function handleSuccessModalClose() {
+    setShowSuccessModal(false);
     setSelectedPlan(null);
   }
 
@@ -147,7 +153,7 @@ export function PremiumFeatures() {
                 className={`block w-full text-left px-4 py-2.5 text-sm ${themeClasses.bgHoverSecondary} ${themeClasses.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''}`}
                 onClick={() => setMenuOpen(false)}
               >
-                Get Premium
+                Upgrade
               </button>
               <button 
                 className={`block w-full text-left px-4 py-2.5 text-sm ${themeClasses.bgHoverSecondary} ${themeClasses.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-b-lg' : ''}`}
@@ -308,6 +314,15 @@ export function PremiumFeatures() {
           planType={selectedPlan}
           onSuccess={handlePaymentSuccess}
           onCancel={handlePaymentCancel}
+        />
+      )}
+
+      {/* Success Modal */}
+      {showSuccessModal && selectedPlan && (
+        <PaymentSuccessModal
+          isOpen={showSuccessModal}
+          planType={selectedPlan}
+          onClose={handleSuccessModalClose}
         />
       )}
     </div>

@@ -4,15 +4,30 @@ import { useRef, useEffect, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/theme';
+import { getUserPlan, getPlanDisplayName } from '../lib/userPlanService';
 
 export function UserProfile() {
   const navigate = useNavigate();
   const { user, signOut } = useAuthContext();
   const { isDarkMode, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userPlan, setUserPlan] = useState<string>('free');
   const menuRef = useRef<HTMLDivElement | null>(null);
   
   const theme = getThemeClasses(isDarkMode);
+
+  // Fetch user plan on component mount
+  useEffect(() => {
+    if (user?.id) {
+      getUserPlan(user.id, user.email).then(result => {
+        if (result.success && result.user) {
+          setUserPlan(result.user.plan_type);
+        } else {
+          console.error('Failed to get user plan:', result.error);
+        }
+      });
+    }
+  }, [user?.id, user?.email]);
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -89,7 +104,7 @@ export function UserProfile() {
                   <button onClick={() => { setMenuOpen(false); navigate('/signup'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Sign&nbsp;Up</button>
                 </>
               )}
-              <button onClick={() => { setMenuOpen(false); navigate('/premium'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} ${!user ? '' : ''}`}>Get&nbsp;Premium</button>
+              <button onClick={() => { setMenuOpen(false); navigate('/premium'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} ${!user ? '' : ''}`}>Upgrade</button>
               <button onClick={() => { setMenuOpen(false); navigate('/'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} ${!user ? 'rounded-b-lg' : ''}`}>Chat</button>
               {user && (
                 <button onClick={handleLogout} className={`block w-full px-4 py-2 text-left text-red-400 ${theme.bgHoverSecondary} hover:text-red-300 rounded-b-lg`}>Logout</button>
@@ -112,8 +127,12 @@ export function UserProfile() {
         </h2>
         <p className={theme.textSecondary}>{user?.email || 'No email available'}</p>
         <div className={`mt-4 flex items-center ${theme.bgSecondary} px-4 py-2 rounded-full`}>
-          <CrownIcon size={16} className="text-yellow-500 mr-2" />
-          <span className="text-sm font-medium">Free Member</span>
+          <CrownIcon size={16} className={`mr-2 ${
+            userPlan === 'diamond' ? 'text-purple-500' : 
+            userPlan === 'gold' ? 'text-yellow-500' : 
+            'text-gray-400'
+          }`} />
+          <span className="text-sm font-medium">{getPlanDisplayName(userPlan)}</span>
         </div>
       </div>
       <div className="p-4 space-y-4">
