@@ -1,4 +1,4 @@
-import { SparklesIcon, ZapIcon, CrownIcon, User } from 'lucide-react';
+import { ZapIcon, CrownIcon, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { XIcon } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
@@ -180,9 +180,9 @@ export function PremiumFeatures() {
           </div>
 
           {/* Cards - 3 column layout on all screen sizes */}
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6 mb-4 sm:mb-6 pt-2 " >
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6 mb-4 sm:mb-6 pt-2 items-stretch" >
             {/* Card 1 */}
-            <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm h-[180px] sm:h-[240px] md:h-[280px] flex flex-col relative`}>
+            <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm flex flex-col relative`}>
               <div className="bg-[#8C52FF] w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-1 sm:mb-2 md:mb-3">
           <ZapIcon size={10} className="text-white sm:hidden" />
           <ZapIcon size={16} className="text-white hidden sm:block md:hidden" />
@@ -210,11 +210,11 @@ export function PremiumFeatures() {
             </div>
 
             {/* Card 2 - Gold Plan */}
-            <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm h-[180px] sm:h-[240px] md:h-[280px] flex flex-col relative`}>
+            <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm flex flex-col relative`}>
               <div className="bg-[#8C52FF] w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-1 sm:mb-2 md:mb-3">
-          <SparklesIcon size={10} className="text-white sm:hidden" />
-          <SparklesIcon size={16} className="text-white hidden sm:block md:hidden" />
-          <SparklesIcon size={20} className="text-white hidden md:block" />
+          <ZapIcon size={10} className="text-white sm:hidden" />
+          <ZapIcon size={16} className="text-white hidden sm:block md:hidden" />
+          <ZapIcon size={20} className="text-white hidden md:block" />
               </div>
               <h3 className="text-xs sm:text-sm md:text-lg font-bold mb-1 sm:mb-2 md:mb-3">Gold Plan</h3>
               <p className="text-xs sm:text-sm md:text-base font-bold text-[#8C52FF] mb-1 sm:mb-2">
@@ -247,11 +247,11 @@ export function PremiumFeatures() {
             </div>
 
             {/* Card 3 */}
-            <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm h-[180px] sm:h-[240px] md:h-[280px] flex flex-col relative`}>
+            <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm flex flex-col relative`}>
               <div className="bg-[#8C52FF] w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-1 sm:mb-2 md:mb-3">
-          <CrownIcon size={10} className="text-white sm:hidden" />
-          <CrownIcon size={16} className="text-white hidden sm:block md:hidden" />
-          <CrownIcon size={20} className="text-white hidden md:block" />
+                <CrownIcon size={10} className="text-white sm:hidden" />
+                <CrownIcon size={16} className="text-white hidden sm:block md:hidden" />
+                <CrownIcon size={20} className="text-white hidden md:block" />
               </div>
               <h3 className="text-xs sm:text-sm md:text-lg font-bold mb-1 sm:mb-2 md:mb-3">
           Diamond Plan
