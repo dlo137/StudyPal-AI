@@ -415,6 +415,52 @@ export function ChatInterface() {
           <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 min-h-0">
             
             <h2 className="text-xl sm:text-3xl font-medium px-2 max-w-md mb-6 sm:mb-8">How can I help you?</h2>
+            
+            {/* Subject Option Buttons */}
+            <div className="w-full max-w-2xl px-2 mb-6 sm:mb-6">
+              <div className="space-y-2 sm:space-y-2">
+                {/* Top row - 5 buttons (wraps on mobile) */}
+                <div className="flex flex-wrap sm:flex-nowrap justify-center gap-1.5 sm:gap-2">
+                  <button className="bg-blue-300 hover:bg-blue-400 text-blue-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    Math
+                  </button>
+                  <button className="bg-emerald-300 hover:bg-emerald-400 text-emerald-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    Science
+                  </button>
+                  <button className="bg-rose-300 hover:bg-rose-400 text-rose-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    Literature
+                  </button>
+                  <button className="bg-amber-300 hover:bg-amber-400 text-amber-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    Art
+                  </button>
+                  <button className="bg-violet-300 hover:bg-violet-400 text-violet-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    Music
+                  </button>
+                </div>
+                {/* Bottom row - 6 buttons (wraps on mobile) */}
+                <div className="flex flex-wrap sm:flex-nowrap justify-center gap-1.5 sm:gap-2">
+                  <button className="bg-orange-300 hover:bg-orange-400 text-orange-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    History
+                  </button>
+                  <button className="bg-cyan-300 hover:bg-cyan-400 text-cyan-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    Physics
+                  </button>
+                  <button className="bg-lime-300 hover:bg-lime-400 text-lime-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    Chemistry
+                  </button>
+                  <button className="bg-pink-300 hover:bg-pink-400 text-pink-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    Biology
+                  </button>
+                  <button className="bg-teal-300 hover:bg-teal-400 text-teal-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    Geography
+                  </button>
+                  <button className="bg-purple-300 hover:bg-purple-400 text-purple-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                    Economics
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div className="w-full max-w-2xl px-2">
               <form
                 onSubmit={e => {
