@@ -21,7 +21,11 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Enable Row Level Security
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- Create policies for profiles table
+-- Create policies for profiles table (drop existing ones first to avoid conflicts)
+DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
+
 CREATE POLICY "Users can view their own profile" ON profiles
   FOR SELECT USING (auth.uid() = id);
 
@@ -66,6 +70,10 @@ ON CONFLICT DO NOTHING;
 
 -- Allow anonymous read access to test table (for connection testing)
 ALTER TABLE public.test_table ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing test table policy to avoid conflicts
+DROP POLICY IF EXISTS "Allow anonymous read access to test table" ON public.test_table;
+
 CREATE POLICY "Allow anonymous read access to test table" ON public.test_table
   FOR SELECT USING (true);
 
@@ -81,9 +89,84 @@ CREATE TABLE IF NOT EXISTS chat_history (
 -- Enable RLS for chat history
 ALTER TABLE chat_history ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing chat history policies to avoid conflicts
+DROP POLICY IF EXISTS "Users can view their own chat history" ON chat_history;
+DROP POLICY IF EXISTS "Users can insert their own chat messages" ON chat_history;
+
 -- Chat history policies
 CREATE POLICY "Users can view their own chat history" ON chat_history
   FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert their own chat messages" ON chat_history
   FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Add daily usage tracking table
+CREATE TABLE IF NOT EXISTS daily_usage (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  questions_asked INTEGER DEFAULT 0,
+  plan_type TEXT DEFAULT 'free',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, date)
+);
+
+-- Enable Row Level Security
+ALTER TABLE daily_usage ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing daily_usage policies to avoid conflicts
+DROP POLICY IF EXISTS "Users can view their own usage" ON daily_usage;
+DROP POLICY IF EXISTS "Users can update their own usage" ON daily_usage;
+DROP POLICY IF EXISTS "Users can insert their own usage" ON daily_usage;
+
+-- Create policies for daily_usage table
+CREATE POLICY "Users can view their own usage" ON daily_usage
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own usage" ON daily_usage 
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own usage" ON daily_usage
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Create atomic function to increment daily usage and check limits
+CREATE OR REPLACE FUNCTION increment_daily_usage(
+  p_user_id UUID,
+  p_date DATE,
+  p_plan_type TEXT,
+  p_limit INTEGER
+) 
+RETURNS TABLE(
+  id UUID,
+  user_id UUID,
+  date DATE,
+  questions_asked INTEGER,
+  plan_type TEXT,
+  created_at TIMESTAMP WITH TIME ZONE,
+  updated_at TIMESTAMP WITH TIME ZONE
+) 
+AS $$
+BEGIN
+  -- Try to insert new record or update existing one atomically
+  INSERT INTO daily_usage (user_id, date, questions_asked, plan_type, created_at, updated_at)
+  VALUES (p_user_id, p_date, 1, p_plan_type, NOW(), NOW())
+  ON CONFLICT (user_id, date) 
+  DO UPDATE SET 
+    questions_asked = daily_usage.questions_asked + 1,
+    plan_type = p_plan_type,
+    updated_at = NOW()
+  WHERE daily_usage.questions_asked < p_limit;
+
+  -- Return the updated record only if the update was successful
+  RETURN QUERY
+  SELECT du.id, du.user_id, du.date, du.questions_asked, du.plan_type, du.created_at, du.updated_at
+  FROM daily_usage du
+  WHERE du.user_id = p_user_id 
+    AND du.date = p_date 
+    AND du.questions_asked <= p_limit;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create index for faster queries
+CREATE INDEX IF NOT EXISTS idx_daily_usage_user_date ON daily_usage(user_id, date);

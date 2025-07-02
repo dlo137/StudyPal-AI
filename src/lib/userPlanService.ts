@@ -262,3 +262,205 @@ export function getPlanDisplayName(planType: string): string {
       return 'Free Member';
   }
 }
+
+/**
+ * Downgrades a user's plan to free
+ */
+export async function downgradeToFreePlan(userId: string, userEmail?: string): Promise<UpdatePlanResult> {
+  try {
+    // Check if supabase client is available
+    if (!supabase) {
+      return {
+        success: false,
+        error: 'Database connection not available'
+      };
+    }
+    
+    // Validate input
+    if (!userId) {
+      return {
+        success: false,
+        error: 'User ID is required'
+      };
+    }
+
+    // Update the user's plan in the profiles table to 'free'
+    // In a real application, you'd want to:
+    // 1. Cancel the subscription at the payment provider (Stripe)
+    // 2. Set the plan to change at the end of the billing cycle
+    // 3. Keep track of when the user still has access to premium features
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ 
+        plan_type: 'free',
+        updated_at: new Date().toISOString(),
+        // In production, you'd add fields like:
+        // downgrade_scheduled: true,
+        // current_period_end: billing_cycle_end_date,
+        // next_plan_type: 'free'
+      })
+      .eq('id', userId)
+      .select('*')
+      .single();
+
+    if (error) {
+      // If user profile doesn't exist, create one first
+      if (error.code === 'PGRST116') {
+        console.log('User profile not found during downgrade, creating new profile...');
+        const createResult = await createUserProfileIfNotExists(userId, userEmail);
+        if (!createResult.success) {
+          return createResult;
+        }
+        // The new profile is already created as 'free', so we're done
+        return createResult;
+      }
+      
+      console.error('Error downgrading user plan:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to downgrade user plan'
+      };
+    }
+
+    if (!data) {
+      return {
+        success: false,
+        error: 'User not found'
+      };
+    }
+
+    console.log('✅ User plan downgraded to free successfully:', data);
+
+    return {
+      success: true,
+      user: {
+        id: data.id,
+        email: data.email,
+        plan_type: data.plan_type,
+        updated_at: data.updated_at
+      }
+    };
+
+  } catch (error) {
+    console.error('Unexpected error downgrading user plan:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred'
+    };
+  }
+}
+
+/**
+ * Downgrades a user's plan from diamond to gold
+ */
+export async function downgradeToGoldPlan(userId: string, userEmail?: string): Promise<UpdatePlanResult> {
+  try {
+    // Check if supabase client is available
+    if (!supabase) {
+      return {
+        success: false,
+        error: 'Database connection not available'
+      };
+    }
+    
+    // Validate input
+    if (!userId) {
+      return {
+        success: false,
+        error: 'User ID is required'
+      };
+    }
+
+    // Update the user's plan in the profiles table to 'gold'
+    // In a real application, you'd want to:
+    // 1. Update the subscription at the payment provider (Stripe) to the new plan
+    // 2. Set the plan to change at the end of the billing cycle
+    // 3. Calculate prorated billing for the next cycle
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ 
+        plan_type: 'gold',
+        updated_at: new Date().toISOString(),
+        // In production, you'd add fields like:
+        // downgrade_scheduled: true,
+        // current_period_end: billing_cycle_end_date,
+        // next_plan_type: 'gold'
+      })
+      .eq('id', userId)
+      .select('*')
+      .single();
+
+    if (error) {
+      // If user profile doesn't exist, create one first
+      if (error.code === 'PGRST116') {
+        console.log('User profile not found during downgrade, creating new profile...');
+        const createResult = await createUserProfileIfNotExists(userId, userEmail);
+        if (!createResult.success) {
+          return createResult;
+        }
+        // Now try to update to gold
+        const { data: updateData, error: updateError } = await supabase
+          .from('profiles')
+          .update({ 
+            plan_type: 'gold',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userId)
+          .select('*')
+          .single();
+        
+        if (updateError) {
+          console.error('Error updating user plan to gold after creation:', updateError);
+          return {
+            success: false,
+            error: updateError.message || 'Failed to update user plan to gold'
+          };
+        }
+        
+        return {
+          success: true,
+          user: {
+            id: updateData.id,
+            email: updateData.email,
+            plan_type: updateData.plan_type,
+            updated_at: updateData.updated_at
+          }
+        };
+      }
+      
+      console.error('Error downgrading user plan to gold:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to downgrade user plan to gold'
+      };
+    }
+
+    if (!data) {
+      return {
+        success: false,
+        error: 'User not found'
+      };
+    }
+
+    console.log('✅ User plan downgraded to gold successfully:', data);
+
+    return {
+      success: true,
+      user: {
+        id: data.id,
+        email: data.email,
+        plan_type: data.plan_type,
+        updated_at: data.updated_at
+      }
+    };
+
+  } catch (error) {
+    console.error('Unexpected error downgrading user plan to gold:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred'
+    };
+  }
+}

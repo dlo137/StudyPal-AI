@@ -8,7 +8,8 @@ import { sendMessageToAI, validateOpenAIConfig, type ChatMessage } from '../lib/
 import { useAuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/theme';
-import { DebugPanel } from '../components/DebugPanel';
+import { getUserPlan } from '../lib/userPlanService';
+import { checkDailyUsage, recordQuestionAsked, getDailyLimit } from '../lib/usageService';
 
 export function ChatInterface() {
   /* ── state ──────────────────────────────────────────────────────── */
@@ -16,6 +17,8 @@ export function ChatInterface() {
   const [messages, setMsgs] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userPlan, setUserPlan] = useState<'free' | 'gold' | 'diamond'>('free');
+  const [dailyUsage, setDailyUsage] = useState({ questionsAsked: 0, limit: 5, remaining: 5 });
   const menuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { user, signOut } = useAuthContext();
@@ -53,6 +56,42 @@ export function ChatInterface() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [menuOpen]);
 
+  // Fetch user plan and daily usage
+  useEffect(() => {
+    if (user?.id) {
+      // Get user's current plan
+      getUserPlan(user.id, user.email).then(result => {
+        if (result.success && result.user) {
+          const planType = result.user.plan_type;
+          setUserPlan(planType);
+          
+          // Check daily usage for this plan
+          checkDailyUsage(user.id, planType).then(usageResult => {
+            console.log('📊 Initial Usage Check:', {
+              planType,
+              usageResult,
+              questionsAsked: usageResult.usage?.questions_asked || 0,
+              limit: usageResult.limit || getDailyLimit(planType),
+              remaining: usageResult.remaining || getDailyLimit(planType)
+            });
+            
+            if (usageResult.success) {
+              setDailyUsage({
+                questionsAsked: usageResult.usage?.questions_asked || 0,
+                limit: usageResult.limit || getDailyLimit(planType),
+                remaining: usageResult.remaining || getDailyLimit(planType)
+              });
+            }
+          });
+        }
+      });
+    } else {
+      // If no user, set to free plan limits
+      setUserPlan('free');
+      setDailyUsage({ questionsAsked: 0, limit: 5, remaining: 5 });
+    }
+  }, [user?.id, user?.email]);
+
   /* ── refs ───────────────────────────────────────────────────────── */
   const bottomRef  = useRef<HTMLDivElement | null>(null);
 
@@ -65,11 +104,65 @@ export function ChatInterface() {
     const text = input.trim();
     if (!text) return;
 
+    // For logged-in users, check and record usage BEFORE processing
+    if (user?.id) {
+      // Check current usage limit
+      const usageCheck = await checkDailyUsage(user.id, userPlan);
+      if (!usageCheck.success) {
+        const errorMessage: ChatMessage = {
+          role: 'assistant',
+          content: `⚠️ Unable to check usage limit: ${usageCheck.error}`
+        };
+        setMsgs(m => [...m, errorMessage]);
+        return;
+      }
+
+      if (!usageCheck.canAsk) {
+        const limitMessage: ChatMessage = { 
+          role: 'assistant', 
+          content: `⚠️ Daily limit reached! You've used all ${usageCheck.limit} questions for today. ${
+            userPlan === 'free' ? 'Upgrade to Gold (10 questions) or Diamond (15 questions) for more daily questions!' : 
+            userPlan === 'gold' ? 'Upgrade to Diamond (15 questions) for more daily questions!' :
+            'Your limit will reset tomorrow.'
+          }`
+        };
+        setMsgs(m => [...m, limitMessage]);
+        return;
+      }
+
+      // Record the question IMMEDIATELY after confirming they can ask
+      const recordResult = await recordQuestionAsked(user.id, userPlan);
+      if (!recordResult.success) {
+        const errorMessage: ChatMessage = {
+          role: 'assistant',
+          content: `⚠️ Unable to record usage: ${recordResult.error}`
+        };
+        setMsgs(m => [...m, errorMessage]);
+        return;
+      }
+
+      // Debug the usage update
+      console.log('🔢 Usage Update:', {
+        before: dailyUsage,
+        recordResult: recordResult.usage,
+        newQuestionsAsked: recordResult.usage?.questions_asked || 0,
+        newRemaining: Math.max(0, getDailyLimit(userPlan) - (recordResult.usage?.questions_asked || 0))
+      });
+
+      // Update local usage count immediately with the actual database values
+      setDailyUsage({
+        questionsAsked: recordResult.usage?.questions_asked || 0,
+        limit: getDailyLimit(userPlan),
+        remaining: Math.max(0, getDailyLimit(userPlan) - (recordResult.usage?.questions_asked || 0))
+      });
+    }
+
     console.log('💬 Sending message:', {
       messageText: text,
       timestamp: new Date().toISOString(),
-      location: window.location.href,
-      currentMessageCount: messages.length
+      userPlan: userPlan,
+      currentUsage: dailyUsage,
+      userId: user?.id
     });
 
     // Check OpenAI configuration
@@ -192,8 +285,21 @@ export function ChatInterface() {
             </svg>
           </button>
         </div>
-        {/* Right side - Upgrade Button, Profile Menu */}
+        {/* Right side - Usage Counter, Upgrade Button, Profile Menu */}
         <div className="flex items-center gap-2 sm:gap-3 relative">
+          {/* Usage Counter - only show for logged in users */}
+          {user && (
+            <div className={`px-2 py-1 rounded-full text-xs ${
+              dailyUsage.remaining === 0 
+                ? 'bg-red-100 text-red-800 border-red-200' 
+                : theme.bgSecondary + ' ' + theme.textSecondary + ' border ' + theme.borderPrimary
+            }`}>
+              {dailyUsage.remaining === 0 
+                ? `${dailyUsage.questionsAsked}/${dailyUsage.limit} used` 
+                : `${dailyUsage.remaining}/${dailyUsage.limit} left`
+              }
+            </div>
+          )}
           <button 
             className="border border-[#4285F4] text-[#4285F4] bg-transparent px-3 py-1 rounded-full text-sm transition-all duration-200 cursor-pointer hover:bg-[#4285F4] hover:text-white"
             onClick={handlePremium}
@@ -290,7 +396,8 @@ export function ChatInterface() {
                   <button
                     type="submit"
                     className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed" 
-                    disabled={!input.trim() || isLoading}
+                    disabled={!input.trim() || isLoading || (!!user && dailyUsage.remaining <= 0)}
+                    title={user && dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)` : undefined}
                   >
                     <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
                   </button>
@@ -351,7 +458,8 @@ export function ChatInterface() {
                   <button
                     type="submit"
                     className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed"
-                    disabled={!input.trim() || isLoading}
+                    disabled={!input.trim() || isLoading || (!!user && dailyUsage.remaining <= 0)}
+                    title={user && dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)` : undefined}
                   >
                     <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
                   </button>
@@ -496,9 +604,6 @@ export function ChatInterface() {
           </div>
         </div>
       </div>
-      
-      {/* Debug Panel for troubleshooting */}
-      <DebugPanel />
     </div>
   );
 }

@@ -7,14 +7,19 @@ import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/theme';
 import { PaymentModal } from '../components/PaymentModal';
 import { PaymentSuccessModal } from '../components/PaymentSuccessModal';
+import { DowngradeSuccessModal } from '../components/DowngradeSuccessModal';
 import { formatPrice, getPlanDetails } from '../lib/paymentService';
+import { getUserPlan, updateUserPlan, downgradeToFreePlan, downgradeToGoldPlan } from '../lib/userPlanService';
 
 export function PremiumFeatures() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showDowngradeModal, setShowDowngradeModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'gold' | 'diamond' | null>(null);
+  const [downgradeInfo, setDowngradeInfo] = useState<{from: 'gold' | 'diamond', to: 'free' | 'gold'} | null>(null);
+  const [currentUserPlan, setCurrentUserPlan] = useState<'free' | 'gold' | 'diamond'>('free');
   const menuRef = useRef<HTMLDivElement | null>(null);
   const { user, signOut } = useAuthContext();
   const { isDarkMode } = useTheme();
@@ -50,6 +55,17 @@ export function PremiumFeatures() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [menuOpen]);
 
+  // Fetch user's current plan
+  useEffect(() => {
+    if (user?.id) {
+      getUserPlan(user.id, user.email).then(result => {
+        if (result.success && result.user) {
+          setCurrentUserPlan(result.user.plan_type);
+        }
+      });
+    }
+  }, [user?.id, user?.email]);
+
   function handleLogin() {
     setMenuOpen(false);
     navigate('/login');
@@ -80,6 +96,53 @@ export function PremiumFeatures() {
     setShowPaymentModal(true);
   }
 
+  function handleSelectFreePlan() {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    // For free plan, we need to update the user's plan in the database
+    if (currentUserPlan !== 'free') {
+      // Call the downgrade function
+      downgradeToFreePlan(user.id, user.email).then(result => {
+        if (result.success) {
+          console.log('✅ User downgraded to free plan successfully');
+          setCurrentUserPlan('free');
+          // Show downgrade success modal
+          setDowngradeInfo({ from: currentUserPlan as 'gold' | 'diamond', to: 'free' });
+          setShowDowngradeModal(true);
+        } else {
+          console.error('❌ Failed to downgrade user to free plan:', result.error);
+          // You might want to show an error message to the user here
+        }
+      });
+    }
+  }
+
+  function handleSelectGoldPlan() {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    // If user has diamond, downgrade to gold
+    if (currentUserPlan === 'diamond') {
+      downgradeToGoldPlan(user.id, user.email).then(result => {
+        if (result.success) {
+          console.log('✅ User downgraded to gold plan successfully');
+          setCurrentUserPlan('gold');
+          // Show downgrade success modal
+          setDowngradeInfo({ from: 'diamond', to: 'gold' });
+          setShowDowngradeModal(true);
+        } else {
+          console.error('❌ Failed to downgrade user to gold plan:', result.error);
+        }
+      });
+    } else {
+      // If user has free, upgrade to gold (existing logic)
+      handleSelectPlan('gold');
+    }
+  }
+
   function handlePaymentSuccess() {
     setShowPaymentModal(false);
     setShowSuccessModal(true);
@@ -93,7 +156,16 @@ export function PremiumFeatures() {
 
   function handleSuccessModalClose() {
     setShowSuccessModal(false);
+    // Update the current plan to reflect the new purchase
+    if (selectedPlan) {
+      setCurrentUserPlan(selectedPlan);
+    }
     setSelectedPlan(null);
+  }
+
+  function handleDowngradeModalClose() {
+    setShowDowngradeModal(false);
+    setDowngradeInfo(null);
   }
 
   const goldPlan = getPlanDetails('gold');
@@ -213,6 +285,17 @@ export function PremiumFeatures() {
             <span>No Credit Card Required</span>
           </li>
               </ul>
+              <button
+                onClick={() => currentUserPlan !== 'free' ? handleSelectFreePlan() : undefined}
+                className={`mt-2 w-full text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg transition-opacity ${
+                  currentUserPlan === 'free' 
+                    ? 'bg-gray-500 cursor-default opacity-70' 
+                    : 'bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] hover:opacity-90 cursor-pointer'
+                }`}
+                disabled={currentUserPlan === 'free'}
+              >
+                {currentUserPlan === 'free' ? 'Current Plan' : 'Choose Free'}
+              </button>
             </div>
 
             {/* Card 2 - Gold Plan */}
@@ -245,10 +328,15 @@ export function PremiumFeatures() {
           </li>
               </ul>
               <button
-                onClick={() => handleSelectPlan('gold')}
-                className="mt-2 w-full bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+                onClick={() => currentUserPlan !== 'gold' ? handleSelectGoldPlan() : undefined}
+                className={`mt-2 w-full text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg transition-opacity ${
+                  currentUserPlan === 'gold' 
+                    ? 'bg-gray-500 cursor-default opacity-70' 
+                    : 'bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] hover:opacity-90 cursor-pointer'
+                }`}
+                disabled={currentUserPlan === 'gold'}
               >
-                Choose Gold
+                {currentUserPlan === 'gold' ? 'Current Plan' : 'Choose Gold'}
               </button>
             </div>
 
@@ -284,10 +372,15 @@ export function PremiumFeatures() {
           </li>
               </ul>
               <button
-                onClick={() => handleSelectPlan('diamond')}
-                className="mt-2 w-full bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+                onClick={() => currentUserPlan !== 'diamond' ? handleSelectPlan('diamond') : undefined}
+                className={`mt-2 w-full text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg transition-opacity ${
+                  currentUserPlan === 'diamond' 
+                    ? 'bg-gray-500 cursor-default opacity-70' 
+                    : 'bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] hover:opacity-90 cursor-pointer'
+                }`}
+                disabled={currentUserPlan === 'diamond'}
               >
-                Choose Diamond
+                {currentUserPlan === 'diamond' ? 'Current Plan' : 'Choose Diamond'}
               </button>
             </div>
           </div>
@@ -323,6 +416,16 @@ export function PremiumFeatures() {
           isOpen={showSuccessModal}
           planType={selectedPlan}
           onClose={handleSuccessModalClose}
+        />
+      )}
+
+      {/* Downgrade Success Modal */}
+      {showDowngradeModal && downgradeInfo && (
+        <DowngradeSuccessModal
+          isOpen={showDowngradeModal}
+          fromPlan={downgradeInfo.from}
+          toPlan={downgradeInfo.to}
+          onClose={handleDowngradeModalClose}
         />
       )}
     </div>
