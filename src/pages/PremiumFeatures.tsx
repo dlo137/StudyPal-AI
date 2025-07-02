@@ -5,10 +5,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/theme';
+import { PaymentModal } from '../components/PaymentModal';
+import { formatPrice, getPlanDetails } from '../lib/paymentService';
 
 export function PremiumFeatures() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'gold' | 'diamond' | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const { user, signOut } = useAuthContext();
   const { isDarkMode } = useTheme();
@@ -63,6 +67,31 @@ export function PremiumFeatures() {
     setMenuOpen(false);
     navigate('/');
   }
+
+  function handleSelectPlan(planType: 'gold' | 'diamond') {
+    if (!user) {
+      // Redirect to login if not authenticated
+      navigate('/login');
+      return;
+    }
+    setSelectedPlan(planType);
+    setShowPaymentModal(true);
+  }
+
+  function handlePaymentSuccess() {
+    setShowPaymentModal(false);
+    setSelectedPlan(null);
+    // You could redirect to a success page or show a success message
+    alert('Payment successful! Welcome to your new plan!');
+  }
+
+  function handlePaymentCancel() {
+    setShowPaymentModal(false);
+    setSelectedPlan(null);
+  }
+
+  const goldPlan = getPlanDetails('gold');
+  const diamondPlan = getPlanDetails('diamond');
 
   return (
     <div className={`min-h-screen ${themeClasses.bgPrimary} ${themeClasses.textPrimary} relative overflow-hidden flex flex-col`}>
@@ -188,6 +217,9 @@ export function PremiumFeatures() {
           <SparklesIcon size={20} className="text-white hidden md:block" />
               </div>
               <h3 className="text-xs sm:text-sm md:text-lg font-bold mb-1 sm:mb-2 md:mb-3">Gold Plan</h3>
+              <p className="text-xs sm:text-sm md:text-base font-bold text-[#8C52FF] mb-1 sm:mb-2">
+                {formatPrice(goldPlan.price)}/month
+              </p>
               <ul className={`space-y-0.5 sm:space-y-1.5 md:space-y-2 ${themeClasses.textSecondary} flex-1 text-xs sm:text-xs md:text-sm`}>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
@@ -210,6 +242,12 @@ export function PremiumFeatures() {
             <span>24/7 Available</span>
           </li>
               </ul>
+              <button
+                onClick={() => handleSelectPlan('gold')}
+                className="mt-2 w-full bg-[#8C52FF] text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg hover:bg-[#7a4ae6] transition-colors cursor-pointer"
+              >
+                Choose Gold
+              </button>
             </div>
 
             {/* Card 3 */}
@@ -222,6 +260,9 @@ export function PremiumFeatures() {
               <h3 className="text-xs sm:text-sm md:text-lg font-bold mb-1 sm:mb-2 md:mb-3">
           Diamond Plan
               </h3>
+              <p className="text-xs sm:text-sm md:text-base font-bold text-[#8C52FF] mb-1 sm:mb-2">
+                {formatPrice(diamondPlan.price)}/month
+              </p>
               <ul className={`space-y-0.5 sm:space-y-1.5 md:space-y-2 ${themeClasses.textSecondary} flex-1 text-xs sm:text-xs md:text-sm`}>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
@@ -240,21 +281,39 @@ export function PremiumFeatures() {
             <span>Export History</span>
           </li>
               </ul>
+              <button
+                onClick={() => handleSelectPlan('diamond')}
+                className="mt-2 w-full bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+              >
+                Choose Diamond
+              </button>
             </div>
           </div>
 
           {/* Bottom CTA */}
           <div className="max-w-md mx-auto">
-            <button className="w-full p-3 sm:p-4 rounded-xl bg-[#8C52FF] text-white font-bold shadow-lg shadow-purple-500/30 hover:bg-[#7a4ae6] transition-colors text-sm sm:text-base cursor-pointer">
-              Get Now
+            <button 
+              onClick={() => handleSelectPlan('gold')}
+              className="w-full p-3 sm:p-4 rounded-xl bg-[#8C52FF] text-white font-bold shadow-lg shadow-purple-500/30 hover:bg-[#7a4ae6] transition-colors text-sm sm:text-base cursor-pointer"
+            >
+              Start Free Trial
             </button>
             <p className={`text-center text-xs sm:text-sm ${themeClasses.textMuted} mt-2`}>
-              7-day free trial, then $9.99/month
+              7-day free trial, then {formatPrice(goldPlan.price)}/month
             </p>
 
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedPlan && (
+        <PaymentModal
+          planType={selectedPlan}
+          onSuccess={handlePaymentSuccess}
+          onCancel={handlePaymentCancel}
+        />
+      )}
     </div>
   );
 }

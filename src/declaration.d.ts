@@ -26,6 +26,9 @@ interface ImportMetaEnv {
   readonly VITE_OPENAI_API_KEY: string
   readonly VITE_BUILD_TIME?: string
   readonly VITE_COMMIT_SHA?: string
+  readonly VITE_STRIPE_PUBLISHABLE_KEY: string
+  readonly VITE_STRIPE_GOLD_PRICE_ID: string
+  readonly VITE_STRIPE_DIAMOND_PRICE_ID: string
 }
 
 interface ImportMeta {

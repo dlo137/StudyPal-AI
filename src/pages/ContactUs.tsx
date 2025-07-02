@@ -1,4 +1,4 @@
-import { XIcon, User, Mail, MessageSquare, Phone, MapPin, Send } from 'lucide-react';
+import { XIcon, User, Mail, MessageSquare, Phone, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useRef, useEffect, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
@@ -280,8 +280,6 @@ export function ContactUs() {
                       <p className={themeClasses.textSecondary}>+1 (555) 123-4567</p>
                     </div>
                   </div>
-
-
                 </div>
               </div>
             </div>
