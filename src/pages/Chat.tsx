@@ -419,7 +419,7 @@ export function ChatInterface() {
             {/* Subject Option Buttons */}
             <div className="w-full max-w-2xl px-2 mb-6 sm:mb-6">
               <div className="space-y-2 sm:space-y-2">
-                {/* Top row - 5 buttons (wraps on mobile) */}
+                {/* Top row - 6 buttons on mobile, 5 on desktop */}
                 <div className="flex flex-wrap sm:flex-nowrap justify-center gap-1.5 sm:gap-2">
                   <button className="bg-blue-300 hover:bg-blue-400 text-blue-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
                     Math
@@ -436,8 +436,12 @@ export function ChatInterface() {
                   <button className="bg-violet-300 hover:bg-violet-400 text-violet-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
                     Music
                   </button>
+                  {/* Economics - show on mobile, hide on desktop */}
+                  <button className="bg-purple-300 hover:bg-purple-400 text-purple-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs sm:hidden">
+                    Economics
+                  </button>
                 </div>
-                {/* Bottom row - 6 buttons (wraps on mobile) */}
+                {/* Bottom row - 5 buttons on mobile, 6 on desktop */}
                 <div className="flex flex-wrap sm:flex-nowrap justify-center gap-1.5 sm:gap-2">
                   <button className="bg-orange-300 hover:bg-orange-400 text-orange-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
                     History
@@ -454,7 +458,8 @@ export function ChatInterface() {
                   <button className="bg-teal-300 hover:bg-teal-400 text-teal-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
                     Geography
                   </button>
-                  <button className="bg-purple-300 hover:bg-purple-400 text-purple-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  {/* Economics - hide on mobile, show on desktop */}
+                  <button className="bg-purple-300 hover:bg-purple-400 text-purple-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs hidden sm:inline-flex">
                     Economics
                   </button>
                 </div>
