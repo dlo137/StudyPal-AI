@@ -3,6 +3,10 @@ import Stripe from 'stripe';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env.local file
+dotenv.config({ path: '.env.local' });
 
 // Environment validation
 const requiredEnvVars = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'];
@@ -78,30 +82,34 @@ app.post('/api/create-payment-intent', paymentLimiter, async (req, res) => {
 
     // Input validation
     if (!amount || !currency || !planType) {
-      return res.status(400).json({
+      res.status(400).json({
         error: 'Missing required fields: amount, currency, planType'
       });
+      return;
     }
 
     // Validate amount (must be positive integer)
     if (typeof amount !== 'number' || amount <= 0 || !Number.isInteger(amount)) {
-      return res.status(400).json({
+      res.status(400).json({
         error: 'Amount must be a positive integer in cents'
       });
+      return;
     }
 
     // Validate currency
     if (currency !== 'usd') {
-      return res.status(400).json({
+      res.status(400).json({
         error: 'Only USD currency is supported'
       });
+      return;
     }
 
     // Validate planType
     if (!['gold', 'diamond'].includes(planType)) {
-      return res.status(400).json({
+      res.status(400).json({
         error: 'Invalid plan type. Must be gold or diamond'
       });
+      return;
     }
 
     // Validate amount matches plan pricing
@@ -111,16 +119,18 @@ app.post('/api/create-payment-intent', paymentLimiter, async (req, res) => {
     };
 
     if (amount !== validAmounts[planType as keyof typeof validAmounts]) {
-      return res.status(400).json({
+      res.status(400).json({
         error: 'Amount does not match plan pricing'
       });
+      return;
     }
 
     // Validate email format if provided
     if (userEmail && !/\S+@\S+\.\S+/.test(userEmail)) {
-      return res.status(400).json({
+      res.status(400).json({
         error: 'Invalid email format'
       });
+      return;
     }
 
     // Create a PaymentIntent with the order amount and currency

@@ -158,7 +158,7 @@ export function SignUp() {
             <div className={`absolute right-0 mt-2 w-40 ${theme.bgSecondary} border ${theme.borderPrimary} rounded-lg shadow-lg`}>
               <button onClick={() => goto('/login')}    className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Login</button>
               <button onClick={() => setMenuOpen(false)} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Sign&nbsp;Up</button>
-              <button onClick={() => goto('/premium')}  className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Upgrade</button>
+              <button onClick={() => goto('/premium')}  className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Plans</button>
               <button onClick={() => goto('/')}         className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} rounded-b-lg`}>Chat</button>
             </div>
           )}

@@ -71,8 +71,8 @@ export function UserProfile() {
   return <div className={`flex flex-col min-h-screen ${theme.bgPrimary} ${theme.textPrimary}`}>
       {/* ── header ──────────────────────────────────────────── */}
       <div className={`flex items-center justify-between px-4 sm:px-6 py-3 border-b ${theme.borderPrimary} relative z-50`}>
-        <button onClick={() => navigate(-1)} className={`p-2 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full`}>
-          <XIcon size={24} />
+        <button onClick={() => navigate(-1)} className={`p-2 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full cursor-pointer transition-colors`}>
+          <XIcon size={24} className="cursor-pointer" />
         </button>
 
         <span className="absolute left-1/2 -translate-x-1/2 font-bold text-lg">
@@ -96,18 +96,18 @@ export function UserProfile() {
           {menuOpen && (
             <div className={`absolute right-0 mt-2 w-40 ${theme.bgSecondary} border ${theme.borderPrimary} rounded-lg shadow-lg`}>
               {user && (
-                <button onClick={() => setMenuOpen(false)} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} rounded-t-lg ${theme.bgTertiary}`}>Profile</button>
+                <button onClick={() => setMenuOpen(false)} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} rounded-t-lg ${theme.bgTertiary} cursor-pointer hover:opacity-80 transition-opacity`}>Profile</button>
               )}
               {!user && (
                 <>
-                  <button onClick={() => { setMenuOpen(false); navigate('/login'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} rounded-t-lg`}>Login</button>
-                  <button onClick={() => { setMenuOpen(false); navigate('/signup'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary}`}>Sign&nbsp;Up</button>
+                  <button onClick={() => { setMenuOpen(false); navigate('/login'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} rounded-t-lg cursor-pointer hover:opacity-80 transition-opacity`}>Login</button>
+                  <button onClick={() => { setMenuOpen(false); navigate('/signup'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} cursor-pointer hover:opacity-80 transition-opacity`}>Sign&nbsp;Up</button>
                 </>
               )}
-              <button onClick={() => { setMenuOpen(false); navigate('/premium'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} ${!user ? '' : ''}`}>Upgrade</button>
-              <button onClick={() => { setMenuOpen(false); navigate('/'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} ${!user ? 'rounded-b-lg' : ''}`}>Chat</button>
+              <button onClick={() => { setMenuOpen(false); navigate('/premium'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} ${!user ? '' : ''} cursor-pointer hover:opacity-80 transition-opacity`}>Plans</button>
+              <button onClick={() => { setMenuOpen(false); navigate('/'); }} className={`block w-full px-4 py-2 text-left ${theme.bgHoverSecondary} ${!user ? 'rounded-b-lg' : ''} cursor-pointer hover:opacity-80 transition-opacity`}>Chat</button>
               {user && (
-                <button onClick={handleLogout} className={`block w-full px-4 py-2 text-left text-red-400 ${theme.bgHoverSecondary} hover:text-red-300 rounded-b-lg`}>Logout</button>
+                <button onClick={handleLogout} className={`block w-full px-4 py-2 text-left text-red-400 ${theme.bgHoverSecondary} hover:text-red-300 rounded-b-lg cursor-pointer hover:opacity-80 transition-all`}>Logout</button>
               )}
             </div>
           )}

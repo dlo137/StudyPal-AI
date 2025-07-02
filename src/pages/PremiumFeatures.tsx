@@ -8,6 +8,7 @@ import { getThemeClasses } from '../utils/theme';
 import { PaymentModal } from '../components/PaymentModal';
 import { PaymentSuccessModal } from '../components/PaymentSuccessModal';
 import { DowngradeSuccessModal } from '../components/DowngradeSuccessModal';
+import { PlanChangeConfirmationModal } from '../components/PlanChangeConfirmationModal';
 import { formatPrice, getPlanDetails } from '../lib/paymentService';
 import { getUserPlan, downgradeToFreePlan, downgradeToGoldPlan } from '../lib/userPlanService';
 
@@ -17,9 +18,12 @@ export function PremiumFeatures() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showDowngradeModal, setShowDowngradeModal] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'gold' | 'diamond' | null>(null);
   const [downgradeInfo, setDowngradeInfo] = useState<{from: 'gold' | 'diamond', to: 'free' | 'gold'} | null>(null);
+  const [planChangeInfo, setPlanChangeInfo] = useState<{from: 'free' | 'gold' | 'diamond', to: 'free' | 'gold' | 'diamond'} | null>(null);
   const [currentUserPlan, setCurrentUserPlan] = useState<'free' | 'gold' | 'diamond'>('free');
+  const [showFreeTrialText, setShowFreeTrialText] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const { user, signOut } = useAuthContext();
   const { isDarkMode } = useTheme();
@@ -92,8 +96,10 @@ export function PremiumFeatures() {
       navigate('/login');
       return;
     }
-    setSelectedPlan(planType);
-    setShowPaymentModal(true);
+    
+    // Show confirmation modal before proceeding
+    setPlanChangeInfo({ from: currentUserPlan, to: planType });
+    setShowConfirmationModal(true);
   }
 
   function handleSelectFreePlan() {
@@ -101,21 +107,11 @@ export function PremiumFeatures() {
       navigate('/login');
       return;
     }
-    // For free plan, we need to update the user's plan in the database
+    
+    // Show confirmation modal if user is changing plans
     if (currentUserPlan !== 'free') {
-      // Call the downgrade function
-      downgradeToFreePlan(user.id, user.email).then(result => {
-        if (result.success) {
-          console.log('✅ User downgraded to free plan successfully');
-          setCurrentUserPlan('free');
-          // Show downgrade success modal
-          setDowngradeInfo({ from: currentUserPlan as 'gold' | 'diamond', to: 'free' });
-          setShowDowngradeModal(true);
-        } else {
-          console.error('❌ Failed to downgrade user to free plan:', result.error);
-          // You might want to show an error message to the user here
-        }
-      });
+      setPlanChangeInfo({ from: currentUserPlan, to: 'free' });
+      setShowConfirmationModal(true);
     }
   }
 
@@ -124,23 +120,63 @@ export function PremiumFeatures() {
       navigate('/login');
       return;
     }
-    // If user has diamond, downgrade to gold
-    if (currentUserPlan === 'diamond') {
-      downgradeToGoldPlan(user.id, user.email).then(result => {
+    
+    // Show confirmation modal before proceeding
+    if (currentUserPlan !== 'gold') {
+      setPlanChangeInfo({ from: currentUserPlan, to: 'gold' });
+      setShowConfirmationModal(true);
+    }
+  }
+
+  function handleConfirmPlanChange() {
+    if (!planChangeInfo || !user) return;
+
+    setShowConfirmationModal(false);
+    
+    const { from, to } = planChangeInfo;
+    
+    if (to === 'free') {
+      // Downgrade to free
+      downgradeToFreePlan(user.id, user.email).then(result => {
         if (result.success) {
-          console.log('✅ User downgraded to gold plan successfully');
-          setCurrentUserPlan('gold');
-          // Show downgrade success modal
-          setDowngradeInfo({ from: 'diamond', to: 'gold' });
+          console.log('✅ User downgraded to free plan successfully');
+          setCurrentUserPlan('free');
+          setDowngradeInfo({ from: from as 'gold' | 'diamond', to: 'free' });
           setShowDowngradeModal(true);
         } else {
-          console.error('❌ Failed to downgrade user to gold plan:', result.error);
+          console.error('❌ Failed to downgrade user to free plan:', result.error);
         }
       });
-    } else {
-      // If user has free, upgrade to gold (existing logic)
-      handleSelectPlan('gold');
+    } else if (to === 'gold') {
+      if (from === 'diamond') {
+        // Downgrade from diamond to gold
+        downgradeToGoldPlan(user.id, user.email).then(result => {
+          if (result.success) {
+            console.log('✅ User downgraded to gold plan successfully');
+            setCurrentUserPlan('gold');
+            setDowngradeInfo({ from: 'diamond', to: 'gold' });
+            setShowDowngradeModal(true);
+          } else {
+            console.error('❌ Failed to downgrade user to gold plan:', result.error);
+          }
+        });
+      } else {
+        // Upgrade to gold (show payment modal)
+        setSelectedPlan('gold');
+        setShowPaymentModal(true);
+      }
+    } else if (to === 'diamond') {
+      // Upgrade to diamond (show payment modal)
+      setSelectedPlan('diamond');
+      setShowPaymentModal(true);
     }
+    
+    setPlanChangeInfo(null);
+  }
+
+  function handleCancelPlanChange() {
+    setShowConfirmationModal(false);
+    setPlanChangeInfo(null);
   }
 
   function handlePaymentSuccess() {
@@ -168,6 +204,11 @@ export function PremiumFeatures() {
     setDowngradeInfo(null);
   }
 
+  function handleStartFreeTrial() {
+    setShowFreeTrialText(true);
+    handleSelectPlan('diamond');
+  }
+
   const goldPlan = getPlanDetails('gold');
   const diamondPlan = getPlanDetails('diamond');
 
@@ -182,7 +223,7 @@ export function PremiumFeatures() {
           <XIcon size={24} />
         </button>
         <span className="absolute left-1/2 -translate-x-1/2 font-bold text-lg">
-          PREMIUM
+            PLANS
         </span>
         <div className="relative" ref={menuRef}>
           <div className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition ${themeClasses.bgSecondary} flex items-center justify-center`}
@@ -225,7 +266,7 @@ export function PremiumFeatures() {
                 className={`block w-full text-left px-4 py-2.5 text-sm ${themeClasses.bgHoverSecondary} ${themeClasses.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''}`}
                 onClick={() => setMenuOpen(false)}
               >
-                Upgrade
+                Plans
               </button>
               <button 
                 className={`block w-full text-left px-4 py-2.5 text-sm ${themeClasses.bgHoverSecondary} ${themeClasses.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-b-lg' : ''}`}
@@ -388,15 +429,16 @@ export function PremiumFeatures() {
           {/* Bottom CTA */}
           <div className="max-w-md mx-auto">
             <button 
-              onClick={() => handleSelectPlan('gold')}
+              onClick={handleStartFreeTrial}
               className="w-full p-3 sm:p-4 rounded-xl bg-[#8C52FF] text-white font-bold shadow-lg shadow-purple-500/30 hover:bg-[#7a4ae6] transition-colors text-sm sm:text-base cursor-pointer"
             >
               Start Free Trial 
             </button>
-            <p className={`text-center text-xs sm:text-sm ${themeClasses.textMuted} mt-2`}>
-              7-day free gold trial, then {formatPrice(goldPlan.price)}/month
-            </p>
-
+            {showFreeTrialText && (
+              <p className={`text-center text-xs sm:text-sm ${themeClasses.textMuted} mt-2`}>
+                7-day free diamond trial, then {formatPrice(diamondPlan.price)}/month
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -426,6 +468,17 @@ export function PremiumFeatures() {
           fromPlan={downgradeInfo.from}
           toPlan={downgradeInfo.to}
           onClose={handleDowngradeModalClose}
+        />
+      )}
+
+      {/* Plan Change Confirmation Modal */}
+      {showConfirmationModal && planChangeInfo && (
+        <PlanChangeConfirmationModal
+          isOpen={showConfirmationModal}
+          fromPlan={planChangeInfo.from}
+          toPlan={planChangeInfo.to}
+          onConfirm={handleConfirmPlanChange}
+          onClose={handleCancelPlanChange}
         />
       )}
     </div>

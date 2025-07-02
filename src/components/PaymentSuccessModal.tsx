@@ -69,9 +69,9 @@ export function PaymentSuccessModal({ isOpen, onClose, planType }: PaymentSucces
         <div className="relative p-6 pb-4">
           <button
             onClick={onClose}
-            className={`absolute top-4 right-4 p-1 rounded-full ${themeClasses.textSecondary} hover:${themeClasses.bgHover} transition-colors`}
+            className={`absolute top-4 right-4 p-1 rounded-full ${themeClasses.textSecondary} hover:${themeClasses.bgHover} transition-colors cursor-pointer`}
           >
-            <X size={20} />
+            <X size={20} className="cursor-pointer" />
           </button>
         </div>
 
@@ -116,14 +116,14 @@ export function PaymentSuccessModal({ isOpen, onClose, planType }: PaymentSucces
           <div className="space-y-3">
             <button
               onClick={handleStartUsingPlan}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg cursor-pointer hover:shadow-xl transform hover:scale-[1.02]"
             >
               Start Using Your Plan
             </button>
             
             <button
               onClick={onClose}
-              className={`w-full ${themeClasses.textSecondary} hover:${themeClasses.textPrimary} transition-colors text-sm`}
+              className={`w-full ${themeClasses.textSecondary} hover:${themeClasses.textPrimary} transition-colors text-sm cursor-pointer hover:underline`}
             >
               Close
             </button>

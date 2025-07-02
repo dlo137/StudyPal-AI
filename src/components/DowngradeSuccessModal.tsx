@@ -55,9 +55,9 @@ export function DowngradeSuccessModal({ isOpen, onClose, fromPlan, toPlan }: Dow
         {/* Close button */}
         <button
           onClick={onClose}
-          className={`absolute top-4 right-4 ${themeClasses.textSecondary} hover:${themeClasses.textPrimary} transition-colors`}
+          className={`absolute top-4 right-4 ${themeClasses.textSecondary} hover:${themeClasses.textPrimary} transition-colors cursor-pointer`}
         >
-          <X size={24} />
+          <X size={24} className="cursor-pointer" />
         </button>
 
         <div className="p-8 text-center">
@@ -120,7 +120,7 @@ export function DowngradeSuccessModal({ isOpen, onClose, fromPlan, toPlan }: Dow
           {/* Continue Button */}
           <button
             onClick={handleContinue}
-            className="w-full bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white font-bold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity"
+            className="w-full bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white font-bold py-3 px-6 rounded-lg hover:opacity-90 transition-all cursor-pointer hover:shadow-lg transform hover:scale-[1.02]"
           >
             Continue to Chat
           </button>
