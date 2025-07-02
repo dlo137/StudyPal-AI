@@ -10,6 +10,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/theme';
 import { getUserPlan } from '../lib/userPlanService';
 import { checkDailyUsage, recordQuestionAsked, getDailyLimit } from '../lib/usageService';
+import { getAnonymousUsage, canAskQuestion, recordAnonymousQuestion } from '../lib/anonymousUsageService';
 
 export function ChatInterface() {
   /* ── state ──────────────────────────────────────────────────────── */
@@ -86,9 +87,14 @@ export function ChatInterface() {
         }
       });
     } else {
-      // If no user, set to free plan limits
+      // For anonymous users, get usage from localStorage
       setUserPlan('free');
-      setDailyUsage({ questionsAsked: 0, limit: 5, remaining: 5 });
+      const anonymousUsage = getAnonymousUsage();
+      setDailyUsage({
+        questionsAsked: anonymousUsage.questionsAsked,
+        limit: anonymousUsage.limit,
+        remaining: anonymousUsage.remaining
+      });
     }
   }, [user?.id, user?.email]);
 
@@ -104,9 +110,9 @@ export function ChatInterface() {
     const text = input.trim();
     if (!text) return;
 
-    // For logged-in users, check and record usage BEFORE processing
+    // Handle usage limits for both authenticated and anonymous users
     if (user?.id) {
-      // Check current usage limit
+      // For authenticated users, check and record usage in database
       const usageCheck = await checkDailyUsage(user.id, userPlan);
       if (!usageCheck.success) {
         const errorMessage: ChatMessage = {
@@ -155,6 +161,38 @@ export function ChatInterface() {
         limit: getDailyLimit(userPlan),
         remaining: Math.max(0, getDailyLimit(userPlan) - (recordResult.usage?.questions_asked || 0))
       });
+    } else {
+      // For anonymous users, check and record usage in localStorage
+      if (!canAskQuestion()) {
+        const limitMessage: ChatMessage = { 
+          role: 'assistant', 
+          content: `⚠️ Daily limit reached! You've used all 5 questions for today. Sign up for a free account to continue using StudyPal, or upgrade to Gold (10 questions) or Diamond (15 questions) for more daily questions!`
+        };
+        setMsgs(m => [...m, limitMessage]);
+        return;
+      }
+
+      // Record the question for anonymous user
+      try {
+        const newUsage = recordAnonymousQuestion();
+        setDailyUsage({
+          questionsAsked: newUsage.questionsAsked,
+          limit: newUsage.limit,
+          remaining: newUsage.remaining
+        });
+        
+        console.log('🔢 Anonymous Usage Update:', {
+          before: dailyUsage,
+          after: newUsage
+        });
+      } catch (error) {
+        const errorMessage: ChatMessage = {
+          role: 'assistant',
+          content: `⚠️ ${error instanceof Error ? error.message : 'Unable to record usage'}`
+        };
+        setMsgs(m => [...m, errorMessage]);
+        return;
+      }
     }
 
     console.log('💬 Sending message:', {
@@ -162,7 +200,8 @@ export function ChatInterface() {
       timestamp: new Date().toISOString(),
       userPlan: userPlan,
       currentUsage: dailyUsage,
-      userId: user?.id
+      userId: user?.id || 'anonymous',
+      isAuthenticated: !!user
     });
 
     // Check OpenAI configuration
@@ -287,8 +326,8 @@ export function ChatInterface() {
         </div>
         {/* Right side - Usage Counter, Upgrade Button, Profile Menu */}
         <div className="flex items-center gap-2 sm:gap-3 relative">
-          {/* Usage Counter - only show for logged in users */}
-          {user && (
+          {/* Usage Counter - show for both logged in and anonymous users */}
+          {(user || dailyUsage.questionsAsked > 0 || dailyUsage.remaining < 5) && (
             <div className={`px-2 py-1 rounded-full text-xs ${
               dailyUsage.remaining === 0 
                 ? 'bg-red-100 text-red-800 border-red-200' 
@@ -396,8 +435,8 @@ export function ChatInterface() {
                   <button
                     type="submit"
                     className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed" 
-                    disabled={!input.trim() || isLoading || (!!user && dailyUsage.remaining <= 0)}
-                    title={user && dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)` : undefined}
+                    disabled={!input.trim() || isLoading || dailyUsage.remaining <= 0}
+                    title={dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : undefined}
                   >
                     <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
                   </button>
@@ -458,8 +497,8 @@ export function ChatInterface() {
                   <button
                     type="submit"
                     className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed"
-                    disabled={!input.trim() || isLoading || (!!user && dailyUsage.remaining <= 0)}
-                    title={user && dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)` : undefined}
+                    disabled={!input.trim() || isLoading || dailyUsage.remaining <= 0}
+                    title={dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : undefined}
                   >
                     <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
                   </button>

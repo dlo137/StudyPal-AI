@@ -9,7 +9,7 @@ import { PaymentModal } from '../components/PaymentModal';
 import { PaymentSuccessModal } from '../components/PaymentSuccessModal';
 import { DowngradeSuccessModal } from '../components/DowngradeSuccessModal';
 import { formatPrice, getPlanDetails } from '../lib/paymentService';
-import { getUserPlan, updateUserPlan, downgradeToFreePlan, downgradeToGoldPlan } from '../lib/userPlanService';
+import { getUserPlan, downgradeToFreePlan, downgradeToGoldPlan } from '../lib/userPlanService';
 
 export function PremiumFeatures() {
   const navigate = useNavigate();
