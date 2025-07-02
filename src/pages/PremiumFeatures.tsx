@@ -209,8 +209,8 @@ export function PremiumFeatures() {
               </ul>
             </div>
 
-            {/* Card 2 - Elevated */}
-            <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm h-[180px] sm:h-[240px] md:h-[280px] flex flex-col relative sm:-mt-2 md:-mt-8`}>
+            {/* Card 2 - Gold Plan */}
+            <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm h-[180px] sm:h-[240px] md:h-[280px] flex flex-col relative`}>
               <div className="bg-[#8C52FF] w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-1 sm:mb-2 md:mb-3">
           <SparklesIcon size={10} className="text-white sm:hidden" />
           <SparklesIcon size={16} className="text-white hidden sm:block md:hidden" />
@@ -235,16 +235,12 @@ export function PremiumFeatures() {
           </li>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>Chat Support</span>
-          </li>
-          <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
             <span>24/7 Available</span>
           </li>
               </ul>
               <button
                 onClick={() => handleSelectPlan('gold')}
-                className="mt-2 w-full bg-[#8C52FF] text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg hover:bg-[#7a4ae6] transition-colors cursor-pointer"
+                className="mt-2 w-full bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
               >
                 Choose Gold
               </button>
@@ -296,10 +292,10 @@ export function PremiumFeatures() {
               onClick={() => handleSelectPlan('gold')}
               className="w-full p-3 sm:p-4 rounded-xl bg-[#8C52FF] text-white font-bold shadow-lg shadow-purple-500/30 hover:bg-[#7a4ae6] transition-colors text-sm sm:text-base cursor-pointer"
             >
-              Start Free Trial
+              Start Free Trial 
             </button>
             <p className={`text-center text-xs sm:text-sm ${themeClasses.textMuted} mt-2`}>
-              7-day free trial, then {formatPrice(goldPlan.price)}/month
+              7-day free gold trial, then {formatPrice(goldPlan.price)}/month
             </p>
 
           </div>
