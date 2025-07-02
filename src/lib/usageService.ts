@@ -134,76 +134,8 @@ export async function checkDailyUsage(userId: string, planType: 'free' | 'gold' 
  * This function also checks the limit before recording to prevent race conditions
  */
 export async function recordQuestionAsked(userId: string, planType: 'free' | 'gold' | 'diamond'): Promise<UsageResult> {
-  try {
-    if (!supabase) {
-      return {
-        success: false,
-        error: 'Database connection not available'
-      };
-    }
-
-    if (!userId) {
-      return {
-        success: false,
-        error: 'User ID is required'
-      };
-    }
-
-    const today = getTodayDate();
-    const limit = getDailyLimit(planType);
-
-    // Use upsert with a conditional check to prevent exceeding limits
-    // This is atomic and prevents race conditions
-    const { data, error } = await supabase
-      .rpc('increment_daily_usage', {
-        p_user_id: userId,
-        p_date: today,
-        p_plan_type: planType,
-        p_limit: limit
-      });
-
-    if (error) {
-      console.error('Error recording question:', error);
-      
-      // If the RPC doesn't exist, fall back to the original logic
-      if (error.code === '42883') {
-        return await recordQuestionAskedFallback(userId, planType);
-      }
-      
-      return {
-        success: false,
-        error: error.message || 'Failed to record question'
-      };
-    }
-
-    if (!data || data.length === 0) {
-      return {
-        success: false,
-        error: 'Daily limit exceeded'
-      };
-    }
-
-    const usage = data[0];
-    return {
-      success: true,
-      usage: {
-        id: usage.id,
-        user_id: usage.user_id,
-        date: usage.date,
-        questions_asked: usage.questions_asked,
-        plan_type: usage.plan_type,
-        created_at: usage.created_at,
-        updated_at: usage.updated_at
-      }
-    };
-
-  } catch (error) {
-    console.error('Unexpected error recording question:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'An unexpected error occurred'
-    };
-  }
+  // Use the fallback method directly for better compatibility
+  return await recordQuestionAskedFallback(userId, planType);
 }
 
 /**

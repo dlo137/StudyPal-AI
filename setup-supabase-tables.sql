@@ -147,8 +147,27 @@ RETURNS TABLE(
   updated_at TIMESTAMP WITH TIME ZONE
 ) 
 AS $$
+DECLARE
+  current_count INTEGER;
+  updated_record RECORD;
 BEGIN
-  -- Try to insert new record or update existing one atomically
+  -- First, check current usage
+  SELECT COALESCE(du.questions_asked, 0) INTO current_count
+  FROM daily_usage du
+  WHERE du.user_id = p_user_id AND du.date = p_date;
+  
+  -- If current count is NULL (no record exists), set to 0
+  IF current_count IS NULL THEN
+    current_count := 0;
+  END IF;
+  
+  -- Check if adding one more question would exceed limit
+  IF current_count >= p_limit THEN
+    -- Return empty result set if limit exceeded
+    RETURN;
+  END IF;
+  
+  -- Insert or update the record
   INSERT INTO daily_usage (user_id, date, questions_asked, plan_type, created_at, updated_at)
   VALUES (p_user_id, p_date, 1, p_plan_type, NOW(), NOW())
   ON CONFLICT (user_id, date) 
@@ -156,15 +175,13 @@ BEGIN
     questions_asked = daily_usage.questions_asked + 1,
     plan_type = p_plan_type,
     updated_at = NOW()
-  WHERE daily_usage.questions_asked < p_limit;
-
-  -- Return the updated record only if the update was successful
+  RETURNING * INTO updated_record;
+  
+  -- Return the updated record
   RETURN QUERY
-  SELECT du.id, du.user_id, du.date, du.questions_asked, du.plan_type, du.created_at, du.updated_at
-  FROM daily_usage du
-  WHERE du.user_id = p_user_id 
-    AND du.date = p_date 
-    AND du.questions_asked <= p_limit;
+  SELECT updated_record.id, updated_record.user_id, updated_record.date, 
+         updated_record.questions_asked, updated_record.plan_type, 
+         updated_record.created_at, updated_record.updated_at;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
