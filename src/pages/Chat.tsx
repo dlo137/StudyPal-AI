@@ -106,6 +106,38 @@ export function ChatInterface() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Typewriter effect for AI responses
+  const typewriterEffect = async (fullText: string) => {
+    // Add empty message first
+    const emptyMessage: ChatMessage = { role: 'assistant', content: '' };
+    setMsgs(prev => [...prev, emptyMessage]);
+    
+    let currentText = '';
+    
+    for (let i = 0; i < fullText.length; i++) {
+      currentText += fullText[i];
+      
+      setMsgs(prev => {
+        const newMessages = [...prev];
+        const lastMessageIndex = newMessages.length - 1;
+        if (newMessages[lastMessageIndex] && newMessages[lastMessageIndex].role === 'assistant') {
+          newMessages[lastMessageIndex] = { ...newMessages[lastMessageIndex], content: currentText };
+        }
+        return newMessages;
+      });
+      
+      // Variable delay: faster for spaces, slower for punctuation (very fast)
+      const char = fullText[i];
+      let delay = 10; // Base delay (very fast)
+      
+      if (char === ' ') delay = 5; // Very fast for spaces
+      else if (['.', '!', '?'].includes(char)) delay = 50; // Pause for sentence endings
+      else if ([',', ';', ':'].includes(char)) delay = 25; // Brief pause for punctuation
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  };
+
   async function sendMessage() {
     const text = input.trim();
     if (!text) return;
@@ -245,8 +277,8 @@ export function ChatInterface() {
         await new Promise(resolve => setTimeout(resolve, minDelay - elapsedTime));
       }
       
-      const aiMessage: ChatMessage = { role: 'assistant', content: aiResponse };
-      setMsgs(m => [...m, aiMessage]);
+      // Use typewriter effect for AI response
+      await typewriterEffect(aiResponse);
     } catch (error) {
       console.error('❌ Chat Error:', {
         error,
@@ -328,7 +360,12 @@ export function ChatInterface() {
     };
 
     // Add both messages to the conversation
-    setMsgs([systemMessage, welcomeMessage]);
+    setMsgs([systemMessage]);
+    
+    // Use typewriter effect for the welcome message
+    setTimeout(async () => {
+      await typewriterEffect(welcomeMessage.content);
+    }, 100);
   }
 
   /* ── render ─────────────────────────────────────────────────────── */
