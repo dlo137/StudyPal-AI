@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SendIcon, User } from 'lucide-react';
+import { SendIcon, User, Camera, Upload, Paperclip } from 'lucide-react';
 import studyPalIcon from '../assets/studypal-icon.png';
 import { SparklesIcon, ZapIcon, CrownIcon } from 'lucide-react';
 import { XIcon } from 'lucide-react';
@@ -20,7 +20,16 @@ export function ChatInterface() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userPlan, setUserPlan] = useState<'free' | 'gold' | 'diamond'>('free');
   const [dailyUsage, setDailyUsage] = useState({ questionsAsked: 0, limit: 5, remaining: 5 });
+  const [showWelcomeImageOptions, setShowWelcomeImageOptions] = useState(false);
+  const [showChatImageOptions, setShowChatImageOptions] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const welcomeImageOptionsRef = useRef<HTMLDivElement | null>(null);
+  const chatImageOptionsRef = useRef<HTMLDivElement | null>(null);
+  const welcomeFileInputRef = useRef<HTMLInputElement | null>(null);
+  const welcomeCameraInputRef = useRef<HTMLInputElement | null>(null);
+  const chatFileInputRef = useRef<HTMLInputElement | null>(null);
+  const chatCameraInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const { user, signOut } = useAuthContext();
   const { isDarkMode } = useTheme();
@@ -56,6 +65,24 @@ export function ChatInterface() {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [menuOpen]);
+
+  // Close image options when clicking outside
+  useEffect(() => {
+    if (!showWelcomeImageOptions && !showChatImageOptions) return;
+    function handleClick(e: MouseEvent) {
+      const welcomeElement = welcomeImageOptionsRef.current;
+      const chatElement = chatImageOptionsRef.current;
+      
+      if (showWelcomeImageOptions && welcomeElement && !welcomeElement.contains(e.target as Node)) {
+        setShowWelcomeImageOptions(false);
+      }
+      if (showChatImageOptions && chatElement && !chatElement.contains(e.target as Node)) {
+        setShowChatImageOptions(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showWelcomeImageOptions, showChatImageOptions]);
 
   // Fetch user plan and daily usage
   useEffect(() => {
@@ -106,6 +133,28 @@ export function ChatInterface() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Helper function to extract text from message content
+  function getMessageText(content: string | Array<{type: 'text' | 'image_url'; text?: string; image_url?: {url: string}}>): string {
+    if (typeof content === 'string') {
+      return content;
+    }
+    // For array content, find text parts and join them
+    return content
+      .filter(part => part.type === 'text' && part.text)
+      .map(part => part.text)
+      .join(' ');
+  }
+
+  // Helper function to get images from message content
+  function getMessageImages(content: string | Array<{type: 'text' | 'image_url'; text?: string; image_url?: {url: string}}>): string[] {
+    if (typeof content === 'string') {
+      return [];
+    }
+    return content
+      .filter(part => part.type === 'image_url' && part.image_url?.url)
+      .map(part => part.image_url!.url);
+  }
+
   // Typewriter effect for AI responses
   const typewriterEffect = async (fullText: string) => {
     // Add empty message first
@@ -140,7 +189,7 @@ export function ChatInterface() {
 
   async function sendMessage() {
     const text = input.trim();
-    if (!text) return;
+    if (!text && !uploadedImage) return;
 
     // Handle usage limits for both authenticated and anonymous users
     if (user?.id) {
@@ -229,6 +278,7 @@ export function ChatInterface() {
 
     console.log('💬 Sending message:', {
       messageText: text,
+      hasImage: !!uploadedImage,
       timestamp: new Date().toISOString(),
       userPlan: userPlan,
       currentUsage: dailyUsage,
@@ -250,9 +300,38 @@ export function ChatInterface() {
       return;
     }
 
-    const userMessage: ChatMessage = { role: 'user', content: text };
+    // Create user message with image support
+    let userMessage: ChatMessage;
+    
+    if (uploadedImage && text) {
+      // Both text and image
+      userMessage = {
+        role: 'user',
+        content: [
+          { type: 'text', text: text },
+          { type: 'image_url', image_url: { url: uploadedImage } }
+        ]
+      };
+    } else if (uploadedImage) {
+      // Only image
+      userMessage = {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Please analyze this homework image and help me solve it.' },
+          { type: 'image_url', image_url: { url: uploadedImage } }
+        ]
+      };
+    } else {
+      // Only text
+      userMessage = {
+        role: 'user',
+        content: text
+      };
+    }
+
     setMsgs(m => [...m, userMessage]);
     setInput('');
+    setUploadedImage(null); // Clear the uploaded image after sending
     setIsLoading(true);
 
     // Record start time for minimum delay
@@ -261,8 +340,41 @@ export function ChatInterface() {
     try {
       console.log('🚀 Calling OpenAI API...');
       
+      // Prepare messages for AI - add general system message if no system message exists
+      const messagesToSend = [...messages, userMessage];
+      const hasSystemMessage = messagesToSend.some(msg => msg.role === 'system');
+      
+      if (!hasSystemMessage) {
+        // Add general system message for structured responses
+        const generalSystemMessage: ChatMessage = {
+          role: 'system',
+          content: `You are StudyPal, a helpful AI tutor. When answering questions or solving problems, structure your responses with clear sections:
+
+**🤔 Understanding the Problem:**
+- Identify what the question is asking
+- Note any given information or constraints
+
+**📝 Step-by-Step Solution:**
+- Break down the solution into numbered steps
+- Show all work and calculations
+- Explain the reasoning behind each step
+
+**✅ Final Answer:**
+- Clearly state the final answer
+- Include units if applicable
+- Verify the answer makes sense
+
+**💡 Key Concepts:**
+- Explain the main concepts used
+- Provide tips for similar problems
+
+When analyzing homework images, first describe what you see in the image, then follow the same structured format. Provide clear, educational explanations that help students learn.`
+        };
+        messagesToSend.unshift(generalSystemMessage);
+      }
+      
       // Send message to AI
-      const aiResponse = await sendMessageToAI([...messages, userMessage]);
+      const aiResponse = await sendMessageToAI(messagesToSend);
       
       console.log('✅ Received OpenAI response:', {
         responseLength: aiResponse?.length || 0,
@@ -330,12 +442,82 @@ export function ChatInterface() {
     navigate('/premium');
   }
 
+  // Handle image upload
+  function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setUploadedImage(result);
+        // Don't add text to input anymore - the image will be sent directly
+      };
+      reader.readAsDataURL(file);
+    }
+    setShowWelcomeImageOptions(false);
+    setShowChatImageOptions(false);
+  }
+
+  // Handle camera capture for welcome screen
+  function handleWelcomeCameraCapture() {
+    if (welcomeCameraInputRef.current) {
+      welcomeCameraInputRef.current.click();
+    }
+  }
+
+  // Handle file upload for welcome screen
+  function handleWelcomeFileUpload() {
+    if (welcomeFileInputRef.current) {
+      welcomeFileInputRef.current.click();
+    }
+  }
+
+  // Handle camera capture for chat screen
+  function handleChatCameraCapture() {
+    if (chatCameraInputRef.current) {
+      chatCameraInputRef.current.click();
+    }
+  }
+
+  // Handle file upload for chat screen
+  function handleChatFileUpload() {
+    if (chatFileInputRef.current) {
+      chatFileInputRef.current.click();
+    }
+  }
+
+  // Remove uploaded image
+  function removeUploadedImage() {
+    setUploadedImage(null);
+    // No need to remove text from input anymore
+  }
+
   // Handle subject button clicks
   function handleSubjectClick(subject: string) {
     // Create system message for the AI (won't be shown to user)
     const systemMessage: ChatMessage = {
       role: 'system',
-      content: `You are a helpful and knowledgeable AI tutor specialized in ${subject}. Answer questions clearly, accurately, and in a way that's easy for a student to understand. Offer step-by-step explanations when necessary, and use examples to make complex ideas simpler. Stay on topic within ${subject}, unless the user asks to switch topics.`
+      content: `You are a helpful and knowledgeable AI tutor specialized in ${subject}. When answering questions or solving problems, structure your responses with clear sections:
+
+**🤔 Understanding the Problem:**
+- Identify what the question is asking
+- Note any given information or constraints
+
+**📝 Step-by-Step Solution:**
+- Break down the solution into numbered steps
+- Show all work and calculations
+- Explain the reasoning behind each step
+
+**✅ Final Answer:**
+- Clearly state the final answer
+- Include units if applicable
+- Verify the answer makes sense
+
+**💡 Key Concepts:**
+- Explain the main concepts used
+- Provide tips for similar problems
+
+When analyzing homework images, first describe what you see in the image, then follow the same structured format. Stay on topic within ${subject}, unless the user asks to switch topics.`
     };
 
     // Create subject-specific welcome messages
@@ -364,7 +546,7 @@ export function ChatInterface() {
     
     // Use typewriter effect for the welcome message
     setTimeout(async () => {
-      await typewriterEffect(welcomeMessage.content);
+      await typewriterEffect(getMessageText(welcomeMessage.content));
     }, 100);
   }
 
@@ -547,18 +729,90 @@ export function ChatInterface() {
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     type="text"
-                    placeholder="Type a question"
+                    placeholder="Type a question or upload homework"
                     className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0`}
                   />
+                  
+                  {/* Image upload section */}
+                  <div className="relative ml-2" ref={welcomeImageOptionsRef}>
+                    <button
+                      type="button"
+                      onClick={() => setShowWelcomeImageOptions(!showWelcomeImageOptions)}
+                      className={`p-2 rounded-full ${theme.bgHover} transition-colors cursor-pointer`}
+                      title="Upload homework image"
+                    >
+                      <Paperclip size={18} className={theme.textSecondary} />
+                    </button>
+                    
+                    {showWelcomeImageOptions && (
+                      <div className={`absolute bottom-full right-0 mb-2 ${theme.bgSecondary} border ${theme.borderPrimary} rounded-lg shadow-lg z-50 min-w-[150px]`}>
+                        <button
+                          type="button"
+                          onClick={handleWelcomeCameraCapture}
+                          className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${theme.textPrimary} ${theme.bgHoverSecondary} rounded-t-lg transition-colors cursor-pointer`}
+                        >
+                          <Camera size={16} />
+                          Take Photo
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleWelcomeFileUpload}
+                          className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${theme.textPrimary} ${theme.bgHoverSecondary} rounded-b-lg transition-colors cursor-pointer`}
+                        >
+                          <Upload size={16} />
+                          Upload File
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Hidden file inputs */}
+                    <input
+                      ref={welcomeCameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <input
+                      ref={welcomeFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </div>
+
                   <button
                     type="submit"
                     className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed" 
-                    disabled={!input.trim() || isLoading || dailyUsage.remaining <= 0}
+                    disabled={(!input.trim() && !uploadedImage) || isLoading || dailyUsage.remaining <= 0}
                     title={dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : undefined}
                   >
                     <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
                   </button>
                 </div>
+                
+                {/* Show uploaded image preview */}
+                {uploadedImage && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <div className="relative">
+                      <img 
+                        src={uploadedImage} 
+                        alt="Uploaded homework" 
+                        className="w-16 h-16 object-cover rounded-lg border-2 border-blue-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeUploadedImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <span className={`text-sm ${theme.textSecondary}`}>Image ready to send</span>
+                  </div>
+                )}
               </form>
             </div>
           </div>
@@ -566,18 +820,37 @@ export function ChatInterface() {
           /* CHAT MESSAGES WITH BOTTOM INPUT */
           <>
             <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 space-y-3 sm:space-y-4 min-h-0">
-              {messages.filter(m => m.role !== 'system').map((m, i) => (
-                <div
-                  key={i}
-                  className={`max-w-[85%] sm:max-w-lg whitespace-pre-wrap leading-relaxed text-base ${
-                    m.role === 'user'
-                      ? `ml-auto ${theme.bgTertiary} rounded-2xl px-4 py-2.5`
-                      : 'mr-auto bg-[#3b87f6] rounded-2xl px-4 py-2.5'
-                  }`}
-                >
-                  {m.content}
-                </div>
-              ))}
+              {messages.filter(m => m.role !== 'system').map((m, i) => {
+                const messageText = getMessageText(m.content);
+                const messageImages = getMessageImages(m.content);
+                
+                return (
+                  <div
+                    key={i}
+                    className={`max-w-[85%] sm:max-w-lg whitespace-pre-wrap leading-relaxed text-base ${
+                      m.role === 'user'
+                        ? `ml-auto ${theme.bgTertiary} rounded-2xl px-4 py-2.5`
+                        : 'mr-auto bg-[#3b87f6] rounded-2xl px-4 py-2.5'
+                    }`}
+                  >
+                    {/* Render images if present */}
+                    {messageImages.length > 0 && (
+                      <div className="mb-2">
+                        {messageImages.map((imageUrl, imgIndex) => (
+                          <img 
+                            key={imgIndex}
+                            src={imageUrl} 
+                            alt="Homework" 
+                            className="max-w-full h-auto rounded-lg border-2 border-blue-300 mb-2"
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {/* Render text content */}
+                    {messageText}
+                  </div>
+                );
+              })}
               {/* Show "Thinking..." when loading */}
               {isLoading && (
                 <div className="mr-auto max-w-[85%] sm:max-w-lg px-4 py-2.5">
@@ -609,18 +882,90 @@ export function ChatInterface() {
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     type="text"
-                    placeholder="Type a question"
+                    placeholder="Type a question or upload homework"
                     className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0`}
                   />
+                  
+                  {/* Image upload section */}
+                  <div className="relative ml-2" ref={chatImageOptionsRef}>
+                    <button
+                      type="button"
+                      onClick={() => setShowChatImageOptions(!showChatImageOptions)}
+                      className={`p-2 rounded-full ${theme.bgHover} transition-colors cursor-pointer`}
+                      title="Upload homework image"
+                    >
+                      <Paperclip size={18} className={theme.textSecondary} />
+                    </button>
+                    
+                    {showChatImageOptions && (
+                      <div className={`absolute bottom-full right-0 mb-2 ${theme.bgSecondary} border ${theme.borderPrimary} rounded-lg shadow-lg z-50 min-w-[150px]`}>
+                        <button
+                          type="button"
+                          onClick={handleChatCameraCapture}
+                          className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${theme.textPrimary} ${theme.bgHoverSecondary} rounded-t-lg transition-colors cursor-pointer`}
+                        >
+                          <Camera size={16} />
+                          Take Photo
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleChatFileUpload}
+                          className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${theme.textPrimary} ${theme.bgHoverSecondary} rounded-b-lg transition-colors cursor-pointer`}
+                        >
+                          <Upload size={16} />
+                          Upload File
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Hidden file inputs for chat */}
+                    <input
+                      ref={chatCameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <input
+                      ref={chatFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </div>
+
                   <button
                     type="submit"
                     className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed"
-                    disabled={!input.trim() || isLoading || dailyUsage.remaining <= 0}
+                    disabled={(!input.trim() && !uploadedImage) || isLoading || dailyUsage.remaining <= 0}
                     title={dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : undefined}
                   >
                     <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
                   </button>
                 </div>
+                
+                {/* Show uploaded image preview */}
+                {uploadedImage && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <div className="relative">
+                      <img 
+                        src={uploadedImage} 
+                        alt="Uploaded homework" 
+                        className="w-16 h-16 object-cover rounded-lg border-2 border-blue-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeUploadedImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <span className={`text-sm ${theme.textSecondary}`}>Image ready to send</span>
+                  </div>
+                )}
               </form>
             </div>
           </>

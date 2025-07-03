@@ -40,7 +40,13 @@ console.log('🤖 OpenAI Client:', {
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
-  content: string;
+  content: string | Array<{
+    type: 'text' | 'image_url';
+    text?: string;
+    image_url?: {
+      url: string;
+    };
+  }>;
 }
 
 export async function sendMessageToOpenAI(messages: ChatMessage[]): Promise<string> {
@@ -83,18 +89,29 @@ Be friendly, encouraging, and educational in your responses. Keep answers concis
     const chatMessages = [systemMessage, ...messages].map(msg => ({
       role: msg.role,
       content: msg.content
-    }));
+    } as any)); // Use 'as any' to bypass TypeScript strict checking for OpenAI format
+
+    // Check if any messages contain images
+    const hasImages = messages.some(msg => 
+      Array.isArray(msg.content) && 
+      msg.content.some(part => part.type === 'image_url')
+    );
+
+    // Use GPT-4 Vision if images are present, otherwise use GPT-3.5-turbo
+    const model = hasImages ? 'gpt-4o' : 'gpt-3.5-turbo';
 
     console.log('📝 Prepared messages for OpenAI:', {
       totalMessages: chatMessages.length,
       userMessages: messages.filter(m => m.role === 'user').length,
-      assistantMessages: messages.filter(m => m.role === 'assistant').length
+      assistantMessages: messages.filter(m => m.role === 'assistant').length,
+      hasImages,
+      model
     });
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo', // You can change to 'gpt-4' if you have access
+      model: model,
       messages: chatMessages,
-      max_tokens: 500, // Adjust based on your needs
+      max_tokens: hasImages ? 1000 : 500, // More tokens for image analysis
       temperature: 0.7, // Controls creativity (0-1)
       stream: false
     });
