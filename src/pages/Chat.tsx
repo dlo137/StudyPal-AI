@@ -23,6 +23,8 @@ export function ChatInterface() {
   const [showWelcomeImageOptions, setShowWelcomeImageOptions] = useState(false);
   const [showChatImageOptions, setShowChatImageOptions] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const welcomeImageOptionsRef = useRef<HTMLDivElement | null>(null);
   const chatImageOptionsRef = useRef<HTMLDivElement | null>(null);
@@ -30,6 +32,8 @@ export function ChatInterface() {
   const welcomeCameraInputRef = useRef<HTMLInputElement | null>(null);
   const chatFileInputRef = useRef<HTMLInputElement | null>(null);
   const chatCameraInputRef = useRef<HTMLInputElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const navigate = useNavigate();
   const { user, signOut } = useAuthContext();
   const { isDarkMode } = useTheme();
@@ -177,11 +181,11 @@ export function ChatInterface() {
       
       // Variable delay: faster for spaces, slower for punctuation (very fast)
       const char = fullText[i];
-      let delay = 10; // Base delay (very fast)
+      let delay = 3; // Base delay (very fast)
       
-      if (char === ' ') delay = 5; // Very fast for spaces
-      else if (['.', '!', '?'].includes(char)) delay = 50; // Pause for sentence endings
-      else if ([',', ';', ':'].includes(char)) delay = 25; // Brief pause for punctuation
+      if (char === ' ') delay = 1; // Very fast for spaces
+      else if (['.', '!', '?'].includes(char)) delay = 15; // Pause for sentence endings
+      else if ([',', ';', ':'].includes(char)) delay = 8; // Brief pause for punctuation
       
       await new Promise(resolve => setTimeout(resolve, delay));
     }
@@ -208,8 +212,8 @@ export function ChatInterface() {
         const limitMessage: ChatMessage = { 
           role: 'assistant', 
           content: `⚠️ Daily limit reached! You've used all ${usageCheck.limit} questions for today. ${
-            userPlan === 'free' ? 'Upgrade to Gold (10 questions) or Diamond (15 questions) for more daily questions!' : 
-            userPlan === 'gold' ? 'Upgrade to Diamond (15 questions) for more daily questions!' :
+            userPlan === 'free' ? 'Upgrade to Gold (50 questions) or Diamond (150 questions) for more daily questions!' : 
+            userPlan === 'gold' ? 'Upgrade to Diamond (150 questions) for more daily questions!' :
             'Your limit will reset tomorrow.'
           }`
         };
@@ -247,7 +251,7 @@ export function ChatInterface() {
       if (!canAskQuestion()) {
         const limitMessage: ChatMessage = { 
           role: 'assistant', 
-          content: `⚠️ Daily limit reached! You've used all 5 questions for today. Sign up for a free account to continue using StudyPal, or upgrade to Gold (10 questions) or Diamond (15 questions) for more daily questions!`
+          content: `⚠️ Daily limit reached! You've used all 5 questions for today. Sign up for a free account to continue using StudyPal, or upgrade to Gold (50 questions) or Diamond (150 questions) for more daily questions!`
         };
         setMsgs(m => [...m, limitMessage]);
         return;
@@ -389,8 +393,17 @@ When analyzing homework images, first describe what you see in the image, then f
         await new Promise(resolve => setTimeout(resolve, minDelay - elapsedTime));
       }
       
-      // Use typewriter effect for AI response
-      await typewriterEffect(aiResponse);
+      // Check if response is longer than 50 words to decide on typewriter effect
+      const wordCount = aiResponse.trim().split(/\s+/).length;
+      
+      if (wordCount > 50) {
+        // For long responses (>50 words), display instantly without typewriter effect
+        const instantMessage: ChatMessage = { role: 'assistant', content: aiResponse };
+        setMsgs(m => [...m, instantMessage]);
+      } else {
+        // For shorter responses (≤50 words), use typewriter effect
+        await typewriterEffect(aiResponse);
+      }
     } catch (error) {
       console.error('❌ Chat Error:', {
         error,
@@ -420,7 +433,7 @@ When analyzing homework images, first describe what you see in the image, then f
     }
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -459,9 +472,27 @@ When analyzing homework images, first describe what you see in the image, then f
   }
 
   // Handle camera capture for welcome screen
-  function handleWelcomeCameraCapture() {
-    if (welcomeCameraInputRef.current) {
-      welcomeCameraInputRef.current.click();
+  async function handleWelcomeCameraCapture() {
+    setShowWelcomeImageOptions(false);
+    setShowCameraModal(true);
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      });
+      setCameraStream(stream);
+      
+      // Set video source
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.error('Camera access failed:', error);
+      setShowCameraModal(false);
+      // Fallback to file input
+      if (welcomeCameraInputRef.current) {
+        welcomeCameraInputRef.current.click();
+      }
     }
   }
 
@@ -473,9 +504,27 @@ When analyzing homework images, first describe what you see in the image, then f
   }
 
   // Handle camera capture for chat screen
-  function handleChatCameraCapture() {
-    if (chatCameraInputRef.current) {
-      chatCameraInputRef.current.click();
+  async function handleChatCameraCapture() {
+    setShowChatImageOptions(false);
+    setShowCameraModal(true);
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      });
+      setCameraStream(stream);
+      
+      // Set video source
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.error('Camera access failed:', error);
+      setShowCameraModal(false);
+      // Fallback to file input
+      if (chatCameraInputRef.current) {
+        chatCameraInputRef.current.click();
+      }
     }
   }
 
@@ -483,6 +532,41 @@ When analyzing homework images, first describe what you see in the image, then f
   function handleChatFileUpload() {
     if (chatFileInputRef.current) {
       chatFileInputRef.current.click();
+    }
+  }
+
+  // Capture photo from camera
+  function capturePhoto() {
+    if (videoRef.current && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(video, 0, 0);
+      
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const result = e.target?.result as string;
+            setUploadedImage(result);
+            closeCameraModal();
+          };
+          reader.readAsDataURL(blob);
+        }
+      }, 'image/jpeg', 0.8);
+    }
+  }
+
+  // Close camera modal
+  function closeCameraModal() {
+    setShowCameraModal(false);
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
     }
   }
 
@@ -548,6 +632,16 @@ When analyzing homework images, first describe what you see in the image, then f
     setTimeout(async () => {
       await typewriterEffect(getMessageText(welcomeMessage.content));
     }, 100);
+  }
+
+  // Auto-resize textarea based on content
+  function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setInput(e.target.value);
+    
+    // Auto-resize textarea
+    const textarea = e.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 128) + 'px'; // max-h-32 = 128px
   }
 
   /* ── render ─────────────────────────────────────────────────────── */
@@ -723,14 +817,14 @@ When analyzing homework images, first describe what you see in the image, then f
                 }}
                 className="w-full"
               >
-                <div className={`flex items-center ${theme.bgSecondary} rounded-full px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg`}>
-                  <input
+                <div className={`flex items-center ${theme.bgSecondary} rounded-2xl px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg`}>
+                  <textarea
                     value={input}
-                    onChange={e => setInput(e.target.value)}
+                    onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
-                    type="text"
                     placeholder="Type a question or upload homework"
-                    className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0`}
+                    className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0 resize-none min-h-[1.5rem] max-h-32 overflow-y-auto leading-6 py-0`}
+                    rows={1}
                   />
                   
                   {/* Image upload section */}
@@ -827,7 +921,7 @@ When analyzing homework images, first describe what you see in the image, then f
                 return (
                   <div
                     key={i}
-                    className={`max-w-[85%] sm:max-w-lg whitespace-pre-wrap leading-relaxed text-base ${
+                    className={`max-w-[90%] sm:max-w-2xl break-words whitespace-pre-wrap leading-relaxed text-base ${
                       m.role === 'user'
                         ? `ml-auto ${theme.bgTertiary} rounded-2xl px-4 py-2.5`
                         : 'mr-auto bg-[#3b87f6] rounded-2xl px-4 py-2.5'
@@ -853,7 +947,7 @@ When analyzing homework images, first describe what you see in the image, then f
               })}
               {/* Show "Thinking..." when loading */}
               {isLoading && (
-                <div className="mr-auto max-w-[85%] sm:max-w-lg px-4 py-2.5">
+                <div className="mr-auto max-w-[90%] sm:max-w-2xl px-4 py-2.5">
                   <div className={`flex items-center gap-2 ${theme.textSecondary} italic text-sm`}>
                     <span>Thinking</span>
                     <div className="flex gap-1">
@@ -876,14 +970,14 @@ When analyzing homework images, first describe what you see in the image, then f
                 }}
                 className="w-full max-w-4xl mx-auto"
               >
-                <div className={`flex items-center ${theme.bgSecondary} rounded-full px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg`}>
-                  <input
+                <div className={`flex items-center ${theme.bgSecondary} rounded-2xl px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg`}>
+                  <textarea
                     value={input}
-                    onChange={e => setInput(e.target.value)}
+                    onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
-                    type="text"
                     placeholder="Type a question or upload homework"
-                    className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0`}
+                    className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0 resize-none min-h-[1.5rem] max-h-32 overflow-y-auto leading-6 py-0`}
+                    rows={1}
                   />
                   
                   {/* Image upload section */}
@@ -1008,11 +1102,11 @@ When analyzing homework images, first describe what you see in the image, then f
                 <ul className="space-y-2 text-gray-300 flex-1">
                   <li className="flex items-center">
                     <div className="w-3 h-3 rounded-full bg-[#8C52FF] mr-2"></div>
-                    10 Requests/Daily
+                    5 Requests/Daily
                   </li>
                   <li className="flex items-center">
                     <div className="w-3 h-3 rounded-full bg-[#8C52FF] mr-2"></div>
-                    30 Requests/Monthly
+                    150 Requests/Monthly
                   </li>
                   <li className="flex items-center">
                     <div className="w-3 h-3 rounded-full bg-[#8C52FF] mr-2"></div>
@@ -1106,6 +1200,51 @@ When analyzing homework images, first describe what you see in the image, then f
           </div>
         </div>
       </div>
+
+      {/* CAMERA MODAL */}
+      {showCameraModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Take Photo</h3>
+              <button
+                onClick={closeCameraModal}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <XIcon size={24} />
+              </button>
+            </div>
+            
+            <div className="relative mb-4">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-64 object-cover rounded-lg bg-gray-200 dark:bg-gray-700"
+              />
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={capturePhoto}
+                className="flex-1 bg-[#4285F4] text-white px-4 py-2 rounded-lg hover:bg-[#3367d6] transition-colors"
+              >
+                📸 Capture Photo
+              </button>
+              <button
+                onClick={closeCameraModal}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-black dark:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+          
+          {/* Hidden canvas for image capture */}
+          <canvas ref={canvasRef} className="hidden" />
+        </div>
+      )}
     </div>
   );
 }

@@ -311,11 +311,11 @@ export function PremiumFeatures() {
               <ul className={`space-y-0.5 sm:space-y-1.5 md:space-y-2 ${themeClasses.textSecondary} flex-1 text-xs sm:text-xs md:text-sm`}>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>10 Requests/Daily</span>
+            <span>5 Requests/Daily</span>
           </li>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>30 Requests/Monthly</span>
+            <span>150 Requests/Monthly</span>
           </li>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
