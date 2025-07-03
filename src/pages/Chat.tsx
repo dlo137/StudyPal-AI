@@ -298,6 +298,39 @@ export function ChatInterface() {
     navigate('/premium');
   }
 
+  // Handle subject button clicks
+  function handleSubjectClick(subject: string) {
+    // Create system message for the AI (won't be shown to user)
+    const systemMessage: ChatMessage = {
+      role: 'system',
+      content: `You are a helpful and knowledgeable AI tutor specialized in ${subject}. Answer questions clearly, accurately, and in a way that's easy for a student to understand. Offer step-by-step explanations when necessary, and use examples to make complex ideas simpler. Stay on topic within ${subject}, unless the user asks to switch topics.`
+    };
+
+    // Create subject-specific welcome messages
+    const welcomeMessages: { [key: string]: string } = {
+      'Math': "Hello! I'm your Math tutor. Whether you need help with algebra, geometry, calculus, or any other math topic, I'm here to guide you through step-by-step solutions. What math problem can I help you solve today?",
+      'Science': "Hi there! I'm your Science tutor. I can help you explore the wonders of biology, chemistry, physics, and more. From basic concepts to complex theories, let's discover science together. What scientific topic interests you?",
+      'Literature': "Welcome! I'm your Literature tutor. I love discussing books, poems, writing techniques, and literary analysis. Whether it's Shakespeare, modern novels, or creative writing, I'm here to help. What literary work or concept would you like to explore?",
+      'Art': "Hello! I'm your Art tutor. I can help you understand art history, techniques, famous artists, and art movements. From Renaissance masters to modern art, let's explore creativity together. What aspect of art would you like to learn about?",
+      'Music': "Hi! I'm your Music tutor. Whether you're interested in music theory, composition, music history, or learning about instruments, I'm here to help. Let's make music education fun and engaging. What musical topic interests you?",
+      'History': "Greetings! I'm your History tutor. From ancient civilizations to modern events, I can help you understand historical contexts, analyze sources, and connect past events to today. What historical period or event would you like to explore?",
+      'Physics': "Hello! I'm your Physics tutor. I can help you understand everything from basic mechanics to quantum physics. Let's break down complex concepts into simple, understandable parts. What physics topic would you like to tackle?",
+      'Chemistry': "Hi there! I'm your Chemistry tutor. Whether it's balancing equations, understanding molecular structures, or exploring chemical reactions, I'm here to make chemistry clear and interesting. What chemistry concept can I help you with?",
+      'Biology': "Welcome! I'm your Biology tutor. From cells and genetics to ecosystems and evolution, I can help you understand the fascinating world of life sciences. What biological topic would you like to explore today?",
+      'Geography': "Hello! I'm your Geography tutor. I can help you understand physical geography, human geography, maps, climate, and cultures around the world. What geographic topic interests you?",
+      'Economics': "Hi! I'm your Economics tutor. Whether it's microeconomics, macroeconomics, market structures, or economic theories, I'm here to help you understand how economies work. What economic concept would you like to explore?"
+    };
+
+    // Create initial AI welcome message that will be shown to user
+    const welcomeMessage: ChatMessage = {
+      role: 'assistant',
+      content: welcomeMessages[subject] || `Hello! I'm your ${subject} tutor. I'm here to help you understand concepts, solve problems, and answer any questions you have about ${subject}. What would you like to learn about today?`
+    };
+
+    // Add both messages to the conversation
+    setMsgs([systemMessage, welcomeMessage]);
+  }
+
   /* ── render ─────────────────────────────────────────────────────── */
   return (
     <div className={`mobile-full-height w-full ${theme.bgPrimary} ${theme.textPrimary} flex flex-col`}>
@@ -422,41 +455,41 @@ export function ChatInterface() {
 
                 {/* Top row - 6 buttons on mobile, 5 on desktop */}
                 <div className="flex flex-wrap sm:flex-nowrap justify-center gap-1.5 sm:gap-2">
-                  <button className="bg-blue-300 hover:bg-blue-400 text-blue-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  <button onClick={() => handleSubjectClick('Math')} className="bg-blue-300 hover:bg-blue-400 text-blue-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.1s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Math
                   </button>
-                  <button className="bg-emerald-300 hover:bg-emerald-400 text-emerald-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  <button onClick={() => handleSubjectClick('Science')} className="bg-emerald-300 hover:bg-emerald-400 text-emerald-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.2s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Science
                   </button>
-                  <button className="bg-rose-300 hover:bg-rose-400 text-rose-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  <button onClick={() => handleSubjectClick('Literature')} className="bg-rose-300 hover:bg-rose-400 text-rose-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.3s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Literature
                   </button>
-                  <button className="bg-amber-300 hover:bg-amber-400 text-amber-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  <button onClick={() => handleSubjectClick('Art')} className="bg-amber-300 hover:bg-amber-400 text-amber-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.4s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Art
                   </button>
-                  <button className="bg-violet-300 hover:bg-violet-400 text-violet-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  <button onClick={() => handleSubjectClick('Music')} className="bg-violet-300 hover:bg-violet-400 text-violet-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.5s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Music
                   </button>
                 </div>
                 {/* Bottom row - 5 buttons on mobile, 6 on desktop */}
                 <div className="flex flex-wrap sm:flex-nowrap justify-center gap-1.5 sm:gap-2">
-                  <button className="bg-orange-300 hover:bg-orange-400 text-orange-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  <button onClick={() => handleSubjectClick('History')} className="bg-orange-300 hover:bg-orange-400 text-orange-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.6s_forwards] hover:scale-105 hover:shadow-lg transform">
                     History
                   </button>
-                  <button className="bg-cyan-300 hover:bg-cyan-400 text-cyan-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  <button onClick={() => handleSubjectClick('Physics')} className="bg-cyan-300 hover:bg-cyan-400 text-cyan-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.7s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Physics
                   </button>
-                  <button className="bg-lime-300 hover:bg-lime-400 text-lime-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  <button onClick={() => handleSubjectClick('Chemistry')} className="bg-lime-300 hover:bg-lime-400 text-lime-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.8s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Chemistry
                   </button>
-                  <button className="bg-pink-300 hover:bg-pink-400 text-pink-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  <button onClick={() => handleSubjectClick('Biology')} className="bg-pink-300 hover:bg-pink-400 text-pink-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.9s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Biology
                   </button>
-                  <button className="bg-teal-300 hover:bg-teal-400 text-teal-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs">
+                  <button onClick={() => handleSubjectClick('Geography')} className="bg-teal-300 hover:bg-teal-400 text-teal-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_1.0s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Geography
                   </button>
                   {/* Economics - hide on mobile, show on desktop */}
-                  <button className="bg-purple-300 hover:bg-purple-400 text-purple-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-colors cursor-pointer text-xs hidden sm:inline-flex">
+                  <button onClick={() => handleSubjectClick('Economics')} className="bg-purple-300 hover:bg-purple-400 text-purple-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_1.1s_forwards] hover:scale-105 hover:shadow-lg transform hidden sm:inline-flex">
                     Economics
                   </button>
                 </div>
@@ -496,7 +529,7 @@ export function ChatInterface() {
           /* CHAT MESSAGES WITH BOTTOM INPUT */
           <>
             <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 space-y-3 sm:space-y-4 min-h-0">
-              {messages.map((m, i) => (
+              {messages.filter(m => m.role !== 'system').map((m, i) => (
                 <div
                   key={i}
                   className={`max-w-[85%] sm:max-w-lg whitespace-pre-wrap leading-relaxed text-base ${
