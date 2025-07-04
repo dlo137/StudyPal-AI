@@ -1,4 +1,4 @@
-import { ZapIcon, CrownIcon, User } from 'lucide-react';
+import { ZapIcon, CrownIcon, User, StarIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { XIcon } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
@@ -302,24 +302,25 @@ export function PremiumFeatures() {
           <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6 mb-4 sm:mb-6 pt-2 items-stretch" >
             {/* Card 1 */}
             <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm flex flex-col relative`}>
-              <div className="bg-[#8C52FF] w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-1 sm:mb-2 md:mb-3">
-          <ZapIcon size={10} className="text-white sm:hidden" />
-          <ZapIcon size={16} className="text-white hidden sm:block md:hidden" />
-          <ZapIcon size={20} className="text-white hidden md:block" />
+              <div className="flex items-start justify-between mb-1 sm:mb-2 md:mb-3">
+                <div className="bg-[#8C52FF] w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl">
+                  <ZapIcon size={10} className="text-white sm:hidden" />
+                  <ZapIcon size={16} className="text-white hidden sm:block md:hidden" />
+                  <ZapIcon size={20} className="text-white hidden md:block" />
+                </div>
+                <div className="text-right">
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">Free Plan</p>
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">$0</p>
+                </div>
               </div>
-              <h3 className="text-xs sm:text-sm md:text-lg font-bold mb-1 sm:mb-2 md:mb-3">Free Plan</h3>
               <ul className={`space-y-0.5 sm:space-y-1.5 md:space-y-2 ${themeClasses.textSecondary} flex-1 text-xs sm:text-xs md:text-sm`}>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>5 Requests/Daily</span>
+            <span>10 Requests / Monthly</span>
           </li>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>150 Requests/Monthly</span>
-          </li>
-          <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>Free Forever</span>
+            <span>Free Usage</span>
           </li>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
@@ -341,31 +342,25 @@ export function PremiumFeatures() {
 
             {/* Card 2 - Gold Plan */}
             <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm flex flex-col relative`}>
-              <div className="bg-[#8C52FF] w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-1 sm:mb-2 md:mb-3">
-          <ZapIcon size={10} className="text-white sm:hidden" />
-          <ZapIcon size={16} className="text-white hidden sm:block md:hidden" />
-          <ZapIcon size={20} className="text-white hidden md:block" />
+              <div className="flex items-start justify-between mb-1 sm:mb-2 md:mb-3">
+                <div className="bg-[#8C52FF] w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl">
+                  <StarIcon size={10} className="text-white sm:hidden" />
+                  <StarIcon size={16} className="text-white hidden sm:block md:hidden" />
+                  <StarIcon size={20} className="text-white hidden md:block" />
+                </div>
+                <div className="text-right">
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">Gold Plan</p>
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">{formatPrice(goldPlan.price)}/mo</p>
+                </div>
               </div>
-              <h3 className="text-xs sm:text-sm md:text-lg font-bold mb-1 sm:mb-2 md:mb-3">Gold Plan</h3>
-              <p className="text-xs sm:text-sm md:text-base font-bold text-[#8C52FF] mb-1 sm:mb-2">
-                {formatPrice(goldPlan.price)}/month
-              </p>
               <ul className={`space-y-0.5 sm:space-y-1.5 md:space-y-2 ${themeClasses.textSecondary} flex-1 text-xs sm:text-xs md:text-sm`}>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>50 Requests/Daily</span>
-          </li>
-          <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>1.5K Requests/Monthly</span>
+            <span>150 Requests / Monthly</span>
           </li>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
             <span>Email Support</span>
-          </li>
-          <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>24/7 Available</span>
           </li>
               </ul>
               <button
@@ -383,33 +378,25 @@ export function PremiumFeatures() {
 
             {/* Card 3 */}
             <div className={`${isDarkMode ? 'bg-[#2a1052]/80' : 'bg-purple-50/80'} p-1.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl md:rounded-2xl border ${isDarkMode ? 'border-purple-500/30' : 'border-purple-200'} backdrop-blur-sm flex flex-col relative`}>
-              <div className="bg-[#8C52FF] w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl mb-1 sm:mb-2 md:mb-3">
-                <CrownIcon size={10} className="text-white sm:hidden" />
-                <CrownIcon size={16} className="text-white hidden sm:block md:hidden" />
-                <CrownIcon size={20} className="text-white hidden md:block" />
+              <div className="flex items-start justify-between mb-1 sm:mb-2 md:mb-3">
+                <div className="bg-[#8C52FF] w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl">
+                  <CrownIcon size={10} className="text-white sm:hidden" />
+                  <CrownIcon size={16} className="text-white hidden sm:block md:hidden" />
+                  <CrownIcon size={20} className="text-white hidden md:block" />
+                </div>
+                <div className="text-right">
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">Diamond Plan</p>
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">{formatPrice(diamondPlan.price)}/mo</p>
+                </div>
               </div>
-              <h3 className="text-xs sm:text-sm md:text-lg font-bold mb-1 sm:mb-2 md:mb-3">
-          Diamond Plan
-              </h3>
-              <p className="text-xs sm:text-sm md:text-base font-bold text-[#8C52FF] mb-1 sm:mb-2">
-                {formatPrice(diamondPlan.price)}/month
-              </p>
               <ul className={`space-y-0.5 sm:space-y-1.5 md:space-y-2 ${themeClasses.textSecondary} flex-1 text-xs sm:text-xs md:text-sm`}>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>150 Requests/Daily</span>
-          </li>
-          <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>4.5K Requests/Monthly</span>
+            <span>500 Requests / Monthly</span>
           </li>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
             <span>Email Support</span>
-          </li>
-          <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>Export History</span>
           </li>
               </ul>
               <button
