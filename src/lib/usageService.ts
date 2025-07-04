@@ -27,9 +27,9 @@ export function getDailyLimit(planType: 'free' | 'gold' | 'diamond'): number {
     case 'free':
       return 5;
     case 'gold':
-      return 50;
-    case 'diamond':
       return 150;
+    case 'diamond':
+      return 500;
     default:
       return 5;
   }

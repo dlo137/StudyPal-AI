@@ -120,10 +120,27 @@ export function UserProfile() {
           </span>
         </div>
         <h2 className="text-xl font-bold">
-          {user?.user_metadata?.firstName && user?.user_metadata?.lastName 
-            ? `${user.user_metadata.firstName} ${user.user_metadata.lastName}`
-            : user?.email?.split('@')[0] || 'User'
-          }
+          {(() => {
+            // If firstName exists in metadata, use it
+            if (user?.user_metadata?.firstName) {
+              return user.user_metadata.firstName;
+            }
+            
+            // Otherwise, try to extract a readable name from email
+            const email = user?.email;
+            if (email) {
+              const username = email.split('@')[0];
+              // Try to extract first name from username patterns like "dangelo.watson1212"
+              const parts = username.split('.');
+              if (parts.length > 0) {
+                // Capitalize first letter of the first part
+                const firstName = parts[0];
+                return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+              }
+            }
+            
+            return 'User';
+          })()}
         </h2>
         <p className={theme.textSecondary}>{user?.email || 'No email available'}</p>
         <div className={`mt-4 flex items-center ${theme.bgSecondary} px-4 py-2 rounded-full`}>

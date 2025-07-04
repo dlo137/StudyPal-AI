@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SendIcon, User, Camera, Upload, Paperclip } from 'lucide-react';
+import { SendIcon, User, Camera, Upload, Paperclip, Pause } from 'lucide-react';
 import studyPalIcon from '../assets/studypal-icon.png';
 import { SparklesIcon, ZapIcon, CrownIcon } from 'lucide-react';
 import { XIcon } from 'lucide-react';
@@ -17,6 +17,9 @@ export function ChatInterface() {
   const [input, setInput]   = useState('');
   const [messages, setMsgs] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAIResponding, setIsAIResponding] = useState(false);
+  const shouldStopAIRef = useRef(false);
+  const currentRequestIdRef = useRef<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [userPlan, setUserPlan] = useState<'free' | 'gold' | 'diamond'>('free');
   const [dailyUsage, setDailyUsage] = useState({ questionsAsked: 0, limit: 5, remaining: 5 });
@@ -296,6 +299,9 @@ export function ChatInterface() {
 
   // Typewriter effect for AI responses
   const typewriterEffect = async (fullText: string) => {
+    setIsAIResponding(true);
+    shouldStopAIRef.current = false;
+    
     // Add empty message first
     const emptyMessage: ChatMessage = { role: 'assistant', content: '' };
     setMsgs(prev => [...prev, emptyMessage]);
@@ -303,6 +309,20 @@ export function ChatInterface() {
     let currentText = '';
     
     for (let i = 0; i < fullText.length; i++) {
+      // Check if we should stop
+      if (shouldStopAIRef.current) {
+        // Show the full message immediately when stopped
+        setMsgs(prev => {
+          const newMessages = [...prev];
+          const lastMessageIndex = newMessages.length - 1;
+          if (newMessages[lastMessageIndex] && newMessages[lastMessageIndex].role === 'assistant') {
+            newMessages[lastMessageIndex] = { ...newMessages[lastMessageIndex], content: fullText };
+          }
+          return newMessages;
+        });
+        break;
+      }
+      
       currentText += fullText[i];
       
       setMsgs(prev => {
@@ -324,11 +344,18 @@ export function ChatInterface() {
       
       await new Promise(resolve => setTimeout(resolve, delay));
     }
+    
+    setIsAIResponding(false);
   };
 
   async function sendMessage() {
     const text = input.trim();
     if (!text && !uploadedImage) return;
+
+    // Reset the stop flag when starting a new message and generate unique request ID
+    shouldStopAIRef.current = false;
+    const requestId = `request_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    currentRequestIdRef.current = requestId;
 
     // Handle usage limits for both authenticated and anonymous users
     if (user?.id) {
@@ -347,8 +374,8 @@ export function ChatInterface() {
         const limitMessage: ChatMessage = { 
           role: 'assistant', 
           content: `⚠️ Daily limit reached! You've used all ${usageCheck.limit} questions for today. ${
-            userPlan === 'free' ? 'Upgrade to Gold (50 questions) or Diamond (150 questions) for more daily questions!' : 
-            userPlan === 'gold' ? 'Upgrade to Diamond (150 questions) for more daily questions!' :
+            userPlan === 'free' ? 'Upgrade to Gold (150 questions) or Diamond (500 questions) for more daily questions!' : 
+            userPlan === 'gold' ? 'Upgrade to Diamond (500 questions) for more daily questions!' :
             'Your limit will reset tomorrow.'
           }`
         };
@@ -386,7 +413,7 @@ export function ChatInterface() {
       if (!canAskQuestion()) {
         const limitMessage: ChatMessage = { 
           role: 'assistant', 
-          content: `⚠️ Daily limit reached! You've used all 5 questions for today. Sign up for a free account to continue using StudyPal, or upgrade to Gold (50 questions) or Diamond (150 questions) for more daily questions!`
+          content: `⚠️ Daily limit reached! You've used all 5 questions for today. Sign up for a free account to continue using StudyPal, or upgrade to Gold (150 questions) or Diamond (500 questions) for more daily questions!`
         };
         setMsgs(m => [...m, limitMessage]);
         return;
@@ -524,6 +551,18 @@ When analyzing homework images, first describe what you see in the image, then f
       // Send message to AI
       const aiResponse = await sendMessageToAI(messagesToSend);
       
+      // Check if this request is still valid (user hasn't stopped or started a new request)
+      if (currentRequestIdRef.current !== requestId) {
+        console.log('🛑 Request invalidated - user stopped or started new request');
+        return; // Exit early without displaying the response
+      }
+      
+      // Check if the user stopped the AI during thinking
+      if (shouldStopAIRef.current) {
+        console.log('🛑 AI stopped during thinking phase - not displaying response');
+        return; // Exit early without displaying the response
+      }
+      
       console.log('✅ Received OpenAI response:', {
         responseLength: aiResponse?.length || 0,
         timestamp: new Date().toISOString()
@@ -537,18 +576,44 @@ When analyzing homework images, first describe what you see in the image, then f
         await new Promise(resolve => setTimeout(resolve, minDelay - elapsedTime));
       }
       
+      // Check again if this request is still valid after the delay
+      if (currentRequestIdRef.current !== requestId) {
+        console.log('🛑 Request invalidated after delay - user stopped or started new request');
+        return; // Exit early without displaying the response
+      }
+      
+      // Check again if the user stopped the AI (in case they stopped during the delay)
+      if (shouldStopAIRef.current) {
+        console.log('🛑 AI stopped during delay - not displaying response');
+        return; // Exit early without displaying the response
+      }
+      
       // Check if response is longer than 50 words to decide on typewriter effect
       const wordCount = aiResponse.trim().split(/\s+/).length;
       
       if (wordCount > 50) {
         // For long responses (>50 words), display instantly without typewriter effect
+        setIsAIResponding(true);
         const instantMessage: ChatMessage = { role: 'assistant', content: aiResponse };
         setMsgs(m => [...m, instantMessage]);
+        setIsAIResponding(false);
       } else {
         // For shorter responses (≤50 words), use typewriter effect
         await typewriterEffect(aiResponse);
       }
     } catch (error) {
+      // Check if this request is still valid - don't show error if request was invalidated
+      if (currentRequestIdRef.current !== requestId) {
+        console.log('🛑 Request invalidated during error - not showing error');
+        return; // Exit early without showing error
+      }
+      
+      // Check if the user stopped the AI - don't show error if stopped intentionally
+      if (shouldStopAIRef.current) {
+        console.log('🛑 AI stopped during thinking - not showing error');
+        return; // Exit early without showing error
+      }
+      
       console.error('❌ Chat Error:', {
         error,
         timestamp: new Date().toISOString(),
@@ -565,6 +630,18 @@ When analyzing homework images, first describe what you see in the image, then f
         await new Promise(resolve => setTimeout(resolve, minDelay - elapsedTime));
       }
       
+      // Check again if this request is still valid after the error delay
+      if (currentRequestIdRef.current !== requestId) {
+        console.log('🛑 Request invalidated after error delay - not showing error');
+        return; // Exit early without showing error
+      }
+      
+      // Check again if the user stopped the AI during the delay
+      if (shouldStopAIRef.current) {
+        console.log('🛑 AI stopped during error delay - not showing error');
+        return; // Exit early without showing error
+      }
+      
       const errorMessage = error instanceof Error ? error.message : 'Something went wrong with the AI service. Please try again.';
       
       const errorResponse: ChatMessage = { 
@@ -574,13 +651,28 @@ When analyzing homework images, first describe what you see in the image, then f
       setMsgs(m => [...m, errorResponse]);
     } finally {
       setIsLoading(false);
+      setIsAIResponding(false);
     }
+  }
+
+  function stopAIResponse() {
+    shouldStopAIRef.current = true;
+    
+    // Invalidate the current request by clearing the request ID
+    currentRequestIdRef.current = null;
+    
+    setIsLoading(false);
+    setIsAIResponding(false);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      if (isLoading || isAIResponding) {
+        stopAIResponse();
+      } else {
+        sendMessage();
+      }
     }
   }
 
@@ -626,6 +718,10 @@ When analyzing homework images, first describe what you see in the image, then f
       };
       reader.readAsDataURL(file);
     }
+    
+    // Reset the input value to allow uploading the same file again
+    event.target.value = '';
+    
     setShowWelcomeImageOptions(false);
     setShowChatImageOptions(false);
   }
@@ -1074,11 +1170,25 @@ When analyzing homework images, first describe what you see in the image, then f
 
                     <button
                       type="submit"
+                      onClick={(e) => {
+                        if (isLoading || isAIResponding) {
+                          e.preventDefault();
+                          stopAIResponse();
+                        }
+                      }}
                       className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed" 
-                      disabled={(!input.trim() && !uploadedImage) || isLoading || dailyUsage.remaining <= 0}
-                      title={dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : undefined}
+                      disabled={(!input.trim() && !uploadedImage) && !(isLoading || isAIResponding) || dailyUsage.remaining <= 0}
+                      title={
+                        (isLoading || isAIResponding) ? "Stop AI response" :
+                        dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : 
+                        "Send message"
+                      }
                     >
-                      <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
+                      {(isLoading || isAIResponding) ? (
+                        <Pause size={18} className="text-white sm:w-5 sm:h-5" />
+                      ) : (
+                        <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -1249,11 +1359,25 @@ When analyzing homework images, first describe what you see in the image, then f
 
                   <button
                     type="submit"
+                    onClick={(e) => {
+                      if (isLoading || isAIResponding) {
+                        e.preventDefault();
+                        stopAIResponse();
+                      }
+                    }}
                     className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed"
-                    disabled={(!input.trim() && !uploadedImage) || isLoading || dailyUsage.remaining <= 0}
-                    title={dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : undefined}
+                    disabled={(!input.trim() && !uploadedImage) && !(isLoading || isAIResponding) || dailyUsage.remaining <= 0}
+                    title={
+                      (isLoading || isAIResponding) ? "Stop AI response" :
+                      dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : 
+                      "Send message"
+                    }
                   >
-                    <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
+                    {(isLoading || isAIResponding) ? (
+                      <Pause size={18} className="text-white sm:w-5 sm:h-5" />
+                    ) : (
+                      <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
+                    )}
                   </button>
                   </div>
                 </div>
