@@ -55,7 +55,7 @@ export function MissionStatement() {
     <div className={`flex flex-col min-h-screen ${theme.bgPrimary} ${theme.textPrimary}`}>
       {/* ── header ──────────────────────────────────────────── */}
       <div className={`flex items-center justify-between px-4 sm:px-6 py-3 border-b ${theme.borderPrimary} relative z-50`}>
-        <button onClick={() => navigate(-1)} className={`p-2 ${theme.bgHover} rounded-full`}>
+        <button onClick={() => navigate(-1)} className={`p-2 ${theme.bgHover} rounded-full cursor-pointer hover:opacity-80 transition-all`}>
           <XIcon size={24} />
         </button>
 
@@ -169,7 +169,7 @@ export function MissionStatement() {
             </p>
             <button 
               onClick={() => navigate('/')}
-              className="bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition"
+              className="bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition cursor-pointer hover:scale-105 transform"
             >
               Start Learning
             </button>

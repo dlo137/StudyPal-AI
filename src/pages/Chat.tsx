@@ -940,12 +940,14 @@ When analyzing homework images, first describe what you see in the image, then f
               }
             </div>
           )}
-          <button 
-            className="border border-[#4285F4] text-[#4285F4] bg-transparent px-3 py-1 rounded-full text-sm transition-all duration-200 cursor-pointer hover:bg-[#4285F4] hover:text-white"
-            onClick={handlePremium}
-          >
-            Upgrade
-          </button>
+          {userPlan !== 'diamond' && (
+            <button 
+              className="border border-[#4285F4] text-[#4285F4] bg-transparent px-3 py-1 rounded-full text-sm transition-all duration-200 cursor-pointer hover:bg-[#4285F4] hover:text-white"
+              onClick={handlePremium}
+            >
+              Upgrade
+            </button>
+          )}
           <div className="relative" ref={menuRef}>
             <div className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full cursor-pointer border-2 border-transparent hover:border-[#4285F4] transition ${theme.bgSecondary} flex items-center justify-center`}
                  onClick={() => setMenuOpen(v => !v)}>
@@ -983,14 +985,16 @@ When analyzing homework images, first describe what you see in the image, then f
                     Profile
                   </button>
                 )}
+                {userPlan !== 'diamond' && (
+                  <button 
+                    className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''}`}
+                    onClick={handlePremium}
+                  >
+                    Plans
+                  </button>
+                )}
                 <button 
-                  className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''}`}
-                  onClick={handlePremium}
-                >
-                  Plans
-                </button>
-                <button 
-                  className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-b-lg' : ''}`}
+                  className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''} ${!user && userPlan === 'diamond' ? 'rounded-b-lg' : ''}`}
                   onClick={() => { setMenuOpen(false); navigate('/'); }}
                 >
                   Chat

@@ -4,6 +4,7 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 
 // Load environment variables from .env.local file
 dotenv.config({ path: '.env.local' });
@@ -20,6 +21,15 @@ for (const envVar of requiredEnvVars) {
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil',
+});
+
+// Configure email transporter (using Gmail SMTP)
+const emailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER || 'studypalhelpdesk@gmail.com',
+    pass: process.env.EMAIL_APP_PASSWORD || '', // Will gracefully fail if empty
+  },
 });
 
 const app = express();
@@ -58,7 +68,7 @@ app.use(limiter);
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://yourdomain.com', 'https://www.yourdomain.com'] // Replace with your actual domain
-    : ['http://localhost:5173', 'http://localhost:3000'], // Dev origins
+    : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'], // Dev origins
   credentials: true,
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -73,6 +83,93 @@ app.use(express.json({ limit: '10mb' }));
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'StudyPal Payment Server is running' });
+});
+
+// Rate limiter for contact form
+const contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 contact form submissions per windowMs
+  message: 'Too many contact form submissions from this IP, please try again later.',
+});
+
+// Contact form endpoint
+app.post('/api/contact', contactLimiter, async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    // Input validation
+    if (!name || !email || !subject || !message) {
+      res.status(400).json({ 
+        error: 'All fields are required' 
+      });
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      res.status(400).json({ 
+        error: 'Invalid email address' 
+      });
+      return;
+    }
+
+    // Prepare email content
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'studypalhelpdesk@gmail.com',
+      to: 'studypalhelpdesk@gmail.com',
+      subject: `StudyPal Contact Form: ${subject}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #8C52FF;">New Contact Form Submission</h2>
+          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Subject:</strong> ${subject}</p>
+          </div>
+          <div style="background-color: #ffffff; padding: 20px; border-left: 4px solid #8C52FF; margin: 20px 0;">
+            <h3>Message:</h3>
+            <p style="white-space: pre-wrap;">${message}</p>
+          </div>
+          <hr style="margin: 30px 0;">
+          <p style="color: #666; font-size: 12px;">
+            This email was sent from the StudyPal contact form. 
+            Reply directly to respond to ${name} at ${email}.
+          </p>
+        </div>
+      `,
+      replyTo: email, // This allows you to reply directly to the sender
+    };
+
+    // Send email
+    try {
+      await emailTransporter.sendMail(mailOptions);
+      console.log(`Contact form submitted by ${name} (${email}): ${subject}`);
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Log the contact form submission even if email fails
+      console.log('=== CONTACT FORM SUBMISSION ===');
+      console.log(`Name: ${name}`);
+      console.log(`Email: ${email}`);
+      console.log(`Subject: ${subject}`);
+      console.log(`Message: ${message}`);
+      console.log('===============================');
+      
+      // For now, we'll still return success so the user doesn't see an error
+      // In production, you might want to store this in a database
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Message received successfully' 
+    });
+
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.status(500).json({ 
+      error: 'Failed to send email. Please try again later.' 
+    });
+  }
 });
 
 // Create payment intent endpoint

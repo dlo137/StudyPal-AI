@@ -1,4 +1,4 @@
-import { XIcon, User, Mail, MessageSquare, Phone, Send } from 'lucide-react';
+import { XIcon, User, Mail, MessageSquare, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useRef, useEffect, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
@@ -59,7 +59,7 @@ export function ContactUs() {
         ...prev,
         name: user.user_metadata?.firstName && user.user_metadata?.lastName 
           ? `${user.user_metadata.firstName} ${user.user_metadata.lastName}`
-          : user.email?.split('@')[0] || '',
+          : '', // Don't pre-fill with email username
         email: user.email || ''
       }));
     }
@@ -85,12 +85,37 @@ export function ContactUs() {
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
-    // Simulate form submission (replace with actual implementation)
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+      const response = await fetch('http://localhost:3001/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      // Check if response is ok first
+      if (!response.ok) {
+        // Try to get error message from response
+        let errorMessage = 'Failed to send message';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If response isn't JSON, use status text
+          errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Only try to parse JSON if response is ok
+      await response.json(); // Parse response but we don't need the data
+      
       setSubmitStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '' });
-    } catch {
+      
+    } catch (error) {
+      console.error('Contact form error:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -101,8 +126,8 @@ export function ContactUs() {
     <div className={`flex flex-col min-h-screen ${themeClasses.bgPrimary} ${themeClasses.textPrimary}`}>
       {/* ── header ──────────────────────────────────────────── */}
       <div className={`flex items-center justify-between px-4 sm:px-6 py-3 border-b ${themeClasses.borderPrimary} relative z-50`}>
-        <button onClick={() => navigate(-1)} className={`p-2 ${themeClasses.bgHover} rounded-full`}>
-          <XIcon size={24} />
+        <button onClick={() => navigate(-1)} className={`p-2 ${themeClasses.bgHover} rounded-full cursor-pointer hover:scale-110 transition-transform duration-200`}>
+          <XIcon size={24} className="hover:text-red-400 transition-colors duration-200" />
         </button>
 
         <span className="absolute left-1/2 -translate-x-1/2 font-bold text-lg">
@@ -186,7 +211,11 @@ export function ContactUs() {
                     onChange={handleInputChange}
                     required
                     className={`w-full rounded-lg ${themeClasses.inputBg} border ${themeClasses.inputBorder} px-4 py-2.5 ${themeClasses.inputPlaceholder} focus:outline-none ${themeClasses.inputFocus} transition`}
-                    placeholder="Your full name"
+                    placeholder={
+                      user?.user_metadata?.firstName && user?.user_metadata?.lastName 
+                        ? `${user.user_metadata.firstName} ${user.user_metadata.lastName}`
+                        : user ? "Your full name" : "Enter your full name"
+                    }
                     disabled={isSubmitting}
                   />
                 </div>
@@ -239,7 +268,7 @@ export function ContactUs() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 hover:scale-105 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -267,18 +296,12 @@ export function ContactUs() {
                     </div>
                     <div>
                       <p className={`font-medium ${themeClasses.textPrimary}`}>Email</p>
-                      <p className={themeClasses.textSecondary}>support@studypal-ai.com</p>
+                      <p className={themeClasses.textSecondary}>studypalhelpdesk@gmail.com</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#5CE1E6]/20 flex items-center justify-center">
-                      <Phone size={20} className="text-[#5CE1E6]" />
-                    </div>
-                    <div>
-                      <p className={`font-medium ${themeClasses.textPrimary}`}>Phone</p>
-                      <p className={themeClasses.textSecondary}>+1 (555) 123-4567</p>
-                    </div>
+
                   </div>
                 </div>
               </div>
