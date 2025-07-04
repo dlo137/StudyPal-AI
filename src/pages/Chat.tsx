@@ -25,6 +25,8 @@ export function ChatInterface() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [showCameraModal, setShowCameraModal] = useState(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [welcomePopupPosition, setWelcomePopupPosition] = useState({ top: 0, left: 0 });
+  const [chatPopupPosition, setChatPopupPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef<HTMLDivElement | null>(null);
   const welcomeImageOptionsRef = useRef<HTMLDivElement | null>(null);
   const chatImageOptionsRef = useRef<HTMLDivElement | null>(null);
@@ -32,6 +34,8 @@ export function ChatInterface() {
   const welcomeCameraInputRef = useRef<HTMLInputElement | null>(null);
   const chatFileInputRef = useRef<HTMLInputElement | null>(null);
   const chatCameraInputRef = useRef<HTMLInputElement | null>(null);
+  const welcomePaperclipRef = useRef<HTMLButtonElement | null>(null);
+  const chatPaperclipRef = useRef<HTMLButtonElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const navigate = useNavigate();
@@ -157,6 +161,137 @@ export function ChatInterface() {
     return content
       .filter(part => part.type === 'image_url' && part.image_url?.url)
       .map(part => part.image_url!.url);
+  }
+
+  // Helper function to format AI responses with semantic HTML and markdown support
+  function formatAIResponse(text: string): React.ReactElement {
+    // Remove unwanted symbols but preserve meaningful formatting
+    let formattedText = text
+      .replace(/\\+/g, '') // Remove backslashes
+      .replace(/\[|\]/g, '') // Remove square brackets
+      .replace(/(?<![\d\s])-(?![\d\s])/g, '') // Remove standalone dashes (not part of numbers or math)
+      .trim();
+    
+    // Split text into paragraphs and lines
+    const paragraphs = formattedText.split(/\n\s*\n/);
+    
+    const formatInlineText = (text: string) => {
+      return text
+        // Math expressions: $...$ or wrapped in mathematical context
+        .replace(/\$([^$]+)\$/g, '<span class="math-expression">$1</span>')
+        .replace(/(\d+\s*[+\-×÷=]\s*\d+|\d+\^\d+|\d+\/\d+|√\d+)/g, '<span class="math-expression">$1</span>')
+        // Bold text: **text** or __text__
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/__(.*?)__/g, '<strong>$1</strong>')
+        // Italic text: *text* or _text_ (but not within math expressions)
+        .replace(/(?<!\$)\*([^*]+?)\*(?!\$)/g, '<em>$1</em>')
+        .replace(/(?<!\$)_([^_]+?)_(?!\$)/g, '<em>$1</em>')
+        // Inline code: `code`
+        .replace(/`([^`]+)`/g, '<code class="bg-white/15 border border-white/20 px-1 py-0.5 rounded text-sm font-mono text-blue-50">$1</code>');
+    };
+
+    const elements: React.ReactElement[] = [];
+    let key = 0;
+
+    paragraphs.forEach((paragraph, paragraphIndex) => {
+      const lines = paragraph.split('\n').filter(line => line.trim());
+      
+      lines.forEach((line) => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return;
+
+        // Check for final answer patterns
+        const isFinalAnswer = /^(Final Answer|Answer|Therefore|Thus|Hence|The answer is|Result)[:]/i.test(trimmedLine) ||
+                             /^(Answer|Result|Solution):\s*(.+)$/i.test(trimmedLine);
+
+        // Check for main section headers (larger titles)
+        const isMainHeader = /^(Understanding the Problem|Problem Analysis|Solution|Explanation|Method|Approach|Summary)[:]/i.test(trimmedLine) ||
+                            /^[A-Z][A-Za-z\s]*:$/.test(trimmedLine);
+
+        // Check for step/subsection headers
+        const isStepHeader = /^(Step \d+|Part \d+|Stage \d+)[:]/i.test(trimmedLine) ||
+                            /^(Given|Find|To solve|Let's|First|Second|Third|Next|Finally)[:]/i.test(trimmedLine) ||
+                            /^(Proof|Therefore|Hence|Thus):/i.test(trimmedLine);
+
+        // Check for numbered/lettered lists
+        const isListItem = /^(\d+[\.\)]\s|[a-zA-Z][\.\)]\s)/.test(trimmedLine);
+
+        // Check for bullet points (-, *, •)
+        const isBulletPoint = /^[-*•]\s/.test(trimmedLine);
+
+        if (isFinalAnswer) {
+          elements.push(
+            <div 
+              key={key++} 
+              className="final-answer bg-green-500/10 border-l-4 border-green-500/60 pl-4 py-3 my-3 rounded-r-lg"
+            >
+              <div className="font-bold text-green-100 mb-1 flex items-center">
+                <span className="mr-2">✅</span>
+                Final Answer
+              </div>
+              <div 
+                className="text-green-50 font-medium"
+                dangerouslySetInnerHTML={{ __html: formatInlineText(trimmedLine.replace(/^[^:]*:\s*/, '')) }}
+              />
+            </div>
+          );
+        } else if (isMainHeader) {
+          elements.push(
+            <h2 
+              key={key++} 
+              className="text-lg font-bold text-white mt-4 mb-2 border-b border-white/30 pb-1"
+              dangerouslySetInnerHTML={{ __html: formatInlineText(trimmedLine) }}
+            />
+          );
+        } else if (isStepHeader) {
+          elements.push(
+            <h3 
+              key={key++} 
+              className="text-base font-semibold text-blue-100 mt-3 mb-1"
+              dangerouslySetInnerHTML={{ __html: formatInlineText(trimmedLine) }}
+            />
+          );
+        } else if (isListItem) {
+          const listContent = trimmedLine.replace(/^(\d+[\.\)]\s|[a-zA-Z][\.\)]\s)/, '');
+          elements.push(
+            <div key={key++} className="ml-4 mb-1">
+              <span className="font-medium text-blue-200">
+                {trimmedLine.match(/^(\d+[\.\)]\s|[a-zA-Z][\.\)]\s)/)?.[0]}
+              </span>
+              <span dangerouslySetInnerHTML={{ __html: formatInlineText(listContent) }} />
+            </div>
+          );
+        } else if (isBulletPoint) {
+          const bulletContent = trimmedLine.replace(/^[-*•]\s/, '');
+          elements.push(
+            <div key={key++} className="ml-4 mb-1 flex items-start">
+              <span className="text-blue-200 mr-2 font-bold">•</span>
+              <span dangerouslySetInnerHTML={{ __html: formatInlineText(bulletContent) }} />
+            </div>
+          );
+        } else {
+          // Regular paragraph text
+          elements.push(
+            <p 
+              key={key++} 
+              className="mb-2 leading-relaxed text-blue-50"
+              dangerouslySetInnerHTML={{ __html: formatInlineText(trimmedLine) }}
+            />
+          );
+        }
+      });
+
+      // Add minimal spacing between paragraphs only if needed
+      if (paragraphIndex < paragraphs.length - 1 && paragraphs[paragraphIndex + 1].trim()) {
+        elements.push(<div key={key++} className="mb-1" />);
+      }
+    });
+
+    return (
+      <div className="ai-response">
+        {elements}
+      </div>
+    );
   }
 
   // Typewriter effect for AI responses
@@ -306,9 +441,10 @@ export function ChatInterface() {
 
     // Create user message with image support
     let userMessage: ChatMessage;
+    let messageForAI: ChatMessage;
     
     if (uploadedImage && text) {
-      // Both text and image
+      // Both text and image - same for both display and AI
       userMessage = {
         role: 'user',
         content: [
@@ -316,9 +452,16 @@ export function ChatInterface() {
           { type: 'image_url', image_url: { url: uploadedImage } }
         ]
       };
+      messageForAI = userMessage;
     } else if (uploadedImage) {
-      // Only image
+      // Only image - different for display vs AI
       userMessage = {
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: uploadedImage } }
+        ]
+      };
+      messageForAI = {
         role: 'user',
         content: [
           { type: 'text', text: 'Please analyze this homework image and help me solve it.' },
@@ -326,11 +469,12 @@ export function ChatInterface() {
         ]
       };
     } else {
-      // Only text
+      // Only text - same for both display and AI
       userMessage = {
         role: 'user',
         content: text
       };
+      messageForAI = userMessage;
     }
 
     setMsgs(m => [...m, userMessage]);
@@ -345,7 +489,7 @@ export function ChatInterface() {
       console.log('🚀 Calling OpenAI API...');
       
       // Prepare messages for AI - add general system message if no system message exists
-      const messagesToSend = [...messages, userMessage];
+      const messagesToSend = [...messages, messageForAI];
       const hasSystemMessage = messagesToSend.some(msg => msg.role === 'system');
       
       if (!hasSystemMessage) {
@@ -454,6 +598,21 @@ When analyzing homework images, first describe what you see in the image, then f
     setMenuOpen(false);
     navigate('/premium');
   }
+
+  // Calculate popup position relative to button
+  const calculatePopupPosition = (buttonRef: React.RefObject<HTMLButtonElement | null>) => {
+    if (!buttonRef.current) return { top: 0, left: 0 };
+    
+    const rect = buttonRef.current.getBoundingClientRect();
+    const popupWidth = 150; // min-w-[150px]
+    const popupHeight = 80; // approximate height for 2 buttons
+    
+    // Position above the button, aligned to the right
+    return {
+      top: rect.top - popupHeight - 8, // 8px gap (mb-2)
+      left: rect.right - popupWidth
+    };
+  };
 
   // Handle image upload
   function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -760,10 +919,10 @@ When analyzing homework images, first describe what you see in the image, then f
           /* WELCOME SCREEN WITH CENTERED INPUT */
           <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 min-h-0">
             
-            <h2 className="text-xl sm:text-3xl font-medium px-2 max-w-md mb-6 sm:mb-8">How can I help you?</h2>
+            <h2 className="text-xl sm:text-3xl font-medium px-2 max-w-md mb-5">How can I help you?</h2>
             
             {/* Subject Option Buttons */}
-            <div className="w-full max-w-2xl px-2 mb-6 sm:mb-6">
+            <div className="w-full max-w-2xl px-2 mb-5">
               <div className="space-y-2 sm:space-y-2">
 
                 {/* Top row - 6 buttons on mobile, 5 on desktop */}
@@ -817,96 +976,112 @@ When analyzing homework images, first describe what you see in the image, then f
                 }}
                 className="w-full"
               >
-                <div className={`flex items-center ${theme.bgSecondary} rounded-2xl px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg`}>
-                  <textarea
-                    value={input}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type a question or upload homework"
-                    className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0 resize-none min-h-[1.5rem] max-h-32 overflow-y-auto leading-6 py-0`}
-                    rows={1}
-                  />
-                  
-                  {/* Image upload section */}
-                  <div className="relative ml-2" ref={welcomeImageOptionsRef}>
-                    <button
-                      type="button"
-                      onClick={() => setShowWelcomeImageOptions(!showWelcomeImageOptions)}
-                      className={`p-2 rounded-full ${theme.bgHover} transition-colors cursor-pointer`}
-                      title="Upload homework image"
-                    >
-                      <Paperclip size={18} className={theme.textSecondary} />
-                    </button>
-                    
-                    {showWelcomeImageOptions && (
-                      <div className={`absolute bottom-full right-0 mb-2 ${theme.bgSecondary} border ${theme.borderPrimary} rounded-lg shadow-lg z-50 min-w-[150px]`}>
-                        <button
-                          type="button"
-                          onClick={handleWelcomeCameraCapture}
-                          className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${theme.textPrimary} ${theme.bgHoverSecondary} rounded-t-lg transition-colors cursor-pointer`}
-                        >
-                          <Camera size={16} />
-                          Take Photo
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleWelcomeFileUpload}
-                          className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${theme.textPrimary} ${theme.bgHoverSecondary} rounded-b-lg transition-colors cursor-pointer`}
-                        >
-                          <Upload size={16} />
-                          Upload File
-                        </button>
+                <div className={`flex flex-col ${theme.bgSecondary} rounded-2xl shadow-lg overflow-hidden`}>
+                  {/* Show uploaded image preview above input */}
+                  {uploadedImage && (
+                    <div className="p-2 border-b border-white/10">
+                      <div className="flex items-center gap-2">
+                        <div className="relative">
+                          <img 
+                            src={uploadedImage} 
+                            alt="Uploaded homework" 
+                            className="w-32 h-32 object-cover rounded border border-blue-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={removeUploadedImage}
+                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer"
+                            style={{ fontSize: '8px', lineHeight: '1' }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <span className={`text-xs ${theme.textSecondary}`}>Image attached</span>
                       </div>
-                    )}
-                    
-                    {/* Hidden file inputs */}
-                    <input
-                      ref={welcomeCameraInputRef}
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                    <input
-                      ref={welcomeFileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed" 
-                    disabled={(!input.trim() && !uploadedImage) || isLoading || dailyUsage.remaining <= 0}
-                    title={dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : undefined}
-                  >
-                    <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
-                  </button>
-                </div>
-                
-                {/* Show uploaded image preview */}
-                {uploadedImage && (
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="relative">
-                      <img 
-                        src={uploadedImage} 
-                        alt="Uploaded homework" 
-                        className="w-16 h-16 object-cover rounded-lg border-2 border-blue-300"
-                      />
-                      <button
-                        type="button"
-                        onClick={removeUploadedImage}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer"
-                      >
-                        ×
-                      </button>
                     </div>
-                    <span className={`text-sm ${theme.textSecondary}`}>Image ready to send</span>
+                  )}
+                  
+                  <div className="flex items-center px-4 py-2.5 sm:px-5 sm:py-2.5">
+                    <textarea
+                      value={input}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Type a question or upload homework"
+                      className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0 resize-none min-h-[1.5rem] max-h-32 overflow-y-auto leading-6 py-0`}
+                      rows={1}
+                    />
+                    
+                    {/* Image upload section */}
+                    <div className="relative ml-2" ref={welcomeImageOptionsRef}>
+                      <button
+                        ref={welcomePaperclipRef}
+                        type="button"
+                        onClick={() => {
+                          const position = calculatePopupPosition(welcomePaperclipRef);
+                          setWelcomePopupPosition(position);
+                          setShowWelcomeImageOptions(!showWelcomeImageOptions);
+                        }}
+                        className={`p-2 rounded-full ${theme.bgHover} transition-colors cursor-pointer`}
+                        title="Upload homework image"
+                      >
+                        <Paperclip size={18} className={theme.textSecondary} />
+                      </button>
+                      
+                      {showWelcomeImageOptions && (
+                        <div 
+                          className={`fixed ${theme.bgSecondary} border ${theme.borderPrimary} rounded-lg shadow-lg z-[9999] min-w-[150px]`}
+                          style={{ 
+                            top: `${welcomePopupPosition.top}px`, 
+                            left: `${welcomePopupPosition.left}px` 
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={handleWelcomeCameraCapture}
+                            className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${theme.textPrimary} ${theme.bgHoverSecondary} rounded-t-lg transition-colors cursor-pointer`}
+                          >
+                            <Camera size={16} />
+                            Take Photo
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleWelcomeFileUpload}
+                            className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${theme.textPrimary} ${theme.bgHoverSecondary} rounded-b-lg transition-colors cursor-pointer`}
+                          >
+                            <Upload size={16} />
+                            Upload File
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* Hidden file inputs */}
+                      <input
+                        ref={welcomeCameraInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <input
+                        ref={welcomeFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed" 
+                      disabled={(!input.trim() && !uploadedImage) || isLoading || dailyUsage.remaining <= 0}
+                      title={dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : undefined}
+                    >
+                      <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
+                    </button>
                   </div>
-                )}
+                </div>
               </form>
             </div>
           </div>
@@ -921,10 +1096,10 @@ When analyzing homework images, first describe what you see in the image, then f
                 return (
                   <div
                     key={i}
-                    className={`max-w-[90%] sm:max-w-2xl break-words whitespace-pre-wrap leading-relaxed text-base ${
+                    className={`break-words leading-relaxed text-base flex flex-col ${
                       m.role === 'user'
-                        ? `ml-auto ${theme.bgTertiary} rounded-2xl px-4 py-2.5`
-                        : 'mr-auto bg-[#3b87f6] rounded-2xl px-4 py-2.5'
+                        ? `ml-auto ${theme.bgTertiary} rounded-3xl px-4 py-2.5 whitespace-pre-wrap max-w-[80%] w-fit`
+                        : 'mr-auto bg-[#3b87f6] rounded-3xl px-4 py-2.5 max-w-[85%] w-fit'
                     }`}
                   >
                     {/* Render images if present */}
@@ -935,13 +1110,19 @@ When analyzing homework images, first describe what you see in the image, then f
                             key={imgIndex}
                             src={imageUrl} 
                             alt="Homework" 
-                            className="max-w-full h-auto rounded-lg border-2 border-blue-300 mb-2"
+                            className="w-full max-w-[200px] h-auto rounded-lg border-2 border-blue-300 mb-2"
                           />
                         ))}
                       </div>
                     )}
                     {/* Render text content */}
-                    {messageText}
+                    {m.role === 'assistant' ? (
+                      <div className="text-white w-full">
+                        {formatAIResponse(messageText)}
+                      </div>
+                    ) : (
+                      messageText
+                    )}
                   </div>
                 );
               })}
@@ -970,21 +1151,51 @@ When analyzing homework images, first describe what you see in the image, then f
                 }}
                 className="w-full max-w-4xl mx-auto"
               >
-                <div className={`flex items-center ${theme.bgSecondary} rounded-2xl px-4 py-2.5 sm:px-5 sm:py-2.5 shadow-lg`}>
-                  <textarea
-                    value={input}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type a question or upload homework"
-                    className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0 resize-none min-h-[1.5rem] max-h-32 overflow-y-auto leading-6 py-0`}
-                    rows={1}
-                  />
+                <div className={`flex flex-col ${theme.bgSecondary} rounded-2xl shadow-lg overflow-hidden`}>
+                  {/* Show uploaded image preview above input */}
+                  {uploadedImage && (
+                    <div className="p-2 border-b border-white/10">
+                      <div className="flex items-center gap-2">
+                        <div className="relative">
+                          <img 
+                            src={uploadedImage} 
+                            alt="Uploaded homework" 
+                            className="w-32 h-32 object-cover rounded border border-blue-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={removeUploadedImage}
+                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer"
+                            style={{ fontSize: '8px', lineHeight: '1' }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <span className={`text-xs ${theme.textSecondary}`}>Image attached</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center px-4 py-2.5 sm:px-5 sm:py-2.5">
+                    <textarea
+                      value={input}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Type a question or upload homework"
+                      className={`flex-1 bg-transparent border-none focus:outline-none ${theme.textPrimary} ${theme.inputPlaceholder} text-base min-w-0 resize-none min-h-[1.5rem] max-h-32 overflow-y-auto leading-6 py-0`}
+                      rows={1}
+                    />
                   
                   {/* Image upload section */}
                   <div className="relative ml-2" ref={chatImageOptionsRef}>
                     <button
+                      ref={chatPaperclipRef}
                       type="button"
-                      onClick={() => setShowChatImageOptions(!showChatImageOptions)}
+                      onClick={() => {
+                        const position = calculatePopupPosition(chatPaperclipRef);
+                        setChatPopupPosition(position);
+                        setShowChatImageOptions(!showChatImageOptions);
+                      }}
                       className={`p-2 rounded-full ${theme.bgHover} transition-colors cursor-pointer`}
                       title="Upload homework image"
                     >
@@ -992,7 +1203,13 @@ When analyzing homework images, first describe what you see in the image, then f
                     </button>
                     
                     {showChatImageOptions && (
-                      <div className={`absolute bottom-full right-0 mb-2 ${theme.bgSecondary} border ${theme.borderPrimary} rounded-lg shadow-lg z-50 min-w-[150px]`}>
+                      <div 
+                        className={`fixed ${theme.bgSecondary} border ${theme.borderPrimary} rounded-lg shadow-lg z-[9999] min-w-[150px]`}
+                        style={{ 
+                          top: `${chatPopupPosition.top}px`, 
+                          left: `${chatPopupPosition.left}px` 
+                        }}
+                      >
                         <button
                           type="button"
                           onClick={handleChatCameraCapture}
@@ -1038,28 +1255,8 @@ When analyzing homework images, first describe what you see in the image, then f
                   >
                     <SendIcon size={18} className="text-white sm:w-5 sm:h-5" />
                   </button>
-                </div>
-                
-                {/* Show uploaded image preview */}
-                {uploadedImage && (
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="relative">
-                      <img 
-                        src={uploadedImage} 
-                        alt="Uploaded homework" 
-                        className="w-16 h-16 object-cover rounded-lg border-2 border-blue-300"
-                      />
-                      <button
-                        type="button"
-                        onClick={removeUploadedImage}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer"
-                      >
-                        ×
-                      </button>
-                    </div>
-                    <span className={`text-sm ${theme.textSecondary}`}>Image ready to send</span>
                   </div>
-                )}
+                </div>
               </form>
             </div>
           </>
