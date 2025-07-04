@@ -329,7 +329,7 @@ export function PremiumFeatures() {
               </ul>
               <button
                 onClick={() => currentUserPlan !== 'free' ? handleSelectFreePlan() : undefined}
-                className={`mt-2 w-full text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg transition-opacity ${
+                className={`mt-4 w-full text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg transition-opacity ${
                   currentUserPlan === 'free' 
                     ? 'bg-gray-500 cursor-default opacity-70' 
                     : 'bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] hover:opacity-90 cursor-pointer'
@@ -362,10 +362,14 @@ export function PremiumFeatures() {
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
             <span>Email Support</span>
           </li>
+          <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
+            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
+            <span>Priority Access to New Features</span>
+          </li>
               </ul>
               <button
                 onClick={() => currentUserPlan !== 'gold' ? handleSelectGoldPlan() : undefined}
-                className={`mt-2 w-full text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg transition-opacity ${
+                className={`mt-4 w-full text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg transition-opacity ${
                   currentUserPlan === 'gold' 
                     ? 'bg-gray-500 cursor-default opacity-70' 
                     : 'bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] hover:opacity-90 cursor-pointer'
@@ -398,10 +402,18 @@ export function PremiumFeatures() {
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
             <span>Email Support</span>
           </li>
+          <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
+            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
+            <span>Priority Access to New Features</span>
+          </li>
+          <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
+            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
+            <span>Priority Support</span>
+          </li>
               </ul>
               <button
                 onClick={() => currentUserPlan !== 'diamond' ? handleSelectPlan('diamond') : undefined}
-                className={`mt-2 w-full text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg transition-opacity ${
+                className={`mt-4 w-full text-white text-xs sm:text-sm py-1.5 sm:py-2 rounded-lg transition-opacity ${
                   currentUserPlan === 'diamond' 
                     ? 'bg-gray-500 cursor-default opacity-70' 
                     : 'bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] hover:opacity-90 cursor-pointer'
