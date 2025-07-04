@@ -3,6 +3,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 import { ChatInterface } from './pages/Chat';
 import { UserProfile } from './pages/UserProfile';
 import { PremiumFeatures } from './pages/PremiumFeatures';
@@ -18,6 +20,8 @@ export function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<ChatInterface />} />
             <Route path="/chat" element={<ChatInterface />} />
             <Route path="/profile" element={<UserProfile />} />

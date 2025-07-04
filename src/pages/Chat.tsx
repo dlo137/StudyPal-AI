@@ -985,16 +985,14 @@ When analyzing homework images, first describe what you see in the image, then f
                     Profile
                   </button>
                 )}
-                {userPlan !== 'diamond' && (
-                  <button 
-                    className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''}`}
-                    onClick={handlePremium}
-                  >
-                    Plans
-                  </button>
-                )}
                 <button 
-                  className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''} ${!user && userPlan === 'diamond' ? 'rounded-b-lg' : ''}`}
+                  className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer ${!user ? 'rounded-t-lg' : ''}`}
+                  onClick={handlePremium}
+                >
+                  Plans
+                </button>
+                <button 
+                  className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer ${!user ? '' : ''}`}
                   onClick={() => { setMenuOpen(false); navigate('/'); }}
                 >
                   Chat
