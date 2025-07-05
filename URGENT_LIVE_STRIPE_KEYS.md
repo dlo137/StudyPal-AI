@@ -33,6 +33,37 @@ If using webhooks, update the endpoint URL in Stripe dashboard:
 - Test mode webhooks ≠ Live mode webhooks
 - Update webhook secret: `STRIPE_WEBHOOK_SECRET`
 
+## ⚠️ CRITICAL ISSUE IDENTIFIED
+
+### Your Current Status:
+- ✅ Frontend (GitHub Pages): Using live Stripe keys
+- ❌ Backend (Supabase): Still using test Stripe keys
+
+This causes the 404 error you're seeing when confirming payments.
+
+### 5. Update Supabase Edge Function Environment Variables
+
+**URGENT**: Your Supabase Edge Function needs the live Stripe secret key:
+
+1. Go to https://supabase.com/dashboard/project/[your-project-id]
+2. Navigate to **Settings** → **Edge Functions** → **Environment Variables**
+3. Update or add:
+   - `STRIPE_SECRET_KEY` = your **live** secret key (starts with `sk_live_`)
+
+### 6. Redeploy Edge Function (if needed)
+```bash
+# If you have Supabase CLI installed
+supabase functions deploy create-payment-intent
+```
+
+OR manually redeploy through the Supabase dashboard.
+
+### 7. Test Payment Flow
+After updating the Supabase environment variable:
+1. Try a test payment with a real card
+2. Check Stripe dashboard for the payment intent
+3. Verify no more 404 errors in browser console
+
 ## Security Checklist
 - ✅ Never commit live keys to git
 - ✅ Use GitHub secrets for production
