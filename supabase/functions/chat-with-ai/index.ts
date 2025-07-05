@@ -5,6 +5,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 }
 
 interface ChatMessage {
@@ -168,7 +170,7 @@ serve(async (req) => {
       msg.content.some(part => part.type === 'image_url')
     );
     
-    const modelToUse = hasImages ? 'gpt-4-vision-preview' : 'gpt-3.5-turbo';
+    const modelToUse = hasImages ? 'gpt-4o-mini' : 'gpt-4o-mini';
     const maxTokens = hasImages ? 1000 : 500;
     
     console.log('🤖 Model selection:', { hasImages, modelToUse, maxTokens });
