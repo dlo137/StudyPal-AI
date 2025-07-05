@@ -941,13 +941,13 @@ When analyzing homework images, first describe what you see in the image, then f
       'Math': "Hello! I'm your Math tutor. Whether you need help with algebra, geometry, calculus, or any other math topic, I'm here to guide you through step-by-step solutions. What math problem can I help you solve today?",
       'Science': "Hi there! I'm your Science tutor. I can help you explore the wonders of biology, chemistry, physics, and more. From basic concepts to complex theories, let's discover science together. What scientific topic interests you?",
       'Literature': "Welcome! I'm your Literature tutor. I love discussing books, poems, writing techniques, and literary analysis. Whether it's Shakespeare, modern novels, or creative writing, I'm here to help. What literary work or concept would you like to explore?",
-      'Art': "Hello! I'm your Art tutor. I can help you understand art history, techniques, famous artists, and art movements. From Renaissance masters to modern art, let's explore creativity together. What aspect of art would you like to learn about?",
-      'Music': "Hi! I'm your Music tutor. Whether you're interested in music theory, composition, music history, or learning about instruments, I'm here to help. Let's make music education fun and engaging. What musical topic interests you?",
+      'Programming': "Hello! I'm your Programming tutor. I can help you learn coding languages, debug programs, understand algorithms, and build projects. From Python and JavaScript to data structures, let's code together. What programming topic would you like to explore?",
+      'Health': "Welcome! I'm your Health tutor. I can help you understand nutrition, wellness, mental health, anatomy, and healthy lifestyle choices. Let's explore how to live a healthier life. What health topic would you like to learn about?",
       'History': "Greetings! I'm your History tutor. From ancient civilizations to modern events, I can help you understand historical contexts, analyze sources, and connect past events to today. What historical period or event would you like to explore?",
       'Physics': "Hello! I'm your Physics tutor. I can help you understand everything from basic mechanics to quantum physics. Let's break down complex concepts into simple, understandable parts. What physics topic would you like to tackle?",
       'Chemistry': "Hi there! I'm your Chemistry tutor. Whether it's balancing equations, understanding molecular structures, or exploring chemical reactions, I'm here to make chemistry clear and interesting. What chemistry concept can I help you with?",
       'Biology': "Welcome! I'm your Biology tutor. From cells and genetics to ecosystems and evolution, I can help you understand the fascinating world of life sciences. What biological topic would you like to explore today?",
-      'Geography': "Hello! I'm your Geography tutor. I can help you understand physical geography, human geography, maps, climate, and cultures around the world. What geographic topic interests you?",
+      'Fitness': "Hi! I'm your Fitness tutor. I can help you with workout plans, exercise techniques, nutrition advice, and health goals. Whether you're a beginner or looking to optimize your routine, let's get fit together. What fitness topic interests you?",
       'Economics': "Hi! I'm your Economics tutor. Whether it's microeconomics, macroeconomics, market structures, or economic theories, I'm here to help you understand how economies work. What economic concept would you like to explore?"
     };
 
@@ -1111,11 +1111,11 @@ When analyzing homework images, first describe what you see in the image, then f
                   <button onClick={() => handleSubjectClick('Literature')} className="bg-rose-300 hover:bg-rose-400 text-rose-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.3s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Literature
                   </button>
-                  <button onClick={() => handleSubjectClick('Art')} className="bg-amber-300 hover:bg-amber-400 text-amber-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.4s_forwards] hover:scale-105 hover:shadow-lg transform">
-                    Art
+                  <button onClick={() => handleSubjectClick('Programming')} className="bg-amber-300 hover:bg-amber-400 text-amber-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.4s_forwards] hover:scale-105 hover:shadow-lg transform">
+                    Programming
                   </button>
-                  <button onClick={() => handleSubjectClick('Music')} className="bg-violet-300 hover:bg-violet-400 text-violet-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.5s_forwards] hover:scale-105 hover:shadow-lg transform">
-                    Music
+                  <button onClick={() => handleSubjectClick('Health')} className="bg-violet-300 hover:bg-violet-400 text-violet-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.5s_forwards] hover:scale-105 hover:shadow-lg transform">
+                    Health
                   </button>
                 </div>
                 {/* Bottom row - 5 buttons on mobile, 6 on desktop */}
@@ -1132,8 +1132,8 @@ When analyzing homework images, first describe what you see in the image, then f
                   <button onClick={() => handleSubjectClick('Biology')} className="bg-pink-300 hover:bg-pink-400 text-pink-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_0.9s_forwards] hover:scale-105 hover:shadow-lg transform">
                     Biology
                   </button>
-                  <button onClick={() => handleSubjectClick('Geography')} className="bg-teal-300 hover:bg-teal-400 text-teal-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_1.0s_forwards] hover:scale-105 hover:shadow-lg transform">
-                    Geography
+                  <button onClick={() => handleSubjectClick('Fitness')} className="bg-teal-300 hover:bg-teal-400 text-teal-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_1.0s_forwards] hover:scale-105 hover:shadow-lg transform">
+                    Fitness
                   </button>
                   {/* Economics - hide on mobile, show on desktop */}
                   <button onClick={() => handleSubjectClick('Economics')} className="bg-purple-300 hover:bg-purple-400 text-purple-900 font-medium py-1.5 px-2.5 sm:px-3 rounded-full transition-all duration-500 cursor-pointer text-xs opacity-0 animate-[fadeInUp_0.6s_ease-out_1.1s_forwards] hover:scale-105 hover:shadow-lg transform hidden sm:inline-flex">
