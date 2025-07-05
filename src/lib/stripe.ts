@@ -27,9 +27,31 @@ const getStripePublishableKey = () => {
 
 const stripePublishableKey = getStripePublishableKey();
 
+// Additional debugging for the promise creation
+console.log('🔄 Stripe Promise Creation:', {
+  hasKey: !!stripePublishableKey,
+  keyValue: stripePublishableKey,
+  willCreatePromise: !!stripePublishableKey
+});
+
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
-const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey).then(stripe => {
+  console.log('✅ Stripe loaded successfully:', !!stripe);
+  if (!stripe) {
+    console.error('❌ Stripe returned null - invalid publishable key?');
+  }
+  return stripe;
+}).catch(error => {
+  console.error('❌ Stripe failed to load:', error);
+  return null;
+}) : null;
+
+// Log the promise result
+console.log('✨ Stripe Promise Result:', {
+  promiseExists: !!stripePromise,
+  promiseType: typeof stripePromise
+});
 
 export { stripePromise };
 

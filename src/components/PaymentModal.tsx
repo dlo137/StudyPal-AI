@@ -46,10 +46,22 @@ function CheckoutForm({ planType, onSuccess, onCancel }: PaymentFormProps) {
 
   // Check if Stripe has loaded
   React.useEffect(() => {
+    // More detailed logging
+    console.log('🔍 Stripe useEffect triggered:', {
+      stripe,
+      stripeType: typeof stripe,
+      stripeIsNull: stripe === null,
+      stripeIsUndefined: stripe === undefined
+    });
+    
     if (stripe !== undefined) {
       setStripeLoading(false);
       if (!stripe) {
+        console.error('❌ Stripe is null after loading');
         setError('Payment system failed to load. Please check your internet connection and try again.');
+      } else {
+        console.log('✅ Stripe is ready for payments');
+        setError(null); // Clear any previous errors
       }
     }
   }, [stripe]);
@@ -218,9 +230,43 @@ function CheckoutForm({ planType, onSuccess, onCancel }: PaymentFormProps) {
 export function PaymentModal({ planType, onSuccess, onCancel }: PaymentFormProps) {
   const { isDarkMode } = useTheme();
   const themeClasses = getThemeClasses(isDarkMode);
+  const [stripeReady, setStripeReady] = React.useState(false);
+  const [stripeError, setStripeError] = React.useState<string | null>(null);
+
+  // Wait for Stripe promise to resolve
+  React.useEffect(() => {
+    if (stripePromise) {
+      stripePromise
+        .then((stripe) => {
+          if (stripe) {
+            console.log('✅ PaymentModal: Stripe promise resolved successfully');
+            setStripeReady(true);
+          } else {
+            console.error('❌ PaymentModal: Stripe promise resolved to null');
+            setStripeError('Invalid Stripe configuration');
+          }
+        })
+        .catch((error) => {
+          console.error('❌ PaymentModal: Stripe promise rejected:', error);
+          setStripeError(error.message || 'Failed to load payment system');
+        });
+    } else {
+      setStripeError('Stripe not initialized');
+    }
+  }, []);
+
+  // Debug the stripePromise
+  console.log('💳 PaymentModal Stripe Debug:', {
+    stripePromiseExists: !!stripePromise,
+    stripePromiseType: typeof stripePromise,
+    stripePromiseValue: stripePromise,
+    stripeReady,
+    stripeError
+  });
 
   // Handle case where Stripe failed to initialize
-  if (!stripePromise) {
+  if (!stripePromise || stripeError) {
+    console.error('❌ PaymentModal: stripePromise is null or error occurred:', stripeError);
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="max-w-md w-full">
@@ -228,13 +274,13 @@ export function PaymentModal({ planType, onSuccess, onCancel }: PaymentFormProps
             <XCircle size={48} className="text-red-500 mx-auto mb-4" />
             <h3 className={`text-xl font-bold ${themeClasses.textPrimary} mb-2`}>Payment System Configuration Error</h3>
             <p className={themeClasses.textSecondary} mb-4>
-              The payment system is not properly configured. This usually means the Stripe publishable key is missing.
+              {stripeError || 'The payment system is not properly configured. This usually means the Stripe publishable key is missing.'}
             </p>
             <div className={`text-xs ${themeClasses.textMuted} mb-6 text-left bg-gray-100 p-3 rounded`}>
               <strong>For developers:</strong><br/>
               • Check browser console for detailed error messages<br/>
-              • Ensure VITE_STRIPE_PUBLISHABLE_KEY is set in GitHub repository secrets<br/>
-              • Verify the secret name matches exactly in deploy.yml workflow
+              • Ensure VITE_STRIPE_PUBLISHABLE_KEY is set in environment variables<br/>
+              • Verify the key starts with 'pk_test_' or 'pk_live_'
             </div>
             <button
               onClick={onCancel}
@@ -242,6 +288,23 @@ export function PaymentModal({ planType, onSuccess, onCancel }: PaymentFormProps
             >
               Close
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while Stripe is initializing
+  if (!stripeReady) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="max-w-md w-full">
+          <div className={`${themeClasses.bgSecondary} p-8 rounded-lg border ${themeClasses.borderPrimary} text-center`}>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <h3 className={`text-xl font-bold ${themeClasses.textPrimary} mb-2`}>Initializing Payment System</h3>
+            <p className={themeClasses.textSecondary}>
+              Please wait while we set up secure payment processing...
+            </p>
           </div>
         </div>
       </div>
