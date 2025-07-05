@@ -65,43 +65,79 @@ async function sendMessageViaSupabase(messages: ChatMessage[]): Promise<string> 
       Array.isArray(msg.content) && 
       msg.content.some(part => part.type === 'image_url')
     ),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    environment: window.location.hostname
   });
 
-  const { data, error } = await supabase.functions.invoke('chat-with-ai', {
-    body: { messages }
+  // Log detailed message info for debugging
+  messages.forEach((msg, index) => {
+    if (Array.isArray(msg.content)) {
+      const textParts = msg.content.filter(part => part.type === 'text');
+      const imageParts = msg.content.filter(part => part.type === 'image_url');
+      console.log(`📝 Message ${index}:`, {
+        role: msg.role,
+        textParts: textParts.length,
+        imageParts: imageParts.length,
+        imageSize: imageParts.length > 0 ? imageParts[0].image_url?.url?.length : 0
+      });
+    }
   });
 
-  if (error) {
-    console.error('❌ Supabase Edge Function error:', error);
-    
-    // Provide more specific error messages for common issues
-    if (error.message?.includes('413') || error.message?.includes('too large')) {
-      throw new Error('Image too large for processing. Please use a smaller image or try compressing it.');
+  try {
+    const { data, error } = await supabase.functions.invoke('chat-with-ai', {
+      body: { messages }
+    });
+
+    // Enhanced error logging
+    if (error) {
+      console.error('❌ Supabase Edge Function error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        status: error.status,
+        statusCode: error.statusCode,
+        timestamp: new Date().toISOString(),
+        fullError: error
+      });
+      
+      // Try to extract more specific error information
+      let errorMessage = error.message;
+      
+      if (error.message?.includes('413') || error.message?.includes('too large') || error.message?.includes('Payload Too Large')) {
+        errorMessage = 'Image too large for processing. Please use a smaller image.';
+      } else if (error.message?.includes('401') || error.message?.includes('unauthorized')) {
+        errorMessage = 'Authentication error. Please try refreshing the page.';
+      } else if (error.message?.includes('404') || error.message?.includes('not found')) {
+        errorMessage = 'AI service temporarily unavailable. Please try again.';
+      } else if (error.message?.includes('500') || error.message?.includes('Internal Server Error')) {
+        errorMessage = 'Server error occurred. Please try again in a moment.';
+      } else if (error.message?.includes('timeout')) {
+        errorMessage = 'Request timed out. Please try with a smaller image.';
+      }
+      
+      throw new Error(`Edge Function error: ${errorMessage}`);
     }
-    
-    if (error.message?.includes('401') || error.message?.includes('unauthorized')) {
-      throw new Error('Authentication error. Please try refreshing the page.');
+
+    if (!data?.response) {
+      console.error('❌ No response from Edge Function:', data);
+      throw new Error('No response from AI service');
     }
-    
-    if (error.message?.includes('404') || error.message?.includes('not found')) {
-      throw new Error('AI service temporarily unavailable. Please try again in a moment.');
-    }
-    
-    throw new Error(`Edge Function error: ${error.message}`);
+
+    console.log('✅ Supabase Edge Function response received:', {
+      responseLength: data.response.length,
+      timestamp: data.timestamp || new Date().toISOString()
+    });
+
+    return data.response;
+  } catch (networkError) {
+    console.error('❌ Network/Request error:', {
+      error: networkError,
+      message: networkError instanceof Error ? networkError.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+    throw networkError;
   }
-
-  if (!data?.response) {
-    console.error('❌ No response from Edge Function:', data);
-    throw new Error('No response from AI service');
-  }
-
-  console.log('✅ Supabase Edge Function response received:', {
-    responseLength: data.response.length,
-    timestamp: data.timestamp || new Date().toISOString()
-  });
-
-  return data.response;
 }
 
 function getDemoResponse(): string {
