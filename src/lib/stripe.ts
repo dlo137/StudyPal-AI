@@ -1,8 +1,30 @@
 import { loadStripe } from '@stripe/stripe-js';
 
+// Get Stripe publishable key with debugging
+const getStripePublishableKey = () => {
+  const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+  
+  // Debug logging
+  console.log('🔑 Stripe Key Debug:', {
+    keyExists: !!key,
+    keyLength: key?.length || 0,
+    keyPrefix: key?.substring(0, 7) || 'undefined',
+    allEnvVars: Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')),
+  });
+  
+  if (!key) {
+    console.error('❌ VITE_STRIPE_PUBLISHABLE_KEY is not defined');
+    console.error('Available environment variables:', Object.keys(import.meta.env));
+  }
+  
+  return key;
+};
+
+const stripePublishableKey = getStripePublishableKey();
+
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
 export { stripePromise };
 

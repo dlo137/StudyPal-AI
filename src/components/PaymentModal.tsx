@@ -40,13 +40,25 @@ function CheckoutForm({ planType, onSuccess, onCancel }: PaymentFormProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [succeeded, setSucceeded] = useState(false);
+  const [stripeLoading, setStripeLoading] = useState(true);
 
   const plan = getPlanDetails(planType);
+
+  // Check if Stripe has loaded
+  React.useEffect(() => {
+    if (stripe !== undefined) {
+      setStripeLoading(false);
+      if (!stripe) {
+        setError('Payment system failed to load. Please check your internet connection and try again.');
+      }
+    }
+  }, [stripe]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!stripe || !elements) {
+      setError('Payment system not ready. Please try again.');
       return;
     }
 
@@ -136,14 +148,25 @@ function CheckoutForm({ planType, onSuccess, onCancel }: PaymentFormProps) {
             <CreditCard size={16} className="inline mr-2" />
             Card Information
           </label>
-          <div className={`p-4 border ${themeClasses.borderPrimary} rounded-lg ${themeClasses.bgPrimary}`}>
-            <CardElement 
-              options={{
-                ...CARD_ELEMENT_OPTIONS,
-                hidePostalCode: false,
-                disableLink: true,
-              }} 
-            />
+          <div className={`p-4 border ${themeClasses.borderPrimary} rounded-lg ${themeClasses.bgPrimary} ${!stripe ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            {stripeLoading ? (
+              <div className="py-3 text-center text-gray-500">
+                Loading payment form...
+              </div>
+            ) : !stripe ? (
+              <div className="py-3 text-center text-red-500">
+                Payment system unavailable
+              </div>
+            ) : (
+              <CardElement 
+                options={{
+                  ...CARD_ELEMENT_OPTIONS,
+                  hidePostalCode: false,
+                  disableLink: true,
+                  disabled: !stripe,
+                }} 
+              />
+            )}
           </div>
         </div>
 
@@ -169,10 +192,10 @@ function CheckoutForm({ planType, onSuccess, onCancel }: PaymentFormProps) {
           </button>
           <button
             type="submit"
-            disabled={!stripe || isProcessing}
+            disabled={!stripe || isProcessing || stripeLoading}
             className="flex-1 bg-gradient-to-r from-[#8C52FF] to-[#5CE1E6] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none cursor-pointer"
           >
-            {isProcessing ? 'Processing...' : `Subscribe ${formatPrice(plan.price)}/month`}
+            {stripeLoading ? 'Loading...' : isProcessing ? 'Processing...' : `Subscribe ${formatPrice(plan.price)}/month`}
           </button>
         </div>
       </form>
@@ -193,6 +216,32 @@ function CheckoutForm({ planType, onSuccess, onCancel }: PaymentFormProps) {
 }
 
 export function PaymentModal({ planType, onSuccess, onCancel }: PaymentFormProps) {
+  const { isDarkMode } = useTheme();
+  const themeClasses = getThemeClasses(isDarkMode);
+
+  // Handle case where Stripe failed to initialize
+  if (!stripePromise) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="max-w-md w-full">
+          <div className={`${themeClasses.bgSecondary} p-8 rounded-lg border ${themeClasses.borderPrimary} text-center`}>
+            <XCircle size={48} className="text-red-500 mx-auto mb-4" />
+            <h3 className={`text-xl font-bold ${themeClasses.textPrimary} mb-2`}>Payment System Unavailable</h3>
+            <p className={themeClasses.textSecondary} mb-6>
+              Unable to load payment system. Please check your internet connection and try again.
+            </p>
+            <button
+              onClick={onCancel}
+              className={`w-full px-6 py-3 border ${themeClasses.borderPrimary} rounded-lg ${themeClasses.textPrimary} ${themeClasses.bgHover} transition-all duration-200 hover:shadow-md hover:scale-105 hover:border-gray-400 cursor-pointer`}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="max-w-md w-full max-h-[90vh] overflow-y-auto">
