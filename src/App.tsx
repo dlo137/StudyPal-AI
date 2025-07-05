@@ -11,13 +11,11 @@ import { PremiumFeatures } from './pages/PremiumFeatures';
 import { MissionStatement } from './pages/MissionStatement';
 import { ContactUs } from './pages/ContactUs';
 import TestSupabase from './pages/TestSupabase';
-import EnvironmentDebug from './components/EnvironmentDebug';
 
 export function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <EnvironmentDebug />
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />

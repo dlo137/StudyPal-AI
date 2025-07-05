@@ -12,8 +12,10 @@ export const EnvironmentDebug: React.FC = () => {
     dev: import.meta.env.DEV,
   };
 
-  // Only show in development or if explicitly enabled
-  if (!import.meta.env.DEV && !window.location.search.includes('debug=true')) {
+  // Show in development or production with debug=true parameter
+  const shouldShow = import.meta.env.DEV || window.location.search.includes('debug=true');
+  
+  if (!shouldShow) {
     return null;
   }
 
