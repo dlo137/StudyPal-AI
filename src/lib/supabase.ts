@@ -11,7 +11,8 @@ console.log('🔍 Supabase Environment Check:', {
   keyPreview: supabaseAnonKey ? supabaseAnonKey.substring(0, 20) + '...' : 'MISSING',
   mode: import.meta.env.MODE,
   dev: import.meta.env.DEV,
-  timestamp: new Date().toISOString()
+  timestamp: new Date().toISOString(),
+  buildTrigger: 'Fix 401 auth error - updated secrets'
 });
 
 // Create Supabase client only if environment variables are available
