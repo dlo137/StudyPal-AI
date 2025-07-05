@@ -48,7 +48,10 @@ jobs:
           echo "  - NPM version: $(npm --version)"  
           echo "  - Build time: ${{ github.run_number }}"
           echo "  - Commit: ${{ github.sha }}"
-          echo "  - Environment variables are configured"
+          echo "🔍 Environment variables check:"
+          echo "  - VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:0:30}..."
+          echo "  - VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:0:30}..."
+          echo "  - VITE_OPENAI_API_KEY: ${VITE_OPENAI_API_KEY:0:15}..."
           npm run build
           echo "✅ Build completed successfully"
         
