@@ -62,7 +62,15 @@ export async function signUpUser(data: SignUpData): Promise<AuthResult> {
 
 // Log in an existing user
 export async function loginUser(data: LoginData): Promise<AuthResult> {
+  console.log('🔐 Login attempt:', {
+    email: data.email,
+    supabaseConfigured: isSupabaseConfigured(),
+    supabaseExists: !!supabase,
+    timestamp: new Date().toISOString()
+  });
+
   if (!isSupabaseConfigured() || !supabase) {
+    console.error('❌ Supabase not configured for login');
     return {
       user: null,
       error: createDemoModeError('Login')
@@ -75,11 +83,28 @@ export async function loginUser(data: LoginData): Promise<AuthResult> {
       password: data.password
     })
 
+    if (error) {
+      console.error('❌ Supabase login error:', {
+        message: error.message,
+        status: error.status,
+        statusCode: error.status,
+        name: error.name,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      console.log('✅ Login successful:', {
+        userId: authData.user?.id,
+        email: authData.user?.email,
+        timestamp: new Date().toISOString()
+      });
+    }
+
     return {
       user: authData.user,
       error
     }
   } catch (error) {
+    console.error('❌ Login exception:', error);
     return {
       user: null,
       error: error as AuthError
