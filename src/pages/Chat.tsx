@@ -172,7 +172,10 @@ export function ChatInterface() {
     let formattedText = text
       .replace(/\\+/g, '') // Remove backslashes
       .replace(/\[|\]/g, '') // Remove square brackets
-      .replace(/(?<![\d\s])-(?![\d\s])/g, '') // Remove standalone dashes (not part of numbers or math)
+      // More selective dash removal - only remove standalone dashes at start/end of words, not hyphens in compound words
+      .replace(/\s-\s/g, ' ') // Remove standalone dashes with spaces around them
+      .replace(/^-\s/gm, '') // Remove dashes at start of lines
+      .replace(/\s-$/gm, '') // Remove dashes at end of lines
       .trim();
     
     // Split text into paragraphs and lines
