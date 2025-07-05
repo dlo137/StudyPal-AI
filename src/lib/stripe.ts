@@ -15,6 +15,11 @@ const getStripePublishableKey = () => {
   if (!key) {
     console.error('❌ VITE_STRIPE_PUBLISHABLE_KEY is not defined');
     console.error('Available environment variables:', Object.keys(import.meta.env));
+    console.error('🔧 To fix this issue:');
+    console.error('  1. For local development: Add VITE_STRIPE_PUBLISHABLE_KEY to .env.local');
+    console.error('  2. For GitHub Pages: Set VITE_STRIPE_PUBLISHABLE_KEY in repository secrets');
+    console.error('  3. Repository Settings → Secrets and variables → Actions → New repository secret');
+    console.error('  4. Name: VITE_STRIPE_PUBLISHABLE_KEY, Value: your Stripe publishable key');
   }
   
   return key;

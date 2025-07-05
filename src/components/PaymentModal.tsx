@@ -226,10 +226,16 @@ export function PaymentModal({ planType, onSuccess, onCancel }: PaymentFormProps
         <div className="max-w-md w-full">
           <div className={`${themeClasses.bgSecondary} p-8 rounded-lg border ${themeClasses.borderPrimary} text-center`}>
             <XCircle size={48} className="text-red-500 mx-auto mb-4" />
-            <h3 className={`text-xl font-bold ${themeClasses.textPrimary} mb-2`}>Payment System Unavailable</h3>
-            <p className={themeClasses.textSecondary} mb-6>
-              Unable to load payment system. Please check your internet connection and try again.
+            <h3 className={`text-xl font-bold ${themeClasses.textPrimary} mb-2`}>Payment System Configuration Error</h3>
+            <p className={themeClasses.textSecondary} mb-4>
+              The payment system is not properly configured. This usually means the Stripe publishable key is missing.
             </p>
+            <div className={`text-xs ${themeClasses.textMuted} mb-6 text-left bg-gray-100 p-3 rounded`}>
+              <strong>For developers:</strong><br/>
+              • Check browser console for detailed error messages<br/>
+              • Ensure VITE_STRIPE_PUBLISHABLE_KEY is set in GitHub repository secrets<br/>
+              • Verify the secret name matches exactly in deploy.yml workflow
+            </div>
             <button
               onClick={onCancel}
               className={`w-full px-6 py-3 border ${themeClasses.borderPrimary} rounded-lg ${themeClasses.textPrimary} ${themeClasses.bgHover} transition-all duration-200 hover:shadow-md hover:scale-105 hover:border-gray-400 cursor-pointer`}

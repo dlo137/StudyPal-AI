@@ -51,7 +51,12 @@ jobs:
           echo "  - NPM version: $(npm --version)"  
           echo "  - Build time: ${{ github.run_number }}"
           echo "  - Commit: ${{ github.sha }}"
-          echo "  - Environment variables are configured"
+          echo "🔍 Environment variable status:"
+          echo "  - VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:+SET} ${VITE_SUPABASE_URL:-MISSING}"
+          echo "  - VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:+SET} ${VITE_SUPABASE_ANON_KEY:-MISSING}"
+          echo "  - VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY:+SET} ${VITE_STRIPE_PUBLISHABLE_KEY:-MISSING}"
+          echo "  - VITE_STRIPE_GOLD_PRICE_ID: ${VITE_STRIPE_GOLD_PRICE_ID:+SET} ${VITE_STRIPE_GOLD_PRICE_ID:-MISSING}"
+          echo "  - VITE_STRIPE_DIAMOND_PRICE_ID: ${VITE_STRIPE_DIAMOND_PRICE_ID:+SET} ${VITE_STRIPE_DIAMOND_PRICE_ID:-MISSING}"
           npm run build
           echo "✅ Build completed successfully"
         
