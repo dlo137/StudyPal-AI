@@ -30,7 +30,7 @@ function validatePaymentRequest(request: CreatePaymentRequest): string | null {
   return null;
 }
 
-// Create a payment intent on your backend
+// Create a payment intent using Supabase Edge Function
 export async function createPaymentIntent(request: CreatePaymentRequest): Promise<PaymentResult> {
   try {
     // Client-side validation
@@ -44,10 +44,20 @@ export async function createPaymentIntent(request: CreatePaymentRequest): Promis
 
     const plan = STRIPE_CONFIG.plans[request.planType];
     
-    const response = await fetch('/api/create-payment-intent', {
+    // Use Supabase Edge Function instead of local API
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Payment system configuration error');
+    }
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'apikey': supabaseAnonKey,
       },
       body: JSON.stringify({
         amount: plan.price,

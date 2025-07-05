@@ -39,6 +39,9 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}  
           VITE_OPENAI_API_KEY: ${{ secrets.VITE_OPENAI_API_KEY }}
+          VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+          VITE_STRIPE_GOLD_PRICE_ID: ${{ secrets.VITE_STRIPE_GOLD_PRICE_ID }}
+          VITE_STRIPE_DIAMOND_PRICE_ID: ${{ secrets.VITE_STRIPE_DIAMOND_PRICE_ID }}
           VITE_BUILD_TIME: ${{ github.run_number }}
           VITE_COMMIT_SHA: ${{ github.sha }}
         run: |
