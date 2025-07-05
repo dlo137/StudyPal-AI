@@ -72,13 +72,39 @@ serve(async (req) => {
     
     const { messages }: ChatRequest = requestBody;
     
+    // Check request size (Supabase Edge Functions have ~6MB limit)
+    const requestSizeBytes = JSON.stringify(requestBody).length;
+    const maxSizeBytes = 6 * 1024 * 1024; // 6MB
+    
+    if (requestSizeBytes > maxSizeBytes) {
+      console.error('❌ Request too large:', {
+        size: requestSizeBytes,
+        maxSize: maxSizeBytes,
+        timestamp: new Date().toISOString()
+      });
+      return new Response(
+        JSON.stringify({ 
+          error: `Request too large (${Math.round(requestSizeBytes / 1024 / 1024 * 10) / 10}MB). Please use a smaller image or compress it.`,
+          timestamp: new Date().toISOString()
+        }),
+        {
+          status: 413, // Payload Too Large
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          },
+        },
+      )
+    }
+    
     console.log('📨 Received messages:', {
       count: messages?.length || 0,
       timestamp: new Date().toISOString(),
       hasImages: messages?.some(msg => 
         Array.isArray(msg.content) && 
         msg.content.some(part => part.type === 'image_url')
-      ) || false
+      ) || false,
+      requestSizeMB: Math.round(requestSizeBytes / 1024 / 1024 * 10) / 10
     });
 
     if (!messages || !Array.isArray(messages)) {

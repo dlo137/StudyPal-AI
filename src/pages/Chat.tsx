@@ -706,15 +706,40 @@ When analyzing homework images, first describe what you see in the image, then f
     };
   };
 
-  // Handle image upload
+  // Handle image upload with compression
   function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (file) {
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        console.error('❌ Image too large:', file.size);
+        const errorMessage: ChatMessage = {
+          role: 'assistant',
+          content: '⚠️ Image is too large. Please use an image smaller than 5MB.'
+        };
+        setMsgs(m => [...m, errorMessage]);
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
-        setUploadedImage(result);
-        // Don't add text to input anymore - the image will be sent directly
+        
+        // Compress the image before setting it
+        compressImage(result)
+          .then(compressedImage => {
+            console.log('📷 Image processed:', {
+              originalSize: result.length,
+              compressedSize: compressedImage.length,
+              compressionRatio: (compressedImage.length / result.length * 100).toFixed(1) + '%'
+            });
+            setUploadedImage(compressedImage);
+          })
+          .catch(error => {
+            console.error('❌ Image compression failed:', error);
+            // Fallback to original image if compression fails
+            setUploadedImage(result);
+          });
       };
       reader.readAsDataURL(file);
     }
@@ -724,6 +749,47 @@ When analyzing homework images, first describe what you see in the image, then f
     
     setShowWelcomeImageOptions(false);
     setShowChatImageOptions(false);
+  }
+
+  // Compress image to reduce payload size
+  function compressImage(dataUrl: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          reject(new Error('Canvas context not available'));
+          return;
+        }
+
+        // Calculate new dimensions (max 800px on longest side)
+        const maxSize = 800;
+        let { width, height } = img;
+        
+        if (width > height && width > maxSize) {
+          height = (height * maxSize) / width;
+          width = maxSize;
+        } else if (height > maxSize) {
+          width = (width * maxSize) / height;
+          height = maxSize;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to JPEG with 0.8 quality for smaller file size
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        resolve(compressedDataUrl);
+      };
+      
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = dataUrl;
+    });
   }
 
   // Handle camera capture for welcome screen
@@ -790,7 +856,7 @@ When analyzing homework images, first describe what you see in the image, then f
     }
   }
 
-  // Capture photo from camera
+  // Capture photo from camera with compression
   function capturePhoto() {
     if (videoRef.current && canvasRef.current) {
       const canvas = canvasRef.current;
@@ -802,17 +868,25 @@ When analyzing homework images, first describe what you see in the image, then f
       const ctx = canvas.getContext('2d');
       ctx?.drawImage(video, 0, 0);
       
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const result = e.target?.result as string;
-            setUploadedImage(result);
-            closeCameraModal();
-          };
-          reader.readAsDataURL(blob);
-        }
-      }, 'image/jpeg', 0.8);
+      // Compress the captured image
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      
+      compressImage(dataUrl)
+        .then(compressedImage => {
+          console.log('📸 Camera image processed:', {
+            originalSize: dataUrl.length,
+            compressedSize: compressedImage.length,
+            compressionRatio: (compressedImage.length / dataUrl.length * 100).toFixed(1) + '%'
+          });
+          setUploadedImage(compressedImage);
+          closeCameraModal();
+        })
+        .catch(error => {
+          console.error('❌ Camera image compression failed:', error);
+          // Fallback to original image
+          setUploadedImage(dataUrl);
+          closeCameraModal();
+        });
     }
   }
 

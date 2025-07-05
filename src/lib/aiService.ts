@@ -59,7 +59,14 @@ async function sendMessageViaSupabase(messages: ChatMessage[]): Promise<string> 
     throw new Error('Supabase not configured');
   }
 
-  console.log('📡 Calling Supabase Edge Function...');
+  console.log('📡 Calling Supabase Edge Function...', {
+    messageCount: messages.length,
+    hasImages: messages.some(msg => 
+      Array.isArray(msg.content) && 
+      msg.content.some(part => part.type === 'image_url')
+    ),
+    timestamp: new Date().toISOString()
+  });
 
   const { data, error } = await supabase.functions.invoke('chat-with-ai', {
     body: { messages }
@@ -67,6 +74,20 @@ async function sendMessageViaSupabase(messages: ChatMessage[]): Promise<string> 
 
   if (error) {
     console.error('❌ Supabase Edge Function error:', error);
+    
+    // Provide more specific error messages for common issues
+    if (error.message?.includes('413') || error.message?.includes('too large')) {
+      throw new Error('Image too large for processing. Please use a smaller image or try compressing it.');
+    }
+    
+    if (error.message?.includes('401') || error.message?.includes('unauthorized')) {
+      throw new Error('Authentication error. Please try refreshing the page.');
+    }
+    
+    if (error.message?.includes('404') || error.message?.includes('not found')) {
+      throw new Error('AI service temporarily unavailable. Please try again in a moment.');
+    }
+    
     throw new Error(`Edge Function error: ${error.message}`);
   }
 
