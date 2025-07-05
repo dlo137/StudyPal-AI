@@ -216,6 +216,39 @@ The `.github/workflows/deploy.yml` file already includes these environment varia
 - Silent failures with no error messages
 - Payment flow completely non-functional
 
+## Next Steps to Complete the Fix
+
+The code improvements have been deployed, but you still need to **set up GitHub repository secrets** for the payment system to work on GitHub Pages.
+
+### 🔑 **CRITICAL:** GitHub Secrets Setup Required
+
+The console error `❌ VITE_STRIPE_PUBLISHABLE_KEY is not defined` indicates that GitHub repository secrets are not configured. 
+
+**📋 Follow the detailed setup guide:** [`GITHUB_SECRETS_SETUP.md`](./GITHUB_SECRETS_SETUP.md)
+
+### Quick Setup Summary:
+
+1. **Go to GitHub Repository Settings**
+   - Navigate to: `Settings` → `Secrets and variables` → `Actions`
+
+2. **Add these secrets:**
+   - `VITE_STRIPE_PUBLISHABLE_KEY` - Your Stripe publishable key
+   - `VITE_STRIPE_GOLD_PRICE_ID` - Stripe Price ID for Gold plan  
+   - `VITE_STRIPE_DIAMOND_PRICE_ID` - Stripe Price ID for Diamond plan
+   - `VITE_SUPABASE_URL` - Your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous key
+
+3. **Trigger a new deployment:**
+   ```bash
+   git commit --allow-empty -m "Test secrets configuration"
+   git push origin main
+   ```
+
+4. **Verify in GitHub Actions build log:**
+   - Look for "SET" instead of "MISSING" for all environment variables
+
+Once GitHub secrets are configured, the card input will become functional on GitHub Pages!
+
 ## Verification Checklist
 
 - [ ] Environment variables properly set in GitHub secrets
