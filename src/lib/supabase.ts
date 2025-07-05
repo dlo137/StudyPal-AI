@@ -20,6 +20,8 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
       auth: {
         persistSession: true,
         autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce'
       },
       global: {
         headers: {
@@ -32,3 +34,24 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
 
 // Helper function to check if Supabase is configured
 export const isSupabaseConfigured = () => Boolean(supabase)
+
+// Helper function to clear invalid auth tokens
+export const clearInvalidTokens = async () => {
+  if (!supabase) return
+  
+  try {
+    // Clear potentially corrupted session data
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      console.warn('⚠️ Error during signout:', error.message)
+    }
+    
+    // Clear localStorage auth data
+    localStorage.removeItem('supabase.auth.token')
+    localStorage.removeItem('sb-' + supabaseUrl?.split('//')[1]?.split('.')[0] + '-auth-token')
+    
+    console.log('🧹 Cleared authentication tokens')
+  } catch (error) {
+    console.warn('⚠️ Error clearing tokens:', error)
+  }
+}

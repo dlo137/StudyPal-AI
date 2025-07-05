@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
-import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { supabase, isSupabaseConfigured, clearInvalidTokens } from '../lib/supabase'
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -14,17 +14,54 @@ export function useAuth() {
       return
     }
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    // Get initial session with error handling
+    const initializeAuth = async () => {
+      if (!supabase) return
+      
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.warn('⚠️ Session error:', error.message)
+          // If it's a refresh token error, clear invalid tokens
+          if (error.message.includes('refresh') || error.message.includes('token')) {
+            await clearInvalidTokens()
+          }
+          setSession(null)
+          setUser(null)
+        } else {
+          setSession(session)
+          setUser(session?.user ?? null)
+        }
+      } catch (error) {
+        console.warn('⚠️ Auth initialization error:', error)
+        setSession(null)
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    initializeAuth()
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔐 Auth state change:', event)
+      
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('✅ Token refreshed successfully')
+      } else if (event === 'SIGNED_OUT') {
+        console.log('👋 User signed out')
+        setSession(null)
+        setUser(null)
+      } else if (event === 'SIGNED_IN') {
+        console.log('👤 User signed in')
+        setSession(session)
+        setUser(session?.user ?? null)
+      }
+      
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
