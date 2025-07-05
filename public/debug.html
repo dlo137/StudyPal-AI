@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyPal Edge Function Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        input[type="file"] { margin: 10px 0; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>StudyPal Edge Function Debug Tool</h1>
+        <p>This tool helps debug the Supabase Edge Function for image analysis.</p>
+        
+        <div class="test-section">
+            <h3>1. Basic Text Test</h3>
+            <button onclick="testText()">Test Text Message</button>
+            <div id="textResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Image Upload Test</h3>
+            <input type="file" id="imageInput" accept="image/*">
+            <button onclick="testImage()">Test Image Analysis</button>
+            <div id="imageResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Custom Test</h3>
+            <textarea id="customMessage" placeholder="Enter custom message here...">Solve this math problem: 2 + 2 = ?</textarea>
+            <button onclick="testCustom()">Test Custom Message</button>
+            <div id="customResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Environment Info</h3>
+            <button onclick="showEnvironment()">Show Environment</button>
+            <div id="envResult" class="test-result"></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://vtsmnrcjryizvnnxqvbz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0c21ucmNqcnlpenZubnhxdmJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUzNjIzMzUsImV4cCI6MjA1MDkzODMzNX0.9Gzek3IyWrzWxO7N0LPTKMxBGSYQnUNIV0C1tnzO2-w';
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.className = `test-result ${type}`;
+            element.textContent = message;
+        }
+
+        function logError(elementId, error) {
+            let message = `Error: ${error.message}\n\n`;
+            if (error.response) {
+                message += `Status: ${error.response.status}\n`;
+                message += `Status Text: ${error.response.statusText}\n`;
+                message += `Headers: ${JSON.stringify(Object.fromEntries(error.response.headers.entries()), null, 2)}\n`;
+                if (error.response.body) {
+                    message += `Body: ${error.response.body}\n`;
+                }
+            }
+            message += `Stack: ${error.stack}`;
+            log(elementId, message, 'error');
+        }
+
+        async function callEdgeFunction(messages, resultElementId) {
+            try {
+                log(resultElementId, 'Calling Edge Function...', 'info');
+                
+                const requestBody = {
+                    messages: messages,
+                    model: 'gpt-4o-mini'
+                };
+
+                console.log('Request URL:', `${SUPABASE_URL}/functions/v1/chat-with-ai`);
+                console.log('Request body:', JSON.stringify(requestBody, null, 2));
+                console.log('Request size:', new Blob([JSON.stringify(requestBody)]).size, 'bytes');
+
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/chat-with-ai`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'apikey': SUPABASE_ANON_KEY
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.log('Error response body:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}\nBody: ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log('Success response:', data);
+                
+                log(resultElementId, `Success!\n\nResponse: ${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                console.error('Edge function error:', error);
+                logError(resultElementId, error);
+            }
+        }
+
+        async function testText() {
+            const messages = [
+                { role: 'user', content: 'Hello! Can you solve 5 + 3?' }
+            ];
+            await callEdgeFunction(messages, 'textResult');
+        }
+
+        async function testCustom() {
+            const customMessage = document.getElementById('customMessage').value.trim();
+            if (!customMessage) {
+                log('customResult', 'Please enter a message', 'error');
+                return;
+            }
+            
+            const messages = [
+                { role: 'user', content: customMessage }
+            ];
+            await callEdgeFunction(messages, 'customResult');
+        }
+
+        async function testImage() {
+            const input = document.getElementById('imageInput');
+            const file = input.files[0];
+            
+            if (!file) {
+                log('imageResult', 'Please select an image file', 'error');
+                return;
+            }
+
+            try {
+                log('imageResult', 'Processing image...', 'info');
+                
+                // Compress image similar to the main app
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = async function() {
+                    // Resize to max 800px while maintaining aspect ratio
+                    const maxSize = 800;
+                    let { width, height } = img;
+                    
+                    if (width > height && width > maxSize) {
+                        height = (height * maxSize) / width;
+                        width = maxSize;
+                    } else if (height > maxSize) {
+                        width = (width * maxSize) / height;
+                        height = maxSize;
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convert to base64 with compression
+                    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                    const base64Data = base64.split(',')[1];
+                    
+                    console.log('Original file size:', file.size);
+                    console.log('Compressed base64 size:', base64Data.length);
+                    console.log('Estimated compressed size:', base64Data.length * 0.75, 'bytes');
+                    
+                    const messages = [
+                        {
+                            role: 'user',
+                            content: [
+                                {
+                                    type: 'text',
+                                    text: 'Analyze this image and describe what you see. If it contains any math problems or text, please solve or read them.'
+                                },
+                                {
+                                    type: 'image_url',
+                                    image_url: {
+                                        url: `data:image/jpeg;base64,${base64Data}`
+                                    }
+                                }
+                            ]
+                        }
+                    ];
+                    
+                    await callEdgeFunction(messages, 'imageResult');
+                };
+                
+                img.onerror = function() {
+                    log('imageResult', 'Failed to load image', 'error');
+                };
+                
+                img.src = URL.createObjectURL(file);
+                
+            } catch (error) {
+                console.error('Image processing error:', error);
+                logError('imageResult', error);
+            }
+        }
+
+        function showEnvironment() {
+            const envInfo = {
+                'Current URL': window.location.href,
+                'User Agent': navigator.userAgent,
+                'Supabase URL': SUPABASE_URL,
+                'Anon Key (first 20 chars)': SUPABASE_ANON_KEY.substring(0, 20) + '...',
+                'Timestamp': new Date().toISOString()
+            };
+            
+            log('envResult', JSON.stringify(envInfo, null, 2), 'info');
+        }
+
+        // Test connection on load
+        window.onload = function() {
+            showEnvironment();
+        };
+    </script>
+</body>
+</html>
