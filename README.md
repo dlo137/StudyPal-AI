@@ -1,4 +1,4 @@
-# StudyPal AI UI/UX
+# StudyPal AI UI/UX 🚀
 
 This project is a React + TypeScript application bootstrapped with Vite. It includes custom components and pages for StudyPal's AI-powered study assistant UI/UX.
 
