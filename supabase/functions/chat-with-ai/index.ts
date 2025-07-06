@@ -1,6 +1,6 @@
 // @ts-nocheck
 // This file is designed for Deno runtime in Supabase Edge Functions
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.208.0/http/server.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

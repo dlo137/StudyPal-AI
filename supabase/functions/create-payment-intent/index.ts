@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.208.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -22,6 +22,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('🚀 Edge Function called:', req.method, req.url)
+    
     // Validate request method
     if (req.method !== 'POST') {
       return new Response(
@@ -38,19 +40,30 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
+    console.log('🔧 Environment check:', {
+      hasStripeKey: !!stripeSecretKey,
+      stripeKeyPrefix: stripeSecretKey?.substring(0, 8),
+      hasSupabaseUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey
+    })
+
     if (!stripeSecretKey) {
+      console.error('❌ STRIPE_SECRET_KEY missing')
       throw new Error('Stripe secret key not configured')
     }
 
     if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ Supabase configuration missing')
       throw new Error('Supabase configuration missing')
     }
 
     // Parse request body
     const requestBody: PaymentRequest = await req.json()
+    console.log('📦 Request body:', requestBody)
     
     // Validate request
     if (!requestBody.amount || !requestBody.currency || !requestBody.planType) {
+      console.error('❌ Missing required fields:', requestBody)
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { 
@@ -77,6 +90,7 @@ serve(async (req) => {
     }
 
     // Create Stripe payment intent
+    console.log('💳 Creating Stripe payment intent...')
     const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents', {
       method: 'POST',
       headers: {
@@ -92,13 +106,25 @@ serve(async (req) => {
       }),
     })
 
+    console.log('📡 Stripe response status:', stripeResponse.status)
+
     if (!stripeResponse.ok) {
       const errorData = await stripeResponse.text()
-      console.error('Stripe API error:', errorData)
-      throw new Error('Failed to create payment intent')
+      console.error('❌ Stripe API error status:', stripeResponse.status)
+      console.error('❌ Stripe API error data:', errorData)
+      
+      // Try to parse error for more details
+      try {
+        const errorJson = JSON.parse(errorData)
+        console.error('❌ Stripe parsed error:', errorJson)
+        throw new Error(`Stripe error: ${errorJson.error?.message || errorData}`)
+      } catch {
+        throw new Error(`Stripe API error (${stripeResponse.status}): ${errorData}`)
+      }
     }
 
     const paymentIntent = await stripeResponse.json()
+    console.log('✅ Payment intent created successfully:', paymentIntent.id)
 
     // Log the payment intent creation (optional)
     console.log(`Payment intent created: ${paymentIntent.id} for plan: ${requestBody.planType}`)
