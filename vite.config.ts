@@ -49,7 +49,8 @@ export default defineConfig(({ mode }) => {
   
   return {
     plugins: [react(), checkEnvVars()],
-    base: '/StudyPal-AI/',
+    // Remove base path for Vercel deployment (was for GitHub Pages)
+    // base: '/StudyPal-AI/',
     server: {
       proxy: {
         '/api': 'http://localhost:3001'   // Fixed to match server port
