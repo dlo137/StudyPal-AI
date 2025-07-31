@@ -9,7 +9,7 @@ import { useAuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/theme';
 import { getUserPlan } from '../lib/userPlanService';
-import { checkDailyUsage, recordQuestionAsked, getDailyLimit } from '../lib/usageService';
+import { checkMonthlyUsage, recordQuestionAsked, getDailyLimit } from '../lib/usageService';
 import { getAnonymousUsage, canAskQuestion, recordAnonymousQuestion } from '../lib/anonymousUsageService';
 
 export function ChatInterface() {
@@ -22,7 +22,7 @@ export function ChatInterface() {
   const currentRequestIdRef = useRef<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [userPlan, setUserPlan] = useState<'free' | 'gold' | 'diamond'>('free');
-  const [dailyUsage, setDailyUsage] = useState({ questionsAsked: 0, limit: 5, remaining: 5 });
+  const [monthlyUsage, setMonthlyUsage] = useState({ questionsAsked: 0, limit: 5, remaining: 5 });
   const [showWelcomeImageOptions, setShowWelcomeImageOptions] = useState(false);
   const [showChatImageOptions, setShowChatImageOptions] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -100,12 +100,13 @@ export function ChatInterface() {
     if (user?.id) {
       // Get user's current plan
       getUserPlan(user.id, user.email).then(result => {
+        console.log('🟦 getUserPlan result:', result);
         if (result.success && result.user) {
           const planType = result.user.plan_type;
+          console.log('🟩 Plan type from Supabase:', planType);
           setUserPlan(planType);
-          
           // Check daily usage for this plan
-          checkDailyUsage(user.id, planType).then(usageResult => {
+          checkMonthlyUsage(user.id, planType).then(usageResult => {
             console.log('📊 Initial Usage Check:', {
               planType,
               usageResult,
@@ -113,26 +114,23 @@ export function ChatInterface() {
               limit: usageResult.limit || getDailyLimit(planType),
               remaining: usageResult.remaining || getDailyLimit(planType)
             });
-            
             if (usageResult.success) {
-              setDailyUsage({
+              setMonthlyUsage({
                 questionsAsked: usageResult.usage?.questions_asked || 0,
                 limit: usageResult.limit || getDailyLimit(planType),
                 remaining: usageResult.remaining || getDailyLimit(planType)
               });
             }
           });
+        } else {
+          console.warn('🟥 Failed to get user plan:', result.error);
         }
       });
     } else {
       // For anonymous users, get usage from localStorage
       setUserPlan('free');
       const anonymousUsage = getAnonymousUsage();
-      setDailyUsage({
-        questionsAsked: anonymousUsage.questionsAsked,
-        limit: anonymousUsage.limit,
-        remaining: anonymousUsage.remaining
-      });
+      setMonthlyUsage(anonymousUsage);
     }
   }, [user?.id, user?.email]);
 
@@ -363,7 +361,7 @@ export function ChatInterface() {
     // Handle usage limits for both authenticated and anonymous users
     if (user?.id) {
       // For authenticated users, check and record usage in database
-      const usageCheck = await checkDailyUsage(user.id, userPlan);
+      const usageCheck = await checkMonthlyUsage(user.id, userPlan);
       if (!usageCheck.success) {
         const errorMessage: ChatMessage = {
           role: 'assistant',
@@ -399,14 +397,14 @@ export function ChatInterface() {
 
       // Debug the usage update
       console.log('🔢 Usage Update:', {
-        before: dailyUsage,
+        before: monthlyUsage,
         recordResult: recordResult.usage,
         newQuestionsAsked: recordResult.usage?.questions_asked || 0,
         newRemaining: Math.max(0, getDailyLimit(userPlan) - (recordResult.usage?.questions_asked || 0))
       });
 
       // Update local usage count immediately with the actual database values
-      setDailyUsage({
+      setMonthlyUsage({
         questionsAsked: recordResult.usage?.questions_asked || 0,
         limit: getDailyLimit(userPlan),
         remaining: Math.max(0, getDailyLimit(userPlan) - (recordResult.usage?.questions_asked || 0))
@@ -425,14 +423,14 @@ export function ChatInterface() {
       // Record the question for anonymous user
       try {
         const newUsage = recordAnonymousQuestion();
-        setDailyUsage({
+        setMonthlyUsage({
           questionsAsked: newUsage.questionsAsked,
           limit: newUsage.limit,
           remaining: newUsage.remaining
         });
         
         console.log('🔢 Anonymous Usage Update:', {
-          before: dailyUsage,
+          before: monthlyUsage,
           after: newUsage
         });
       } catch (error) {
@@ -450,7 +448,7 @@ export function ChatInterface() {
       hasImage: !!uploadedImage,
       timestamp: new Date().toISOString(),
       userPlan: userPlan,
-      currentUsage: dailyUsage,
+      currentUsage: monthlyUsage,
       userId: user?.id || 'anonymous',
       isAuthenticated: !!user
     });
@@ -1005,15 +1003,15 @@ When analyzing homework images, first describe what you see in the image, then f
         {/* Right side - Usage Counter, Upgrade Button, Profile Menu */}
         <div className="flex items-center gap-2 sm:gap-3 relative">
           {/* Usage Counter - show for both logged in and anonymous users */}
-          {(user || dailyUsage.questionsAsked > 0 || dailyUsage.remaining < 5) && (
+          {(user || monthlyUsage.questionsAsked > 0 || monthlyUsage.remaining < 5) && (
             <div className={`px-2 py-1 rounded-full text-xs ${
-              dailyUsage.remaining === 0 
+              monthlyUsage.remaining === 0 
                 ? 'bg-red-100 text-red-800 border-red-200' 
                 : theme.bgSecondary + ' ' + theme.textSecondary + ' border ' + theme.borderPrimary
             }`}>
-              {dailyUsage.remaining === 0 
-                ? `${dailyUsage.questionsAsked}/${dailyUsage.limit} used` 
-                : `${dailyUsage.remaining}/${dailyUsage.limit} left`
+              {monthlyUsage.remaining === 0 
+                ? `${monthlyUsage.questionsAsked}/${monthlyUsage.limit} used` 
+                : `${monthlyUsage.remaining}/${monthlyUsage.limit} left`
               }
             </div>
           )}
@@ -1057,7 +1055,7 @@ When analyzing homework images, first describe what you see in the image, then f
                 {user && (
                   <button 
                     className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer rounded-t-lg`} 
-                    onClick={() => { setMenuOpen(false); navigate('/profile'); }}
+                    onClick={() => { setMenuOpen(false); navigate('/UserProfile'); }}
                   >
                     Profile
                   </button>
@@ -1256,10 +1254,10 @@ When analyzing homework images, first describe what you see in the image, then f
                         }
                       }}
                       className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed" 
-                      disabled={(!input.trim() && !uploadedImage) && !(isLoading || isAIResponding) || dailyUsage.remaining <= 0}
+                      disabled={(!input.trim() && !uploadedImage) && !(isLoading || isAIResponding) || monthlyUsage.remaining <= 0}
                       title={
                         (isLoading || isAIResponding) ? "Stop AI response" :
-                        dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : 
+                        monthlyUsage.remaining <= 0 ? `Monthly limit reached (${monthlyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : 
                         "Send message"
                       }
                     >
@@ -1445,10 +1443,10 @@ When analyzing homework images, first describe what you see in the image, then f
                       }
                     }}
                     className="bg-[#4285F4] p-2 rounded-full disabled:opacity-40 ml-2 sm:ml-3 flex-shrink-0 hover:bg-[#3367d6] transition-colors cursor-pointer disabled:cursor-not-allowed"
-                    disabled={(!input.trim() && !uploadedImage) && !(isLoading || isAIResponding) || dailyUsage.remaining <= 0}
+                    disabled={(!input.trim() && !uploadedImage) && !(isLoading || isAIResponding) || monthlyUsage.remaining <= 0}
                     title={
                       (isLoading || isAIResponding) ? "Stop AI response" :
-                      dailyUsage.remaining <= 0 ? `Daily limit reached (${dailyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : 
+                        monthlyUsage.remaining <= 0 ? `Monthly limit reached (${monthlyUsage.limit} questions)${!user ? ' - Sign up for more!' : ''}` : 
                       "Send message"
                     }
                   >

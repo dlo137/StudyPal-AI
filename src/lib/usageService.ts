@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export interface DailyUsage {
+export interface MonthlyUsage {
   id: string;
   user_id: string;
   date: string;
@@ -13,7 +13,7 @@ export interface DailyUsage {
 export interface UsageResult {
   success: boolean;
   error?: string;
-  usage?: DailyUsage;
+  usage?: MonthlyUsage;
   canAsk?: boolean;
   remaining?: number;
   limit?: number;
@@ -45,7 +45,7 @@ function getTodayDate(): string {
 /**
  * Checks if user can ask a question based on their daily limit
  */
-export async function checkDailyUsage(userId: string, planType: 'free' | 'gold' | 'diamond'): Promise<UsageResult> {
+export async function checkMonthlyUsage(userId: string, planType: 'free' | 'gold' | 'diamond'): Promise<UsageResult> {
   try {
     if (!supabase) {
       return {
@@ -68,7 +68,7 @@ export async function checkDailyUsage(userId: string, planType: 'free' | 'gold' 
 
     // Get today's usage for the user with better error handling
     const { data, error } = await supabase
-      .from('daily_usage')
+      .from('monthly_usage')
       .select('id, user_id, date, questions_asked, plan_type, created_at, updated_at')
       .eq('user_id', userId)
       .eq('date', today)
@@ -191,7 +191,7 @@ async function recordQuestionAskedFallback(userId: string, planType: 'free' | 'g
 
     // Try to update existing record first
     const { data: existingData, error: fetchError } = await supabase
-      .from('daily_usage')
+      .from('monthly_usage')
       .select('*')
       .eq('user_id', userId)
       .eq('date', today)
@@ -245,7 +245,7 @@ async function recordQuestionAskedFallback(userId: string, planType: 'free' | 'g
 
       // Update existing record
       const { data, error } = await supabase
-        .from('daily_usage')
+        .from('monthly_usage')
         .update({
           questions_asked: existingData.questions_asked + 1,
           plan_type: planType,
@@ -278,7 +278,7 @@ async function recordQuestionAskedFallback(userId: string, planType: 'free' | 'g
     } else {
       // Create new record (first question of the day)
       const { data, error } = await supabase
-        .from('daily_usage')
+        .from('monthly_usage')
         .insert({
           user_id: userId,
           date: today,

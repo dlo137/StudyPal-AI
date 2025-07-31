@@ -6,7 +6,14 @@ import { supabase } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
 import { getThemeClasses } from '../utils/theme';
 
-export function ResetPassword() {
+// To use this page for /reset-password, add to your router:
+// <Route path="/reset-password" element={<ResetPassword />} />
+export const ResetPassword = () => {
+  // Debug: Log current location and hash to help diagnose 404 issues
+  useEffect(() => {
+    console.log('[ResetPassword] Page loaded. Location:', window.location.href);
+    console.log('[ResetPassword] Hash:', window.location.hash);
+  }, []);
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -525,3 +532,5 @@ export function ResetPassword() {
     </div>
   );
 }
+
+export default ResetPassword;
