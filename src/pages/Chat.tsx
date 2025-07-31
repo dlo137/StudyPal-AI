@@ -1003,15 +1003,15 @@ When analyzing homework images, first describe what you see in the image, then f
         {/* Right side - Usage Counter, Upgrade Button, Profile Menu */}
         <div className="flex items-center gap-2 sm:gap-3 relative">
           {/* Usage Counter - show for both logged in and anonymous users */}
-          {(user || monthlyUsage.questionsAsked > 0 || monthlyUsage.remaining < 5) && (
+          {(user || monthlyUsage.questionsAsked > 0 || monthlyUsage.remaining < getDailyLimit(userPlan)) && (
             <div className={`px-2 py-1 rounded-full text-xs ${
               monthlyUsage.remaining === 0 
                 ? 'bg-red-100 text-red-800 border-red-200' 
                 : theme.bgSecondary + ' ' + theme.textSecondary + ' border ' + theme.borderPrimary
             }`}>
               {monthlyUsage.remaining === 0 
-                ? `${monthlyUsage.questionsAsked}/${monthlyUsage.limit} used` 
-                : `${monthlyUsage.remaining}/${monthlyUsage.limit} left`
+                ? `${monthlyUsage.questionsAsked}/${getDailyLimit(userPlan)} used` 
+                : `${monthlyUsage.remaining}/${getDailyLimit(userPlan)} left`
               }
             </div>
           )}
