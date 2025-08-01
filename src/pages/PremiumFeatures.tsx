@@ -257,7 +257,7 @@ export function PremiumFeatures() {
               {user && (
                 <button 
                   className={`block w-full text-left px-4 py-2.5 text-sm ${themeClasses.bgHoverSecondary} ${themeClasses.textPrimary} transition-all duration-200 cursor-pointer rounded-t-lg`} 
-                  onClick={() => { setMenuOpen(false); navigate('/UserProfile'); }}
+                  onClick={() => { setMenuOpen(false); navigate('/profile'); }}
                 >
                   Profile
                 </button>
