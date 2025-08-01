@@ -75,8 +75,8 @@ serve(async (req) => {
 
     // Validate plan type and amount
     const validPlans = {
-      gold: 50, // $0.50 in cents (temporarily reduced for testing)
-      diamond: 50 // $0.50 in cents (temporarily reduced for testing)
+      gold: 199, // $1.99 in cents
+      diamond: 499 // $4.99 in cents
     }
 
     if (!validPlans[requestBody.planType] || requestBody.amount !== validPlans[requestBody.planType]) {
