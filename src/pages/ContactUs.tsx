@@ -86,10 +86,20 @@ export function ContactUs() {
     setSubmitStatus('idle');
 
     try {
-      const response = await fetch('http://localhost:3001/api/contact', {
+      // Use environment-based URL for production vs development
+      const baseUrl = import.meta.env.VITE_SUPABASE_URL
+      const contactUrl = baseUrl 
+        ? `${baseUrl}/functions/v1/contact-form`  // Production: Supabase Edge Function
+        : 'http://localhost:3001/api/contact'     // Development: Local server
+      
+      const response = await fetch(contactUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(baseUrl ? {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+          } : {})
         },
         body: JSON.stringify(formData),
       });

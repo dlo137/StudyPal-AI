@@ -257,7 +257,7 @@ export function PremiumFeatures() {
               {user && (
                 <button 
                   className={`block w-full text-left px-4 py-2.5 text-sm ${themeClasses.bgHoverSecondary} ${themeClasses.textPrimary} transition-all duration-200 cursor-pointer rounded-t-lg`} 
-                  onClick={() => { setMenuOpen(false); navigate('/profile'); }}
+                  onClick={() => { setMenuOpen(false); navigate('/UserProfile'); }}
                 >
                   Profile
                 </button>
@@ -316,7 +316,7 @@ export function PremiumFeatures() {
               <ul className={`space-y-0.5 sm:space-y-1.5 md:space-y-2 ${themeClasses.textSecondary} flex-1 text-xs sm:text-xs md:text-sm`}>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
-            <span>10 Requests / Monthly</span>
+            <span>5 Requests / Monthly</span>
           </li>
           <li className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full bg-[#8C52FF] flex-shrink-0"></div>
@@ -431,7 +431,7 @@ export function PremiumFeatures() {
               onClick={handleStartFreeTrial}
               className="w-full p-3 sm:p-4 rounded-xl bg-[#8C52FF] text-white font-bold shadow-lg shadow-purple-500/30 hover:bg-[#7a4ae6] transition-colors text-sm sm:text-base cursor-pointer"
             >
-              Start Free Trial 
+              Start Diamond Plan 
             </button>
             {showFreeTrialText && (
               <p className={`text-center text-xs sm:text-sm ${themeClasses.textMuted} mt-2`}>

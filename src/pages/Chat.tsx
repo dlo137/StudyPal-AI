@@ -1055,7 +1055,7 @@ When analyzing homework images, first describe what you see in the image, then f
                 {user && (
                   <button 
                     className={`block w-full text-left px-4 py-2.5 text-sm ${theme.bgHoverSecondary} ${theme.textPrimary} transition-all duration-200 cursor-pointer rounded-t-lg`} 
-                    onClick={() => { setMenuOpen(false); navigate('/UserProfile'); }}
+                    onClick={() => { setMenuOpen(false); navigate('/profile'); }}
                   >
                     Profile
                   </button>

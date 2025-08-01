@@ -10,6 +10,7 @@ function checkEnvVars() {
       const requiredVars = [
         'VITE_SUPABASE_URL',
         'VITE_SUPABASE_ANON_KEY',
+        'VITE_OPENAI_API_KEY',
         'VITE_STRIPE_PUBLISHABLE_KEY',
         'VITE_STRIPE_GOLD_PRICE_ID',
         'VITE_STRIPE_DIAMOND_PRICE_ID'

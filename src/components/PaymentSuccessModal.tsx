@@ -48,14 +48,14 @@ export function PaymentSuccessModal({ isOpen, onClose, planType }: PaymentSucces
       icon: Zap,
       color: 'text-yellow-500',
       bgColor: 'bg-yellow-500',
-      features: ['50 Requests/Daily', '1.5K Requests/Monthly', 'Email Support']
+      features: ['150 Requests/Monthly', 'Email Support', 'Priority Access to New Features']
     },
     diamond: {
       name: 'Diamond Plan', 
       icon: Crown,
       color: 'text-purple-500',
       bgColor: 'bg-purple-500',
-      features: ['150 Requests/Daily', '4.5K Requests/Monthly', 'Priority Support']
+      features: ['500 Requests/Monthly', 'Email Support', 'Priority Access to New Features', 'Priority Support']
     }
   };
 
