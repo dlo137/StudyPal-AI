@@ -309,8 +309,8 @@ export function PremiumFeatures() {
                   <ZapIcon size={20} className="text-white hidden md:block" />
                 </div>
                 <div className="text-right">
-                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">Free Plan</p>
-                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">$0</p>
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-gray-700">Free Plan</p>
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-gray-700">$0</p>
                 </div>
               </div>
               <ul className={`space-y-0.5 sm:space-y-1.5 md:space-y-2 ${themeClasses.textSecondary} flex-1 text-xs sm:text-xs md:text-sm`}>
@@ -349,8 +349,8 @@ export function PremiumFeatures() {
                   <StarIcon size={20} className="text-white hidden md:block" />
                 </div>
                 <div className="text-right">
-                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">Gold Plan</p>
-                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">{formatPrice(goldPlan.price)}/mo</p>
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-gray-700">Gold Plan</p>
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-gray-700">{formatPrice(goldPlan.price)}/mo</p>
                 </div>
               </div>
               <ul className={`space-y-0.5 sm:space-y-1.5 md:space-y-2 ${themeClasses.textSecondary} flex-1 text-xs sm:text-xs md:text-sm`}>
@@ -389,8 +389,8 @@ export function PremiumFeatures() {
                   <CrownIcon size={20} className="text-white hidden md:block" />
                 </div>
                 <div className="text-right">
-                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">Diamond Plan</p>
-                  <p className="text-xs sm:text-sm md:text-base font-bold text-white">{formatPrice(diamondPlan.price)}/mo</p>
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-gray-700">Diamond Plan</p>
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-gray-700">{formatPrice(diamondPlan.price)}/mo</p>
                 </div>
               </div>
               <ul className={`space-y-0.5 sm:space-y-1.5 md:space-y-2 ${themeClasses.textSecondary} flex-1 text-xs sm:text-xs md:text-sm`}>

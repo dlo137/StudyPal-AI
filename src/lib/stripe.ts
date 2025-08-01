@@ -61,7 +61,7 @@ export const STRIPE_CONFIG = {
   plans: {
     gold: {
       name: 'Gold Plan',
-      price: 50, // $0.50 in cents (temporarily reduced for testing)
+      price: 199, // $1.99 in cents
       priceId: import.meta.env.VITE_STRIPE_GOLD_PRICE_ID, // You'll need to create this in Stripe
       features: [
         '150 Requests/Monthly',
@@ -71,7 +71,7 @@ export const STRIPE_CONFIG = {
     },
     diamond: {
       name: 'Diamond Plan',
-      price: 50, // $0.50 in cents (temporarily reduced for testing)
+      price: 499, // $4.99 in cents
       priceId: import.meta.env.VITE_STRIPE_DIAMOND_PRICE_ID, // You'll need to create this in Stripe
       features: [
         '500 Requests/Monthly',
