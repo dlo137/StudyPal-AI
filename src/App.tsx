@@ -1,4 +1,5 @@
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Login } from './pages/Login';
@@ -30,6 +31,7 @@ export function App() {
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/test-supabase" element={<TestSupabase />} />
           </Routes>
+          <Analytics />
         </Router>
       </AuthProvider>
     </ThemeProvider>
